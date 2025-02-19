@@ -1,13 +1,22 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
   <div>
     <router-view />
   </div>
 </template>
+
+<script>
+import { startInactivityTimer, logoutUser } from './utils/auth.js';
+
+export default {
+  created() {
+    if (localStorage.getItem('userToken')) {
+      startInactivityTimer(logoutUser); // Iniciar el temporizador
+    }
+  }
+};
+</script>
+
+
 
 
 <style>
