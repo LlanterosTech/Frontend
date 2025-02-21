@@ -26,6 +26,11 @@
         </div>
       </div>
     </div>
+    <transition name="fade">
+      <div v-if="error" class="alert-container">
+        <p class="error-message">{{ error }}</p>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -37,11 +42,13 @@ export default {
     return {
       email: "",
       password: "",
+      error: null
     };
   },
   methods: {
     async handleLogin() {
       try {
+        this.error = null; // Limpia errores anteriores
         const credentials = { email: this.email, password: this.password };
         const response = await userService.loginUser(credentials);
 
@@ -51,12 +58,19 @@ export default {
           console.log("Token guardado:", response.token);
           this.$router.push("/init");
         } else {
-          alert("Error: No se recibió un token válido.");
+          this.error = "Error: No se recibió un token válido.";
+          this.clearErrorAfterTimeout();
         }
       } catch (error) {
         console.error("Login fallido:", error);
-        alert("Login fallido: " + (error.message || "Error inesperado"));
+        this.error = "Login fallido: " + (error.message || "Error inesperado");
+        this.clearErrorAfterTimeout();
       }
+    },
+    clearErrorAfterTimeout() {
+      setTimeout(() => {
+        this.error = null;
+      }, 4000); // 4 segundos
     },
     goToRegister() {
       this.$router.push("/register");
@@ -187,8 +201,6 @@ body {
   font-size: 3.2rem;
 }
 
-
-
 .text-input input {
   background: none;
   border: none;
@@ -246,5 +258,30 @@ a.forgot {
 .create i {
   color: #9a9a9a;
   margin-left: 12px;
+}
+
+.alert-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 0, 0, 0.8);
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
+}
+
+.error-message {
+  color: white;
+  font-size: 0.9rem;
 }
 </style>
