@@ -78,8 +78,8 @@ const bdService = {
                 throw error;
             });
     },
-     async getEstimacionesByProyectoAndTipoPam(proyectoId, tipoPamId) {
-        return api.get(`estimacion/buscar?proyectoId=${proyectoId}&tipoPamId=${tipoPamId}`)
+    async getEstimacionesByProyectoAndTipoPam(proyectoId, tipoPamId) {
+        return api.get(`estimacion/buscar?proyectoId=${Number(proyectoId)}&tipoPamId=${Number(tipoPamId)}`)
             .then(response => response.data)
             .catch(error => {
                 console.error("Error al obtener estimaciones por ProyectoId y TipoPamId:", error);

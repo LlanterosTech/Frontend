@@ -4,6 +4,7 @@ import RegisterPage from "@/public/auth/register-page.vue";
 import CreateEstimacion from "@/public/CreateEstimacion.vue";
 import InitPage from "@/public/InitPage.vue";
 import MainContainer from '@/components/main-container.vue';
+import BuscarEstimacion from "@/public/BuscarEstimacion.vue";
 
 const routes = [
     {
@@ -36,6 +37,12 @@ const routes = [
         component: CreateEstimacion,
         meta: { title: 'Nueva Estimación', requiresAuth: true }
     },
+    {
+        path: '/buscar-estimacion',
+        name: 'BuscarEstimacion',
+        component: BuscarEstimacion,
+        meta: { title: 'Buscar Estimación' }
+        },
     // Ruta de captura para redirigir a InitPage o LoginPage
     {
         path: '/:catchAll(.*)',
