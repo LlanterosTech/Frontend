@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'; // 🔹 Agregamos la importación correcta
+import { createRouter, createWebHistory } from 'vue-router';
 import LoginPage from "@/public/auth/login-page.vue";
 import RegisterPage from "@/public/auth/register-page.vue";
 import CreateEstimacion from "@/public/CreateEstimacion.vue";
@@ -35,6 +35,19 @@ const routes = [
         name: 'nuevaestimacion',
         component: CreateEstimacion,
         meta: { title: 'Nueva Estimación', requiresAuth: true }
+    },
+    // Ruta de captura para redirigir a InitPage o LoginPage
+    {
+        path: '/:catchAll(.*)',
+        name: 'not-found',
+        beforeEnter: (to, from, next) => {
+            const isAuthenticated = localStorage.getItem('userToken');
+            if (isAuthenticated) {
+                next('/init');
+            } else {
+                next('/login');
+            }
+        }
     }
 ];
 
@@ -50,7 +63,7 @@ router.beforeEach((to, from, next) => {
     const isAuthenticated = localStorage.getItem('userToken'); 
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/'); // Redirige al login si no está autenticado
+        next('/login'); // Redirige al login si no está autenticado
     } else {
         if (!['/', '/register'].includes(to.path)) {
             localStorage.setItem('lastRoute', to.path); // Guarda la última ruta

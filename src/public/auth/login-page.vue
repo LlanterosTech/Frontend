@@ -1,5 +1,7 @@
 <template>
- <LoginForm />
+  <div class="page-container">
+    <login-form />
+  </div>
 </template>
 
 <script>
@@ -11,5 +13,10 @@ export default {
 </script>
 
 <style scoped>
-
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 </style>

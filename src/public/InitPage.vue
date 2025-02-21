@@ -1,5 +1,13 @@
 <template>
   <div class="container">
+    <div class="design">
+      <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
+      <img src="@/assets/Group_2.png" class="plant plant-2" alt="Plant 2">
+      <img src="@/assets/Group_2.png" class="plant plant-3" alt="Plant 3">
+      <img src="@/assets/Group_2.png" class="plant plant-4" alt="Plant 4">
+      <img src="@/assets/Group_2.png" class="plant plant-5" alt="Plant 5">
+      <img src="@/assets/Group_2.png" class="plant plant-6" alt="Plant 6">
+    </div>
     <div class="init-box">
       <div class="init">
         <h1 class="title">Gestión de Estimaciones</h1>
@@ -23,10 +31,8 @@
         <div class="table-container">
           <h2 class="table-title">
             Últimas Estimaciones
-            <button 
-              @click="cambiarOrden" 
-              class="btn-orden">
-              <i :class="ordenAscendente ? 'fas fa-caret-up' : 'fas fa-caret-down'"></i>
+            <button @click="cambiarOrden" class="btn-orden" :key="ordenAscendente">
+              <i :class="iconOrden"></i>
             </button>
           </h2>
           
@@ -55,7 +61,18 @@
                   <p class="text-sm text-gray-600">Gastos Generales: S/ {{ Number(estimacion.costoEstimado.gastosGenerales).toFixed(2) }}</p>
                 </td>
                 <td>
-                  <button @click="verDetalle(estimacion.estimacionId)" class="btn-primary">Ver</button>
+                  <button @click="verDetalle(estimacion.estimacionId)" class="btn-action">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button @click="editarEstimacion(estimacion.estimacionId)" class="btn-action">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <button @click="descargarPDF(estimacion.estimacionId)" class="btn-action">
+                    <i class="fas fa-file-pdf"></i>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -74,8 +91,13 @@ export default {
   data() {
     return {
       ultimasEstimaciones: [],
-      ordenAscendente: true // Por defecto, las estimaciones están en orden ascendente
+      ordenAscendente: false // Por defecto, las estimaciones están en orden ascendente
     };
+  },
+  computed: {
+    iconOrden() {
+      return this.ordenAscendente ? 'fas fa-caret-up' : 'fas fa-caret-down';
+    }
   },
   methods: {
     async cargarEstimaciones() {
@@ -98,8 +120,9 @@ export default {
       }
     },
     cambiarOrden() {
-      this.ordenAscendente = !this.ordenAscendente;
+      this.ordenAscendente = !this.ordenAscendente; // Alterna el estado
       this.ultimasEstimaciones.reverse(); // Invierte el orden del array
+      this.$forceUpdate();
     },
     crearEstimacion() {
       this.$router.push("/nuevaestimacion");
@@ -109,6 +132,18 @@ export default {
     },
     verDetalle(id) {
       this.$router.push(`/detalle-estimacion/${id}`);
+    },
+    editarEstimacion(id) {
+      // Lógica para editar la estimación
+      console.log(`Editar estimación con ID: ${id}`);
+    },
+    eliminarEstimacion(id) {
+      // Lógica para eliminar la estimación
+      console.log(`Eliminar estimación con ID: ${id}`);
+    },
+    descargarPDF(id) {
+      // Lógica para descargar el PDF de la estimación
+      console.log(`Descargar PDF de la estimación con ID: ${id}`);
     }
   },
   mounted() {
@@ -132,7 +167,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to bottom right, #53704b, #7ba58d, #4fd87d);
+  background: linear-gradient(to bottom right, #8fc280, #81cc7a, #8fc280);
 }
 
 .container {
@@ -144,14 +179,59 @@ body {
   position: relative;
 }
 
+.design {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0; /* Asegúrate de que las plantas estén en el fondo */
+}
+
+.plant {
+  position: absolute;
+  width: 420px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.plant-1 {
+  bottom: -10px;
+  left: -20px;
+}
+
+.plant-2 {
+  top: -50px;
+  left: -60px;
+}
+
+.plant-3 {
+  top: -50px;
+  left: 180px;
+}
+
+.plant-4 {
+  bottom: -150px;
+  left: 200px;
+}
+
+.plant-5 {
+  top: 30px;
+  left: 250px;
+}
+
+.plant-6 {
+  bottom: 30px;
+  left: 80px;
+}
+
 .init-box {
   background: rgba(255, 255, 255, 0.9);
   padding: 50px;
   border-radius: 15px;
   box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
-  z-index: 1;
+  z-index: 1; /* Asegúrate de que el init-box esté encima de las plantas */
   width: 80%;
-  max-width: 1200px;
+  max-width: 1500px;
 }
 
 .init {
@@ -182,7 +262,7 @@ body {
   padding: 14px 40px;
   color: white;
   font-size: 1.4rem;
-  background: linear-gradient(to right, #85b977, #4ab96f, #85b977);
+  background: linear-gradient(to right, #8fc280, #81cc7a, #8fc280);
   border: none;
   border-radius: 30px;
   cursor: pointer;
@@ -197,7 +277,7 @@ body {
   padding: 14px 40px;
   color: white;
   font-size: 1.4rem;
-  background: linear-gradient(to right, #85b977, #4ab96f, #85b977);
+  background: linear-gradient(to right, #8fc280, #81cc7a, #8fc280);
   border: none;
   border-radius: 30px;
   cursor: pointer;
@@ -219,6 +299,21 @@ body {
 }
 
 .btn-orden:hover {
+  transform: scale(1.1);
+}
+
+.btn-action {
+  padding: 5px;
+  margin: 0 2px;
+  color: white;
+  background-color: #4fd87d;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.btn-action:hover {
   transform: scale(1.1);
 }
 

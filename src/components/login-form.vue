@@ -211,9 +211,9 @@ body {
 
 .login-btn {
   padding: 14px 80px;
-  color: white;
+  color: #ffffff;
   font-size: 1.4rem;
-  background: linear-gradient(to right,  #a6ec93, #65b46b, #4fd87d);
+  background: #74c905;
   border: none;
   border-radius: 30px;
   cursor: pointer;
