@@ -262,7 +262,7 @@ body {
   padding: 14px 40px;
   color: white;
   font-size: 1.4rem;
-  background: linear-gradient(to right, #8fc280, #81cc7a, #8fc280);
+  background: #74c905;
   border: none;
   border-radius: 30px;
   cursor: pointer;
@@ -277,7 +277,7 @@ body {
   padding: 14px 40px;
   color: white;
   font-size: 1.4rem;
-  background: linear-gradient(to right, #8fc280, #81cc7a, #8fc280);
+  background: #74c905;
   border: none;
   border-radius: 30px;
   cursor: pointer;

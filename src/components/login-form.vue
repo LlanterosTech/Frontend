@@ -19,6 +19,7 @@
           <i class="ri-lock-fill"></i>
           <input v-model="password" type="password" placeholder="Contraseña">
         </div>
+        <div ref="recaptcha" class="g-recaptcha"></div>
         <button @click="handleLogin" class="login-btn">Iniciar Sesión</button>
         <div class="create">
           <a @click.prevent="goToRegister" href="#">Create Your Account</a>
@@ -36,37 +37,82 @@
 
 <script>
 import userService from "@/main/services/userservice";
+import { loadRecaptcha } from "@/utils/recaptcha";
 
 export default {
   data() {
     return {
       email: "",
       password: "",
-      error: null
+      error: null,
+      recaptchaSiteKey: "6Lc7S94qAAAAAE2ohl9u4JgSRLkqFCBd-ypbg9Wd" // Reemplaza con tu clave de sitio reCAPTCHA
     };
   },
+  async mounted() {
+  try {
+    const grecaptcha = await loadRecaptcha();
+
+    setTimeout(() => {
+      if (!this.$refs.recaptcha) {
+        console.error("No se encontró el div de reCAPTCHA en el DOM.");
+        return;
+      }
+
+      grecaptcha.ready(() => {
+        grecaptcha.render(this.$refs.recaptcha, {
+          sitekey: this.recaptchaSiteKey,
+          theme: "light"
+        });
+      });
+    }, 500); // Espera medio segundo para asegurar que el DOM esté listo
+  } catch (error) {
+    console.error("Error al cargar reCAPTCHA:", error);
+    this.error = "No se pudo cargar el reCAPTCHA. Intenta recargar la página.";
+  }
+}
+
+,
+
   methods: {
     async handleLogin() {
-      try {
-        this.error = null; // Limpia errores anteriores
-        const credentials = { email: this.email, password: this.password };
-        const response = await userService.loginUser(credentials);
+  try {
+    this.error = null;
 
-        if (response && response.token) {
-          localStorage.setItem("userToken", response.token);
-          localStorage.setItem("idUser", response.id);
-          console.log("Token guardado:", response.token);
-          this.$router.push("/init");
-        } else {
-          this.error = "Error: No se recibió un token válido.";
-          this.clearErrorAfterTimeout();
-        }
-      } catch (error) {
-        console.error("Login fallido:", error);
-        this.error = "Login fallido: " + (error.message || "Error inesperado");
-        this.clearErrorAfterTimeout();
-      }
-    },
+    if (!window.grecaptcha || !window.grecaptcha.getResponse) {
+      this.error = "Error: reCAPTCHA no está cargado.";
+      this.clearErrorAfterTimeout();
+      return;
+    }
+
+    const recaptchaResponse = window.grecaptcha.getResponse(this.recaptchaWidgetId);
+    if (!recaptchaResponse) {
+      this.error = "Por favor, completa el CAPTCHA.";
+      this.clearErrorAfterTimeout();
+      return;
+    }
+
+    const credentials = {
+      email: this.email,
+      password: this.password,
+      recaptchaResponse
+    };
+
+    const response = await userService.loginUser(credentials);
+
+    if (response && response.token) {
+      localStorage.setItem("userToken", response.token);
+      localStorage.setItem("idUser", response.id);
+      this.$router.push("/init");
+    } else {
+      this.error = "Error: No se recibió un token válido.";
+      this.clearErrorAfterTimeout();
+    }
+  } catch (error) {
+    console.error("Error al Iniciar Sesión:", error);
+    this.error = "Error al Iniciar Sesión: " + (error.message || "Error inesperado");
+    this.clearErrorAfterTimeout();
+  }
+},
     clearErrorAfterTimeout() {
       setTimeout(() => {
         this.error = null;
