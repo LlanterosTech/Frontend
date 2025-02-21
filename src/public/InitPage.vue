@@ -128,7 +128,7 @@ export default {
       this.$router.push("/nuevaestimacion");
     },
     buscarEstimaciones() {
-      this.$router.push("/buscar-estimaciones");
+      this.$router.push("/buscar-estimacion");
     },
     verDetalle(id) {
       this.$router.push(`/detalle-estimacion/${id}`);
