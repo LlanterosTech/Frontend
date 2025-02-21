@@ -25,6 +25,8 @@ import ProgressBar from "primevue/progressbar";
 import Sidebar from "primevue/sidebar";
 import mitt from 'mitt';
 import {VueElement} from "vue";
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
 const emitter = mitt();
 
 VueElement.prototype.$on = emitter.on;

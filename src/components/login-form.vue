@@ -1,80 +1,250 @@
 <template>
-    <div class="login-container">
-      <h1>Login</h1>
-      <input v-model="email" type="email" placeholder="Email" />
-      <input v-model="password" type="password" placeholder="Password" />
-      <button @click="handleLogin">Login</button>
-      <p>
-        ¿No tienes cuenta?
-        <a @click.prevent="goToRegister" href="#">Regístrate aquí</a>
-      </p>
+  <div class="container">
+    <div class="design">
+      <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
+      <img src="@/assets/Group_2.png" class="plant plant-2" alt="Plant 2">
+      <img src="@/assets/Group_2.png" class="plant plant-3" alt="Plant 3">
+      <img src="@/assets/Group_2.png" class="plant plant-4" alt="Plant 4">
+      <img src="@/assets/Group_2.png" class="plant plant-5" alt="Plant 5">
+      <img src="@/assets/Group_2.png" class="plant plant-6" alt="Plant 6">
     </div>
-  </template>
-  
-  <script>
-  import userService from "@/main/services/userservice";
-  
-  export default {
-    data() {
-      return {
-        email: "",
-        password: "",
-      };
-    },
-    methods: {
-      async handleLogin() {
-    try {
-        const credentials = {
-            email: this.email,
-            password: this.password,
-        };
+    <div class="login-box">
+      <div class="login">
+        <h3 class="title">Iniciar Sesión</h3>
+        <div class="text-input">
+          <i class="ri-user-fill"></i>
+          <input v-model="email" type="text" placeholder="Usuario">
+        </div>
+        <div class="text-input">
+          <i class="ri-lock-fill"></i>
+          <input v-model="password" type="password" placeholder="Contraseña">
+        </div>
+        <button @click="handleLogin" class="login-btn">Iniciar Sesión</button>
+        <div class="create">
+          <a @click.prevent="goToRegister" href="#">Create Your Account</a>
+          <i class="ri-arrow-right-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import userService from "@/main/services/userservice";
+
+export default {
+  data() {
+    return {
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    async handleLogin() {
+      try {
+        const credentials = { email: this.email, password: this.password };
         const response = await userService.loginUser(credentials);
 
         if (response && response.token) {
-            localStorage.setItem("userToken", response.token);
-            localStorage.setItem("idUser", response.id);
-            console.log("Token guardado:", response.token);
-            console.log("Redirigiendo a /init...");
-            this.$router.push("/init"); // 🔹 Redirección
+          localStorage.setItem("userToken", response.token);
+          localStorage.setItem("idUser", response.id);
+          console.log("Token guardado:", response.token);
+          this.$router.push("/init");
         } else {
-            alert("Error: No se recibió un token válido.");
+          alert("Error: No se recibió un token válido.");
         }
-    } catch (error) {
+      } catch (error) {
         console.error("Login fallido:", error);
         alert("Login fallido: " + (error.message || "Error inesperado"));
-    }
-}
-,
-      goToRegister() {
-        this.$router.push("/register");
-      },
-      goToInit(){
-        this.$router.push("/init");
       }
     },
-  };
-  </script>
-  
-  <style scoped>
-  .login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  p {
-    margin-top: 1rem;
-  }
-  
-  a {
-    color: #007bff;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  
-  a:hover {
-    text-decoration: underline;
-  }
-  </style>
-  
+    goToRegister() {
+      this.$router.push("/register");
+    }
+  },
+};
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+*, html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to bottom right, #53704b, #7ba58d, #4fd87d);
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  padding-right: 100px;
+}
+
+.design {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.plant {
+  position: absolute;
+  width: 420px; /* Tamaño aumentado */
+  height: auto;
+  opacity: 0.9;
+}
+
+.plant-1 {
+  bottom: -10px;
+  left: -20px;
+}
+
+.plant-2 {
+  top: -50px;
+  left: -60px;
+}
+
+.plant-3 {
+  top: -50px;
+  left: 180px;
+}
+
+.plant-4 {
+  bottom: -150px;
+  left: 200px;
+}
+
+.plant-5 {
+  top: 30px;
+  left: 250px;
+}
+
+.plant-6 {
+  bottom: 30px;
+  left: 80px;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 100px;
+  border-radius: 15px;
+  box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
+  z-index: 1;
+  width: 340px;
+  margin-right: 190px;
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login h3.title {
+  margin: 20px 0;
+  font-size: 3.2rem;
+}
+
+.text-input {
+  background: #e6e6e6;
+  height: 55px;
+  display: flex;
+  width: 85%;
+  align-items: center;
+  border-radius: 12px;
+  padding: 0 18px;
+  margin: 12px 0;
+}
+
+.text-input input {
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login h3.title {
+  margin: 20px 0;
+  font-size: 3.2rem;
+}
+
+
+
+.text-input input {
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  margin-left: 12px;
+  font-size: 1.2rem;
+}
+
+.text-input i {
+  color: #686868;
+  font-size: 1.3rem;
+}
+
+::placeholder {
+  color: #9a9a9a;
+  font-size: 1.2rem;
+}
+
+.login-btn {
+  padding: 14px 80px;
+  color: white;
+  font-size: 1.4rem;
+  background: linear-gradient(to right,  #a6ec93, #65b46b, #4fd87d);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: transform 0.3s;
+}
+
+.login-btn:hover {
+  transform: scale(1.1);
+}
+
+a {
+  font-size: 16px;
+  color: #9a9a9a;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+}
+
+a.forgot {
+  margin-top: 15px;
+}
+
+.create {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.create i {
+  color: #9a9a9a;
+  margin-left: 12px;
+}
+</style>
