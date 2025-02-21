@@ -77,6 +77,30 @@ const bdService = {
                 console.error("Error al obtener el costo total por proyecto:", error);
                 throw error;
             });
+    },
+     async getEstimacionesByProyectoAndTipoPam(proyectoId, tipoPamId) {
+        return api.get(`estimacion/buscar?proyectoId=${proyectoId}&tipoPamId=${tipoPamId}`)
+            .then(response => response.data)
+            .catch(error => {
+                console.error("Error al obtener estimaciones por ProyectoId y TipoPamId:", error);
+                throw error;
+            });
+    },
+    async getEstimacionesByTipoPamId(tipoPamId) {
+        return api.get(`estimacion/tipoPam/${tipoPamId}`)
+            .then(response => response.data)
+            .catch(error => {
+                console.error("Error al obtener estimaciones por TipoPamId:", error);
+                throw error;
+            });
+    },
+    async getEstimacionesByProyectoId(proyectoId) {
+        return api.get(`estimacion/proyecto/${proyectoId}`)
+            .then(response => response.data)
+            .catch(error => {
+                console.error("Error al obtener estimaciones por ProyectoId:", error);
+                throw error;
+            });
     }
 };
 
