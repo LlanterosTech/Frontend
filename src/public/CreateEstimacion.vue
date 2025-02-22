@@ -1,4 +1,4 @@
-<template class="all">
+<template>
   <div class="container">
     <div class="design">
       <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
@@ -46,16 +46,27 @@
             <label class="block text-sm font-medium">
               {{ atributo.nombre }} ({{ atributo.unidadDeMedida.simbolo }})
             </label>
-            <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded" />
-            <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded">
-              <option :value="true">Sí</option>
-              <option :value="false">No</option>
-            </select>
-            <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded" />
+            <template v-if="atributo.nombre === 'TipoCobertura'">
+              <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded">
+                <option value="NINGUNA">NINGUNA</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+              </select>
+            </template>
+            <template v-else>
+              <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded" />
+              <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded">
+                <option :value="true">Sí</option>
+                <option :value="false">No</option>
+              </select>
+              <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded" />
+            </template>
           </div>
         </div>
         
-        <button @click="guardarEstimacion" class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition">
+        <button @click="guardarEstimacion" class="btn-primary">
           Guardar Estimación
         </button>
         
@@ -196,13 +207,6 @@ export default {
   padding: 0;
 }
 
-.all {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
 body {
   font-family: 'Poppins', sans-serif;
   height: 100vh;
@@ -216,10 +220,9 @@ body {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   position: relative;
-  padding-right: 100px;
 }
 
 .design {
@@ -227,6 +230,18 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  z-index: 0; /* Asegúrate de que las plantas estén en el fondo */
+}
+
+.btn-primary {
+  padding: 14px 40px;
+  color: white;
+  font-size: 1.4rem;
+  background: #74c905;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.3s;
 }
 
 .plant {
@@ -268,12 +283,12 @@ body {
 
 .estimacion-box {
   background: rgba(255, 255, 255, 0.9);
-  padding: 100px;
+  padding: 50px;
   border-radius: 15px;
   box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
   z-index: 1;
-  width: 340px;
-  margin-right: 190px;
+  width: 80%;
+  max-width: 1200px;
 }
 
 .estimacion {
@@ -285,76 +300,121 @@ body {
 
 .estimacion h1.title {
   margin: 20px 0;
-  font-size: 3.2rem;
+  font-size: 2.5rem;
 }
 
-.text-input {
-  background: #e6e6e6;
-  height: 55px;
-  display: flex;
-  width: 85%;
-  align-items: center;
-  border-radius: 12px;
-  padding: 0 18px;
-  margin: 12px 0;
-}
-
-.text-input input {
-  background: none;
-  border: none;
-  outline: none;
+.mb-4 {
   width: 100%;
-  height: 100%;
-  margin-left: 12px;
-  font-size: 1.2rem;
+  margin-bottom: 1rem;
 }
 
-.text-input i {
-  color: #686868;
-  font-size: 1.3rem;
+.block {
+  display: block;
 }
 
-::placeholder {
-  color: #9a9a9a;
-  font-size: 1.2rem;
+.text-sm {
+  font-size: 0.875rem;
 }
 
-.login-btn {
-  padding: 14px 80px;
-  color: white;
-  font-size: 1.4rem;
-  background: linear-gradient(to right, #a6ec93, #65b46b, #4fd87d);
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: transform 0.3s;
+.font-medium {
+  font-weight: 500;
 }
 
-.login-btn:hover {
-  transform: scale(1.1);
+.w-full {
+  width: 100%;
 }
 
-a {
-  font-size: 16px;
-  color: #9a9a9a;
-  cursor: pointer;
-  user-select: none;
-  text-decoration: none;
+.p-2 {
+  padding: 0.5rem;
 }
 
-a.forgot {
-  margin-top: 15px;
+.border {
+  border: 1px solid #ccc;
 }
 
-.create {
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
+.rounded {
+  border-radius: 0.375rem;
 }
 
-.create i {
-  color: #9a9a9a;
-  margin-left: 12px;
+.bg-gray-200 {
+  background-color: #edf2f7;
+}
+
+.bg-blue-500 {
+  background-color: #4299e1;
+}
+
+.text-white {
+  color: #fff;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hover\:bg-blue-600:hover {
+  background-color: #3182ce;
+}
+
+.transition {
+  transition: all 0.2s;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.text-blue-600 {
+  color: #3182ce;
 }
 </style>

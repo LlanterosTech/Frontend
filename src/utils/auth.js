@@ -15,7 +15,4 @@ export function resetInactivityTimer(logoutCallback) {
     }, 0.50 * 60 * 1000); // 15 minutos de inactividad
 }
 
-export function logoutUser() {
-    localStorage.removeItem('userToken'); // Elimina el token
-    window.location.href = '/'; // Redirige al login
-}
+

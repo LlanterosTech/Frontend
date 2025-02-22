@@ -16,7 +16,7 @@
           <input v-model="email" type="text" placeholder="Usuario">
         </div>
         <div class="text-input">
-          <i class="ri-lock-fill"></i>
+          <i class="ri-losck-fill"></i>
           <input v-model="password" type="password" placeholder="Contraseña">
         </div>
         <div ref="recaptcha" class="g-recaptcha"></div>
@@ -75,43 +75,41 @@ export default {
 
   methods: {
     async handleLogin() {
-  try {
-    this.error = null;
+    try {
+        this.error = null;
+        
+        if (!window.grecaptcha || !window.grecaptcha.getResponse) {
+            this.error = "Error: reCAPTCHA no está cargado.";
+            this.clearErrorAfterTimeout();
+            return;
+        }
 
-    if (!window.grecaptcha || !window.grecaptcha.getResponse) {
-      this.error = "Error: reCAPTCHA no está cargado.";
-      this.clearErrorAfterTimeout();
-      return;
+        const recaptchaResponse = window.grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+            this.error = "Por favor, completa el CAPTCHA.";
+            this.clearErrorAfterTimeout();
+            return;
+        }
+
+        const credentials = {
+            email: this.email,
+            password: this.password,
+            recaptchaResponse
+        };
+
+        const response = await userService.loginUser(credentials);
+
+        if (response && response.resource.token) {
+            this.$router.push("/init");
+        } else {
+            this.error = "Error: No se recibió un token válido.";
+            this.clearErrorAfterTimeout();
+        }
+    } catch (error) {
+        console.error("Error al Iniciar Sesión:", error);
+        this.error = "Error al Iniciar Sesión: " + (error.message || "Error inesperado");
+        this.clearErrorAfterTimeout();
     }
-
-    const recaptchaResponse = window.grecaptcha.getResponse(this.recaptchaWidgetId);
-    if (!recaptchaResponse) {
-      this.error = "Por favor, completa el CAPTCHA.";
-      this.clearErrorAfterTimeout();
-      return;
-    }
-
-    const credentials = {
-      email: this.email,
-      password: this.password,
-      recaptchaResponse
-    };
-
-    const response = await userService.loginUser(credentials);
-
-    if (response && response.token) {
-      localStorage.setItem("userToken", response.token);
-      localStorage.setItem("idUser", response.id);
-      this.$router.push("/init");
-    } else {
-      this.error = "Error: No se recibió un token válido.";
-      this.clearErrorAfterTimeout();
-    }
-  } catch (error) {
-    console.error("Error al Iniciar Sesión:", error);
-    this.error = "Error al Iniciar Sesión: " + (error.message || "Error inesperado");
-    this.clearErrorAfterTimeout();
-  }
 },
     clearErrorAfterTimeout() {
       setTimeout(() => {

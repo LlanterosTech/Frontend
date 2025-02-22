@@ -34,6 +34,7 @@
             <button @click="cambiarOrden" class="btn-orden" :key="ordenAscendente">
               <i :class="iconOrden"></i>
             </button>
+                      
           </h2>
           
           <table class="table">
@@ -119,6 +120,8 @@ export default {
         console.error("Error al cargar las estimaciones:", error);
       }
     },
+
+
     cambiarOrden() {
       this.ordenAscendente = !this.ordenAscendente; // Alterna el estado
       this.ultimasEstimaciones.reverse(); // Invierte el orden del array

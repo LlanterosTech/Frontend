@@ -48,7 +48,7 @@ const routes = [
         path: '/:catchAll(.*)',
         name: 'not-found',
         beforeEnter: (to, from, next) => {
-            const isAuthenticated = localStorage.getItem('userToken');
+            const isAuthenticated = localStorage.getItem('token');
             if (isAuthenticated) {
                 next('/init');
             } else {
@@ -67,7 +67,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title || 'App';
 
-    const isAuthenticated = localStorage.getItem('userToken'); 
+    const isAuthenticated = localStorage.getItem('token'); 
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login'); // Redirige al login si no está autenticado
@@ -82,7 +82,7 @@ router.beforeEach((to, from, next) => {
 // 🔹 Cuando se recarga la página, redirigir a la última ruta visitada
 window.addEventListener('load', () => {
     const lastRoute = localStorage.getItem('lastRoute');
-    if (lastRoute && localStorage.getItem('userToken')) {
+    if (lastRoute && localStorage.getItem('token')) {
         router.push(lastRoute);
     }
 });
