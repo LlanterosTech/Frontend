@@ -22,7 +22,7 @@
           </div>
           <div class="text-input">
             <i class="ri-user-fill"></i>
-            <input id="area" v-model="formData.area" type="text" placeholder="Area" required>
+            <input id="area" v-model="formData.registerArea" type="text" placeholder="Area" required>
           </div>
           <button type="submit" class="register-btn">Registrarse</button>
         </form>
