@@ -43,9 +43,10 @@
                 <th>Proyecto</th>
                 <th>Tipo de PAM</th>
                 <th>Código PAM</th>
+                <th>Fecha</th>
                 <th>Usuario</th>
                 <th>Área</th>
-                <th>Costo Estimado</th>
+                <th>Total Estimado</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -54,15 +55,16 @@
                 <td>{{ estimacion.proyecto.name }}</td>
                 <td>{{ estimacion.tipoPam.name }}</td>
                 <td>{{ estimacion.codPam }}</td>
+                <td>{{ formatFecha(estimacion.fechaPam) }}</td>
+
                 <td>{{ estimacion.usuario.email }}</td>
                 <td>{{ estimacion.usuario.registerArea }}</td>
                 <td>
                   <p class="font-bold text-green-600">S/ {{ Number(estimacion.costoEstimado.totalEstimado).toFixed(2) }}</p>
-                  <p class="text-sm text-gray-600">Costo Directo: S/ {{ Number(estimacion.costoEstimado.costoDirecto).toFixed(2) }}</p>
-                  <p class="text-sm text-gray-600">Gastos Generales: S/ {{ Number(estimacion.costoEstimado.gastosGenerales).toFixed(2) }}</p>
+                 
                 </td>
                 <td>
-                  <button @click="verDetalle(estimacion.estimacionId)" class="btn-action">
+                  <button @click="verDetalle(estimacion)" class="btn-action">
                     <i class="fas fa-eye"></i>
                   </button>
                   <button @click="editarEstimacion(estimacion.estimacionId)" class="btn-action">
@@ -78,6 +80,28 @@
               </tr>
             </tbody>
           </table>
+          <div v-if="detalleVisible" class="detalle-overlay" :class="{ 'show': detalleVisible }">
+          <div class="detalle-box">
+            <button @click="toggleDetalle" class="btn-secondary btn-close">
+              X
+            </button>
+            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <p class="cost-item"><strong>Costo Directo:</strong> S/ {{ Number(detalleCosto.costoDirecto).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Gastos Generales:</strong> S/ {{ Number(detalleCosto.gastosGenerales).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Utilidad:</strong> S/ {{ Number(detalleCosto.utilidades).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Subtotal:</strong> S/ {{ Number(detalleCosto.subTotal).toFixed(2) }}</p>
+              <p class="cost-item"><strong>IGV:</strong> S/ {{ Number(detalleCosto.igv).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Subtotal Obra:</strong> S/ {{ Number(detalleCosto.subTotalObras).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Expediente Técnico:</strong> S/ {{ Number(detalleCosto.expedienteTecnico).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Supervisión:</strong> S/ {{ Number(detalleCosto.supervision).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Gestión de Proyectos:</strong> S/ {{ Number(detalleCosto.gestionProyecto).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Capacitación:</strong> S/ {{ Number(detalleCosto.capacitacion).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Contingencias:</strong> S/ {{ Number(detalleCosto.contingencias).toFixed(2) }}</p>
+              <p class="cost-item total-estimado"><strong>Total Estimado:</strong> S/ {{ Number(detalleCosto.totalEstimado).toFixed(2) }}</p>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -92,7 +116,9 @@ export default {
   data() {
     return {
       ultimasEstimaciones: [],
-      ordenAscendente: false // Por defecto, las estimaciones están en orden ascendente
+      ordenAscendente: false, // Por defecto, las estimaciones están en orden ascendente
+      detalleVisible: false,
+      detalleCosto: {},
     };
   },
   computed: {
@@ -115,7 +141,7 @@ export default {
             estimacion.usuario = { email: "Desconocido", area: "No definido" }; // Fallback
           }
         }
-        this.ultimasEstimaciones = estimaciones.slice(-3);
+        this.ultimasEstimaciones = estimaciones.slice(-5);
       } catch (error) {
         console.error("Error al cargar las estimaciones:", error);
       }
@@ -133,16 +159,35 @@ export default {
     buscarEstimaciones() {
       this.$router.push("/buscar-estimacion");
     },
-    verDetalle(id) {
-      this.$router.push(`/detalle-estimacion/${id}`);
+    formatFecha(fecha) {
+      const date = new Date(fecha);
+      const dia = date.getDate().toString().padStart(2, '0');
+      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+      const anio = date.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+    },
+    verDetalle(estimacion) {
+      this.detalleCosto = estimacion.costoEstimado;
+      this.detalleVisible = true;
+    },
+    toggleDetalle() {
+      this.detalleVisible = !this.detalleVisible;
     },
     editarEstimacion(id) {
       // Lógica para editar la estimación
       console.log(`Editar estimación con ID: ${id}`);
     },
     eliminarEstimacion(id) {
-      // Lógica para eliminar la estimación
-      console.log(`Eliminar estimación con ID: ${id}`);
+      if (confirm("¿Estás seguro de que deseas eliminar esta estimación?")) {
+      bdService.deleteEstimacion(id)
+        .then(() => {
+        this.ultimasEstimaciones = this.ultimasEstimaciones.filter(estimacion => estimacion.estimacionId !== id);
+        console.log(`Estimación con ID: ${id} eliminada exitosamente.`);
+        })
+        .catch(error => {
+        console.error(`Error al eliminar la estimación con ID: ${id}`, error);
+        });
+      }
     },
     descargarPDF(id) {
       // Lógica para descargar el PDF de la estimación
@@ -315,6 +360,51 @@ body {
   cursor: pointer;
   transition: transform 0.3s;
 }
+.detalle-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.detalle-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.detalle-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
+  z-index: 1001;
+  max-width: 800px;
+  width: 90%;
+}
+
+.btn-close {
+    position: relative;
+    float: right;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #13863a;
+    font-size: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.btn-close:hover {
+  transform: scale(1.1);
+}
 
 .btn-action:hover {
   transform: scale(1.1);
@@ -354,5 +444,21 @@ body {
 
 .table tr:hover {
   background-color: #ddd;
+}
+.cost-item {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.total-estimado {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1f4401; /* Color rojo para resaltar */
+}
+.text-lg-font-semibold-mb-4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 </style>

@@ -25,9 +25,15 @@
             <input id="area" v-model="formData.registerArea" type="text" placeholder="Area" required>
           </div>
           <button type="submit" class="register-btn">Registrarse</button>
+       
         </form>
         <p v-if="error">{{ error }}</p>
+        <div class="create">
+          <a @click.prevent="goToLogin" href="#">¿Ya tienes cuenta? Inicia Sesion</a>
+          <i class="ri-arrow-right-fill"></i>
+          </div>
       </div>
+      
     </div>
   </div>
 </template>
@@ -57,6 +63,9 @@ export default {
       } catch (err) {
         this.error = err || "Failed to register. Please try again.";
       }
+    },
+    async goToLogin() {
+      this.$router.push("/login");
     },
   },
 };
@@ -94,6 +103,17 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.create {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.create i {
+  color: #9a9a9a;
+  margin-left: 12px;
 }
 
 .plant {

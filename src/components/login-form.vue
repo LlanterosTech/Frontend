@@ -22,7 +22,7 @@
         <div ref="recaptcha" class="g-recaptcha"></div>
         <button @click="handleLogin" class="login-btn">Iniciar Sesión</button>
         <div class="create">
-          <a @click.prevent="goToRegister" href="#">Create Your Account</a>
+          <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Registrate</a>
           <i class="ri-arrow-right-fill"></i>
         </div>
       </div>

@@ -101,6 +101,14 @@ const bdService = {
                 console.error("Error al obtener estimaciones por ProyectoId:", error);
                 throw error;
             });
+    },
+    async deleteEstimacion(estimacionId){
+        return api.delete(`estimacion/delete/${estimacionId}`)
+            .then(response => response.data)
+            .catch(error => {
+                console.error("Error al eliminar la estimación:", error);
+                throw error;
+        });
     }
 };
 
