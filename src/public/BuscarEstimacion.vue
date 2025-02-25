@@ -67,7 +67,7 @@
                     <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td>
-                    <td class="highlight">{{ estimacion.costoEstimado?.totalEstimado || 'N/A' }}</td>
+                    <td class="highlight">S/ {{ estimacion.costoEstimado?.totalEstimado.toFixed(2) || 'N/A' }}</td>
                     <td>{{ formatFecha(estimacion.fechaPam) }}</td>
                     <td>{{ estimacion.usuario.email }}</td>
                     <td>{{ estimacion.usuario.registerArea }}</td>
@@ -323,7 +323,9 @@
         align-items: center;
         background: linear-gradient(to bottom right, #8fc280, #81cc7a, #8fc280);
     }
-    
+    .highlight {
+  white-space: nowrap;
+}
     .container {
         width: 100vw;
         height: 100vh;
