@@ -62,11 +62,11 @@
                     <td>{{ estimacion.codPam }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 1) || 'N/A' }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 2) || 'N/A' }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 3) || 'N/A' }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 4) || 'N/A' }}</td>
+                    <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 3)) }}</td>
+                    <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 4)) }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td>
-                    <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 6)) }}</td>
-                    <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 7)) }}</td>
+                    <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td>
+                    <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td>
                     <td class="highlight">{{ estimacion.costoEstimado?.totalEstimado || 'N/A' }}</td>
                     <td>{{ formatFecha(estimacion.fechaPam) }}</td>
                     <td>{{ estimacion.usuario.email }}</td>
@@ -232,7 +232,6 @@
     
             console.log("Datos obtenidos:", response); // 🔹 Imprimir los datos recibidos
     
-            // 🔹 Obtener usuarios asociados a cada estimación
             for (let estimacion of response) {
                 try {
                 const usuario = await userService.getAuthUser(estimacion.usuarioId);
@@ -253,11 +252,19 @@
             this.$router.go(-1);
         },
         convertirBooleano(valor) {
-            return valor === true ? 'Sí' : valor === false ? 'No' : valor;
-        },
+                    if (valor === true || valor === "true") return "Sí";
+        if (valor === false || valor === "false") return "No";
+        return valor; // Retorna el valor original si no es booleano
+                },
         obtenerAtributo(valores, atributoId) {
-            const atributo = valores.find(v => v.atributoPamId === atributoId);
-            return this.convertirBooleano(atributo ? atributo.valor : 'N/A');
+        const atributo = valores.find(v => v.atributoPamId === atributoId);
+        if (!atributo) return "N/A";
+
+        if (atributo.valor === true || atributo.valor === false || atributo.valor === "true" || atributo.valor === "false") {
+            return this.convertirBooleano(atributo.valor);
+        }
+
+        return atributo.valor; // Devuelve el valor original si no es booleano
         },
         verDetalle(estimacion) {
             this.detalleCosto = estimacion.costoEstimado;
