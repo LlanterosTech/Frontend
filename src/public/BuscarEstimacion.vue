@@ -183,16 +183,23 @@ export default {
         downloadFilteredPdf() {
     const doc = new jsPDF("p", "mm", "a4");
 
-    // Título del reporte
+    // 📌 Título del reporte
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.text("Cálculo de Costos por PAM", 10, 15);
 
-    let startY = 25;
+    let startY = 25; // 📌 Margen inicial
+    let estimacionesPorPagina = 0; // 📌 Contador de estimaciones por página
 
-    this.paginatedEstimaciones.forEach((estimacion, index) => {
-        if (index !== 0) {
-            startY += 10;
+    // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
+    const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+
+    estimacionesOrdenadas.forEach((estimacion, index) => {
+        // Si ya imprimimos 2 estimaciones en la página, forzamos una nueva
+        if (estimacionesPorPagina >= 2) {
+            doc.addPage();
+            startY = 25; // Reiniciar margen superior
+            estimacionesPorPagina = 0; // Reiniciar contador de estimaciones por página
         }
 
         doc.setFontSize(12);
@@ -205,13 +212,13 @@ export default {
 
         const tableColumns = ["Descripción", "Valor"];
         const tableRows = [
-            ["Volumen (m³)", estimacion.valores.find(v => v.atributoPamId === 1)?.valor || "N/A"],
-            ["Área (m²)", estimacion.valores.find(v => v.atributoPamId === 2)?.valor || "N/A"],
-            ["Generación DAR", this.convertirBooleano(estimacion.valores.find(v => v.atributoPamId === 3)?.valor)],
-            ["Cobertura", this.convertirBooleano(estimacion.valores.find(v => v.atributoPamId === 4)?.valor)],
-            ["Tipo de cierre", estimacion.valores.find(v => v.atributoPamId === 5)?.valor || "N/A"],
-            ["Tipo de cobertura", estimacion.valores.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-            ["Distancia (Km)", estimacion.valores.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+            ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+            ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+            ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+            ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+            ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+            ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
         ];
 
         doc.autoTable({
@@ -220,7 +227,7 @@ export default {
             body: tableRows,
             theme: "grid",
             styles: { fontSize: 10 },
-            headStyles: { fillColor: [41, 128, 185] }, // Azul
+            headStyles: { fillColor: [41, 128, 185] },
             alternateRowStyles: { fillColor: [240, 240, 240] }
         });
 
@@ -231,7 +238,7 @@ export default {
             startY += 30; // Un espacio predeterminado si no existe finalY
         }
 
-        // Sección de Total Estimado con fondo amarillo
+        // 🔹 Sección de "Total Estimado" con fondo amarillo
         doc.setFillColor(255, 255, 0);
         doc.rect(10, startY, 90, 8, "F");
         doc.setFontSize(12);
@@ -241,10 +248,14 @@ export default {
             12,
             startY + 5
         );
+
+        startY += 20; // Espaciado extra antes del siguiente bloque
+        estimacionesPorPagina++; // 📌 Aumentamos el contador de estimaciones en la página
     });
 
     doc.save("reporte_estimaciones.pdf");
 },
+
     async getEstimaciones() {
         try {
         const estimaciones = await bdService.getEstimaciones();
