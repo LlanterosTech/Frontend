@@ -146,60 +146,62 @@ import bdService from "@/main/services/bdservice";
 import userService from "@/main/services/userservice";
 
 export default {
-    data() {
+  data() {
     return {
-        proyecto: "",
-        tipoPam: "",
-        idPam: "",
-        estimaciones: [],
-        proyectos: [],
-        tiposPAM: [],
-        detalleVisible: false,
-        detalleCosto: {},
-        currentPage: 1,
-        itemsPerPage: 10
+      proyecto: "",
+      tipoPam: "",
+      idPam: "",
+      estimaciones: [],
+      proyectos: [],
+      tiposPAM: [],
+      detalleVisible: false,
+      detalleCosto: {},
+      currentPage: 1,
+      itemsPerPage: 10
     };
-    },
-    computed: {
+  },
+  computed: {
     totalPages() {
-        return Math.ceil(this.estimaciones.length / this.itemsPerPage);
+      return Math.ceil(this.estimaciones.length / this.itemsPerPage);
     },
     paginatedEstimaciones() {
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = start + this.itemsPerPage;
-        return this.estimaciones.slice(start, end);
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.estimaciones.slice(start, end);
     }
-    },
-    watch: {
+  },
+  watch: {
     proyecto: 'buscarEstimacion',
     tipoPam: 'buscarEstimacion',
     idPam: 'buscarEstimacion'
-    },
-    async mounted() {
+  },
+  async mounted() {
     await this.getEstimaciones();
     await this.getProyectosYTipos();
+  },
+  methods: {
+    async goBack() {
+      this.$router.go(-1);
     },
-    methods: {
-        downloadFilteredPdf() {
-    const doc = new jsPDF("p", "mm", "a4");
+    downloadFilteredPdf() {
+      const doc = new jsPDF("p", "mm", "a4");
 
-    // 📌 Título del reporte
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("Cálculo de Costos por PAM", 10, 15);
+      // 📌 Título del reporte
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("Cálculo de Costos por PAM", 10, 15);
 
-    let startY = 25; // 📌 Margen inicial
-    let estimacionesPorPagina = 0; // 📌 Contador de estimaciones por página
+      let startY = 25; // 📌 Margen inicial
+      let totalCostoProyectos = {}; // 📌 Acumulador del costo total por proyecto
 
-    // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
-    const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+      // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
+      const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
 
-    estimacionesOrdenadas.forEach((estimacion, index) => {
-        // Si ya imprimimos 2 estimaciones en la página, forzamos una nueva
-        if (estimacionesPorPagina >= 2) {
-            doc.addPage();
-            startY = 25; // Reiniciar margen superior
-            estimacionesPorPagina = 0; // Reiniciar contador de estimaciones por página
+      estimacionesOrdenadas.forEach((estimacion) => {
+        // Si ya imprimimos una estimación en la página, forzamos una nueva
+        if (startY !== 25) {
+          doc.addPage();
+          startY = 25; // Reiniciar margen superior
         }
 
         doc.setFontSize(12);
@@ -212,30 +214,42 @@ export default {
 
         const tableColumns = ["Descripción", "Valor"];
         const tableRows = [
-            ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
-            ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
-            ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
-            ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
-            ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
-            ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+          ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+          ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+          ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+          ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+          ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+          ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+          ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"],
+          ["Costo Directo", `S/ ${Number(estimacion.costoEstimado?.costoDirecto).toFixed(2) || "N/A"}`],
+          ["Gastos Generales", `S/ ${Number(estimacion.costoEstimado?.gastosGenerales).toFixed(2) || "N/A"}`],
+          ["Utilidad", `S/ ${Number(estimacion.costoEstimado?.utilidades).toFixed(2) || "N/A"}`],
+          ["Subtotal", `S/ ${Number(estimacion.costoEstimado?.subTotal).toFixed(2) || "N/A"}`],
+          ["IGV", `S/ ${Number(estimacion.costoEstimado?.igv).toFixed(2) || "N/A"}`],
+          ["Subtotal Obra", `S/ ${Number(estimacion.costoEstimado?.subTotalObras).toFixed(2) || "N/A"}`],
+          ["Expediente Técnico", `S/ ${Number(estimacion.costoEstimado?.expedienteTecnico).toFixed(2) || "N/A"}`],
+          ["Supervisión", `S/ ${Number(estimacion.costoEstimado?.supervision).toFixed(2) || "N/A"}`],
+          ["Gestión de Proyectos", `S/ ${Number(estimacion.costoEstimado?.gestionProyecto).toFixed(2) || "N/A"}`],
+          ["Capacitación", `S/ ${Number(estimacion.costoEstimado?.capacitacion).toFixed(2) || "N/A"}`],
+          ["Contingencias", `S/ ${Number(estimacion.costoEstimado?.contingencias).toFixed(2) || "N/A"}`],
+          ["Total Estimado", `S/ ${Number(estimacion.costoEstimado?.totalEstimado).toFixed(2) || "N/A"}`]
         ];
 
         doc.autoTable({
-            startY: startY + 22,
-            head: [tableColumns],
-            body: tableRows,
-            theme: "grid",
-            styles: { fontSize: 10 },
-            headStyles: { fillColor: [41, 128, 185] },
-            alternateRowStyles: { fillColor: [240, 240, 240] }
+          startY: startY + 22,
+          head: [tableColumns],
+          body: tableRows,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [41, 128, 185] },
+          alternateRowStyles: { fillColor: [240, 240, 240] }
         });
 
         // 🛠️ Verificar si finalY existe antes de usarlo
         if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
-            startY = doc.lastAutoTable.finalY + 10;
+          startY = doc.lastAutoTable.finalY + 10;
         } else {
-            startY += 30; // Un espacio predeterminado si no existe finalY
+          startY += 30; // Un espacio predeterminado si no existe finalY
         }
 
         // 🔹 Sección de "Total Estimado" con fondo amarillo
@@ -244,152 +258,162 @@ export default {
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
         doc.text(
-            `Total Estimado: S/ ${estimacion.costoEstimado?.totalEstimado.toFixed(2) || "N/A"}`,
-            12,
-            startY + 5
+          `Total Estimado: S/ ${Number(estimacion.costoEstimado?.totalEstimado).toFixed(2) || "N/A"}`,
+          12,
+          startY + 5
         );
 
-        startY += 20; // Espaciado extra antes del siguiente bloque
-        estimacionesPorPagina++; // 📌 Aumentamos el contador de estimaciones en la página
-    });
+        // Acumular el costo total por proyecto
+        const proyectoName = estimacion.proyecto.name;
+        if (!totalCostoProyectos[proyectoName]) {
+          totalCostoProyectos[proyectoName] = 0;
+        }
+        totalCostoProyectos[proyectoName] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
 
-    doc.save("reporte_estimaciones.pdf");
-},
+        startY += 20; // Espaciado extra antes del siguiente bloque
+      });
+
+      // Agregar una nueva página para el costo total por proyecto
+      Object.keys(totalCostoProyectos).forEach((proyectoName) => {
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Costo Total del Proyecto: ${proyectoName}`, 10, 20);
+        doc.setFontSize(14);
+        doc.text(`Total: S/ ${totalCostoProyectos[proyectoName].toFixed(2)}`, 10, 30);
+      });
+
+      doc.save("reporte_estimaciones.pdf");
+    },
 
     async getEstimaciones() {
-        try {
+      try {
         const estimaciones = await bdService.getEstimaciones();
         console.log("Datos obtenidos:", estimaciones); // 🔹 Imprimir los datos recibidos
 
         for (let estimacion of estimaciones) {
-            try {
+          try {
             const usuario = await userService.getAuthUser(estimacion.usuarioId);
             estimacion.usuario = usuario; // Agrega el usuario a la estimación
-            } catch (error) {
+          } catch (error) {
             console.error(`Error obteniendo el usuario para ID ${estimacion.usuarioId}:`, error);
             estimacion.usuario = { email: "Desconocido", area: "No definido" }; // Fallback
-            }
+          }
         }
         this.estimaciones = estimaciones;
-        } catch (error) {
+      } catch (error) {
         console.error("Error al cargar las estimaciones:", error);
-        }
+      }
     },
     formatFecha(fecha) {
-        const date = new Date(fecha);
-        const dia = date.getDate().toString().padStart(2, '0');
-        const mes = (date.getMonth() + 1).toString().padStart(2, '0');
-        const anio = date.getFullYear();
-        return `${dia}/${mes}/${anio}`;
+      const date = new Date(fecha);
+      const dia = date.getDate().toString().padStart(2, '0');
+      const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+      const anio = date.getFullYear();
+      return `${dia}/${mes}/${anio}`;
     },
     async getProyectosYTipos() {
-        try {
+      try {
         this.proyectos = await bdService.getProyectos();
         this.tiposPAM = await bdService.getTiposPAM();
-        } catch (error) {
+      } catch (error) {
         console.error("Error al cargar proyectos y tipos de PAM:", error);
-        }
+      }
     },
     async buscarEstimacion() {
-        try {
+      try {
         let response = await bdService.getEstimaciones();
 
         if (this.proyecto) {
-            response = response.filter(estimacion =>
+          response = response.filter(estimacion =>
             estimacion.proyecto.name.toLowerCase().includes(this.proyecto.toLowerCase())
-            );
+          );
         }
 
         if (this.tipoPam) {
-            response = response.filter(estimacion =>
+          response = response.filter(estimacion =>
             estimacion.tipoPam.name.toLowerCase().includes(this.tipoPam.toLowerCase())
-            );
+          );
         }
 
         if (this.idPam) {
-            response = response.filter(estimacion =>
+          response = response.filter(estimacion =>
             estimacion.codPam === this.idPam
-            );
+          );
         }
 
         console.log("Datos obtenidos:", response); // 🔹 Imprimir los datos recibidos
 
         for (let estimacion of response) {
-            try {
+          try {
             const usuario = await userService.getAuthUser(estimacion.usuarioId);
             estimacion.usuario = usuario; // Agregar el usuario a la estimación
-            } catch (error) {
+          } catch (error) {
             console.error(`Error obteniendo el usuario para ID ${estimacion.usuarioId}:`, error);
             estimacion.usuario = { email: "Desconocido", area: "No definido" }; // Fallback en caso de error
-            }
+          }
         }
 
         this.estimaciones = response; // Actualizar el estado con las estimaciones obtenidas
-        } catch (error) {
+      } catch (error) {
         console.error("Error al buscar estimaciones:", error);
         alert("Error al buscar estimaciones.");
-        }
-    },
-    async goBack() {
-        this.$router.go(-1);
+      }
     },
     convertirBooleano(valor) {
-                if (valor === true || valor === "true") return "Sí";
-    if (valor === false || valor === "false") return "No";
-    return valor; // Retorna el valor original si no es booleano
-            },
+      if (valor === true || valor === "true") return "Sí";
+      if (valor === false || valor === "false") return "No";
+      return valor; // Retorna el valor original si no es booleano
+    },
     obtenerAtributo(valores, atributoId) {
-    const atributo = valores.find(v => v.atributoPamId === atributoId);
-    if (!atributo) return "N/A";
+      const atributo = valores.find(v => v.atributoPamId === atributoId);
+      if (!atributo) return "N/A";
 
-    if (atributo.valor === true || atributo.valor === false || atributo.valor === "true" || atributo.valor === "false") {
+      if (atributo.valor === true || atributo.valor === false || atributo.valor === "true" || atributo.valor === "false") {
         return this.convertirBooleano(atributo.valor);
-    }
+      }
 
-    return atributo.valor; // Devuelve el valor original si no es booleano
+      return atributo.valor; // Devuelve el valor original si no es booleano
     },
     verDetalle(estimacion) {
-        this.detalleCosto = estimacion.costoEstimado;
-        this.detalleVisible = true;
+      this.detalleCosto = estimacion.costoEstimado;
+      this.detalleVisible = true;
     },
     toggleDetalle() {
-        this.detalleVisible = !this.detalleVisible;
+      this.detalleVisible = !this.detalleVisible;
     },
     editarEstimacion(id) {
-        // Lógica para editar la estimación
-        console.log(`Editar estimación con ID: ${id}`);
+      // Lógica para editar la estimación
+      console.log(`Editar estimación con ID: ${id}`);
     },
-    
     eliminarEstimacion(id) {
-        if (confirm("¿Estás seguro de que deseas eliminar esta estimación?")) {
+      if (confirm("¿Estás seguro de que deseas eliminar esta estimación?")) {
         bdService.deleteEstimacion(id)
-        .then(() => {
-        console.log(`Estimación con ID: ${id} eliminada exitosamente.`);
-        this.estimaciones = this.estimaciones.filter(estimacion => estimacion.estimacionId !== id);
-        })
-        .catch(error => {
-        console.error(`Error al eliminar la estimación con ID: ${id}`, error);
-        });
-        }
+          .then(() => {
+            console.log(`Estimación con ID: ${id} eliminada exitosamente.`);
+            this.estimaciones = this.estimaciones.filter(estimacion => estimacion.estimacionId !== id);
+          })
+          .catch(error => {
+            console.error(`Error al eliminar la estimación con ID: ${id}`, error);
+          });
+      }
     },
     descargarPDF(id) {
-        // Lógica para descargar el PDF de la estimación
-        console.log(`Descargar PDF de la estimación con ID: ${id}`);
+      // Lógica para descargar el PDF de la estimación
+      console.log(`Descargar PDF de la estimación con ID: ${id}`);
     },
     prevPage() {
-        if (this.currentPage > 1) {
+      if (this.currentPage > 1) {
         this.currentPage--;
-        }
+      }
     },
     nextPage() {
-        if (this.currentPage < this.totalPages) {
+      if (this.currentPage < this.totalPages) {
         this.currentPage++;
-        }
+      }
     }
-    
-    }
+  }
 };
-
 </script>
 
 <style scoped>

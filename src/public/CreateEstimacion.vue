@@ -74,10 +74,10 @@
               </template>
             </div>
           </div>
-          <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-            Costo Estimado: 
-            <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
-          </p>
+            <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+              Costo Estimado de la Estimación: S/ {{ Number(costoEstimado.totalEstimado).toFixed(2) }}
+              <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
+            </p>
         </div>
         
         <div class="flex justify-between mt-4">
