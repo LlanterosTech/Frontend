@@ -373,10 +373,11 @@
         toggleDetalle() {
         this.detalleVisible = !this.detalleVisible;
         },
-                formatNumero(valor) {
-            if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
-            return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        },
+        formatNumero(valor) {
+      if (valor == null || isNaN(valor)) return 'S/ 0';
+      const roundedValue = Math.round(valor);
+      return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
+    },
         editarEstimacion(id) {
         // Lógica para editar la estimación
         console.log(`Editar estimación con ID: ${id}`);

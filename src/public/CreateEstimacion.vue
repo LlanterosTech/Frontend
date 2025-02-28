@@ -163,9 +163,10 @@ export default {
       this.proyectos = await bdService.getProyectos();
     },
     formatNumero(valor) {
-            if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
-            return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            }` },
+      if (valor == null || isNaN(valor)) return 'S/ 0';
+      const roundedValue = Math.round(valor);
+      return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
+    },
     async cargarTiposPAM() {
       this.tiposPAM = await bdService.getTiposPAM();
     },
