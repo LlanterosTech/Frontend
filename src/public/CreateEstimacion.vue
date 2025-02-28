@@ -227,10 +227,6 @@ export default {
       this.valoresAtributos = {};
       this.costoEstimado = null;
     },
-    formatNumero(valor) {
-            if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
-            return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        },
     toggleDetalle() {
       this.mostrarDetalle = !this.mostrarDetalle;
     },
