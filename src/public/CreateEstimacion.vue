@@ -82,7 +82,7 @@
             </div>
           </div>
             <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-              Costo Estimado de la Estimación: S/ {{ Number(costoEstimado.totalEstimado).toFixed(2) }}
+              Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
               <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
             </p>
         </div>
@@ -106,18 +106,18 @@
         </p>
         <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
         <div class="grid grid-cols-2 gap-4">
-          <p><strong>Costo Directo:</strong> S/ {{ Number(costoEstimado.costoDirecto).toFixed(2) }}</p>
-          <p><strong>Gastos Generales:</strong> S/ {{ Number(costoEstimado.gastosGenerales).toFixed(2) }}</p>
-          <p><strong>Utilidad:</strong> S/ {{ Number(costoEstimado.utilidades).toFixed(2) }}</p>
-          <p><strong>Subtotal:</strong> S/ {{ Number(costoEstimado.subTotal).toFixed(2) }}</p>
-          <p><strong>IGV:</strong> S/ {{ Number(costoEstimado.igv).toFixed(2) }}</p>
-          <p><strong>Subtotal Obra:</strong> S/ {{ Number(costoEstimado.subTotalObras).toFixed(2) }}</p>
-          <p><strong>Expediente Técnico:</strong> S/ {{ Number(costoEstimado.expedienteTecnico).toFixed(2) }}</p>
-          <p><strong>Supervisión:</strong> S/ {{ Number(costoEstimado.supervision).toFixed(2) }}</p>
-          <p><strong>Gestión de Proyectos:</strong> S/ {{ Number(costoEstimado.gestionProyecto).toFixed(2) }}</p>
-          <p><strong>Capacitación:</strong> S/ {{ Number(costoEstimado.capacitacion).toFixed(2) }}</p>
-          <p><strong>Contingencias:</strong> S/ {{ Number(costoEstimado.contingencias).toFixed(2) }}</p>
-          <p class="cost-item total-estimado"><strong>Total Estimado:</strong> S/ {{ Number(costoEstimado.totalEstimado).toFixed(2) }}</p>
+          <p><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
+          <p><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
+          <p><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
+          <p><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
+          <p><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
+          <p><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
+          <p><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
+          <p><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
+          <p><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
+          <p><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
+          <p><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
+          <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
         </div>
       </div>
     </div>
@@ -169,6 +169,10 @@ export default {
     async cargarProyectos() {
       this.proyectos = await bdService.getProyectos();
     },
+    formatNumero(valor) {
+            if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
+            return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            }` },
     async cargarTiposPAM() {
       this.tiposPAM = await bdService.getTiposPAM();
     },
