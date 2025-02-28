@@ -8,13 +8,20 @@
             <img src="@/assets/Group_2.png" class="plant plant-5" alt="Plant 5">
             <img src="@/assets/Group_2.png" class="plant plant-6" alt="Plant 6">
         </div>
-        <div class="init-box">
-            <button @click="goBack" class="btn-back">
-            <i class="fas fa-arrow-left"></i> <!-- Icono de flecha hacia la izquierda -->
-            </button>
+            <div class="init-box">
+            <div class="top-buttons">
+                <button @click="goBack" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+                <div class="download-buttons">
             <button @click="downloadFilteredPdf" class="btn-download-pdf">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
+            <button @click="downloadResumenEjecutivo" class="btn-download-resumen">
+                <i class="fas fa-file-pdf"></i> Resumen Ejecutivo
+            </button>
+        </div>
             <div class="init">
             <h1 class="title">Buscar Estimaciones</h1>
             <p class="subtitle">Encuentra y administra tus estimaciones.</p>
@@ -276,6 +283,46 @@
 
         doc.save("reporte_estimaciones.pdf");
         },
+        downloadResumenEjecutivo() {
+        const doc = new jsPDF("p", "mm", "a4");
+
+        // 📌 Ajustar márgenes y reducir el tamaño de la fuente para optimizar espacio
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("Resumen Ejecutivo", 10, 10);
+
+        doc.setFontSize(12);
+        doc.text(`Proyecto: ${this.paginatedEstimaciones[0]?.proyecto.name || "N/A"}`, 10, 18);
+
+        let startY = 25; // 📌 Margen inicial optimizado
+
+        // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
+        const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+
+        // Configuración de la tabla con margen ajustado
+        const tableColumns = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)", "Total Estimado"];
+        const tableRows = estimacionesOrdenadas.map(estimacion => [
+            estimacion.tipoPam.name,
+            estimacion.codPam,
+            estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
+            estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A",
+            `S/ ${estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A'}`
+        ]);
+
+        doc.autoTable({
+            startY: startY,
+            head: [tableColumns],
+            body: tableRows,
+            theme: "grid",
+            styles: { fontSize: 10, cellPadding: 2 },
+            headStyles: { fillColor: [41, 128, 185] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { top: 25 } // Ajuste del margen superior
+        });
+
+        doc.save("resumen_ejecutivo.pdf");
+    },
+
 
         async getEstimaciones() {
         try {
@@ -414,24 +461,46 @@
 
     <style scoped>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    .btn-download-pdf {
-        background-color: red;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        position: absolute;
-        right: 30px;
-        top: 120px;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-    }
 
-    .btn-download-pdf i {
-        margin-right: 5px;
+    .top-buttons {
+        display: flex;
+        justify-content: space-between; /* Separa los botones a los extremos */
+        width: 100%;
+        padding-bottom: 10px; /* Espacio entre los botones y el título */
     }
+    .download-buttons {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 10px; /* Espaciado entre botones */
+    margin-top: 10px; /* Espaciado con los elementos superiores */
+}
+
+.btn-download-pdf,
+.btn-download-resumen {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.btn-download-pdf {
+    background-color: red;
+    color: white;
+}
+
+.btn-download-pdf i,
+.btn-download-resumen i {
+    margin-right: 5px;
+}
+
+.btn-download-resumen {
+    background-color: blue;
+    color: white;
+}
+
     *, html, body {
         margin: 0;
         padding: 0;
