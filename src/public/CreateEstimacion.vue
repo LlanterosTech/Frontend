@@ -488,6 +488,7 @@ body {
 }
 
 .text-sm {
+  
   font-size: 0.875rem;
 }
 
