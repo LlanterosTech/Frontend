@@ -12,13 +12,14 @@
             <button @click="goBack" class="btn-back">
             <i class="fas fa-arrow-left"></i> <!-- Icono de flecha hacia la izquierda -->
             </button>
-            <button @click="downloadFilteredPdf" class="btn-download-pdf">
-                <i class="fas fa-file-pdf"></i> Descargar PDF
-            </button>
             <div class="init">
             <h1 class="title">Buscar Estimaciones</h1>
             <p class="subtitle">Encuentra y administra tus estimaciones.</p>
-
+            <div class="button-container">
+            <button @click="downloadFilteredPdf" class="btn-download-pdf">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </button>
+            </div>
             <div class="search-box">
             <div class="search-field">
                 <label>Proyecto</label>
@@ -373,7 +374,7 @@
         toggleDetalle() {
         this.detalleVisible = !this.detalleVisible;
         },
-                formatNumero(valor) {
+        formatNumero(valor) {
             if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
             return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         },
@@ -414,19 +415,16 @@
     <style scoped>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     .btn-download-pdf {
-        background-color: red;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        position: absolute;
-        right: 30px;
-        top: 120px;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-    }
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
 
     .btn-download-pdf i {
         margin-right: 5px;
@@ -443,6 +441,12 @@
         justify-content: center;
         align-items: center;
         background: linear-gradient(to bottom right, #8fc280, #81cc7a, #8fc280);
+    }
+        .button-container {
+        display: flex;
+        justify-content: flex-end; /* 🔹 Mantiene el botón alineado a la derecha */
+        width: 100%;
+        margin-bottom: 10px;
     }
     .highlight {
     white-space: nowrap;
@@ -527,6 +531,7 @@
     }
 
     .init-box {
+        position: relative; /* Asegura que el botón esté dentro del cuadro */
         background: rgba(255, 255, 255, 0.9);
         padding: 50px;
         border-radius: 15px;
