@@ -60,7 +60,7 @@
                 <td>{{ estimacion.usuario.email }}</td>
                 <td>{{ estimacion.usuario.registerArea }}</td>
                 <td>
-                  <p class="font-bold text-green-600">S/ {{ Number(estimacion.costoEstimado.totalEstimado).toFixed(2) }}</p>
+                  <p class="font-bold text-green-600"> {{ formatNumero(estimacion.costoEstimado.totalEstimado)}}</p>
                  
                 </td>
                 <td>
@@ -87,18 +87,18 @@
             </button>
             <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM</h2>
             <div class="grid grid-cols-2 gap-4">
-              <p class="cost-item"><strong>Costo Directo:</strong> S/ {{ Number(detalleCosto.costoDirecto).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Gastos Generales:</strong> S/ {{ Number(detalleCosto.gastosGenerales).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Utilidad:</strong> S/ {{ Number(detalleCosto.utilidades).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Subtotal:</strong> S/ {{ Number(detalleCosto.subTotal).toFixed(2) }}</p>
-              <p class="cost-item"><strong>IGV:</strong> S/ {{ Number(detalleCosto.igv).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Subtotal Obra:</strong> S/ {{ Number(detalleCosto.subTotalObras).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Expediente Técnico:</strong> S/ {{ Number(detalleCosto.expedienteTecnico).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Supervisión:</strong> S/ {{ Number(detalleCosto.supervision).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Gestión de Proyectos:</strong> S/ {{ Number(detalleCosto.gestionProyecto).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Capacitación:</strong> S/ {{ Number(detalleCosto.capacitacion).toFixed(2) }}</p>
-              <p class="cost-item"><strong>Contingencias:</strong> S/ {{ Number(detalleCosto.contingencias).toFixed(2) }}</p>
-              <p class="cost-item total-estimado"><strong>Total Estimado:</strong> S/ {{ Number(detalleCosto.totalEstimado).toFixed(2) }}</p>
+              <p class="cost-item"><strong>Costo Directo:</strong>  {{ formatNumero(detalleCosto.costoDirecto) }}</p>
+              <p class="cost-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
+              <p class="cost-item"><strong>Utilidad:</strong> {{ formatNumero(detalleCosto.utilidades)}}</p>
+              <p class="cost-item"><strong>Subtotal:</strong>  {{ formatNumero(detalleCosto.subTotal)}}</p>
+              <p class="cost-item"><strong>IGV:</strong>  {{ formatNumero(detalleCosto.igv) }}</p>
+              <p class="cost-item"><strong>Subtotal Obra:</strong>  {{ formatNumero(detalleCosto.subTotalObras) }}</p>
+              <p class="cost-item"><strong>Expediente Técnico:</strong>  {{ formatNumero(detalleCosto.expedienteTecnico) }}</p>
+              <p class="cost-item"><strong>Supervisión:</strong>  {{ formatNumero(detalleCosto.supervision) }}</p>
+              <p class="cost-item"><strong>Gestión de Proyectos:</strong>  {{ formatNumero(detalleCosto.gestionProyecto) }}</p>
+              <p class="cost-item"><strong>Capacitación:</strong> {{ formatNumero(detalleCosto.capacitacion) }}</p>
+              <p class="cost-item"><strong>Contingencias:</strong>  {{ formatNumero(detalleCosto.contingencias) }}</p>
+              <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(detalleCosto.totalEstimado) }}</p>
             </div>
           </div>
         </div>
@@ -153,6 +153,10 @@ export default {
       this.ultimasEstimaciones.reverse(); // Invierte el orden del array
       this.$forceUpdate();
     },
+    formatNumero(valor) {
+            if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
+            return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        },
     crearEstimacion() {
       this.$router.push("/nuevaestimacion");
     },
