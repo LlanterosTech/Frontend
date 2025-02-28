@@ -55,23 +55,30 @@
               <label class="block text-sm font-medium">
                 {{ atributo.nombre }} 
               </label>
-              <template v-if="atributo.nombre === 'TipoCobertura'">
-                <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-                  <option value="NINGUNA">NINGUNA</option>
-                  <option value="I">I</option>
-                  <option value="II">II</option>
-                  <option value="III">III</option>
-                  <option value="IV">IV</option>
-                </select>
-              </template>
-              <template v-else>
-                <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
-                <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-                  <option :value="true">Sí</option>
-                  <option :value="false">No</option>
-                </select>
-                <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
-              </template>
+              <template v-if="atributo.nombre === 'TipoCierre'">
+            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
+              <option value="TRASLADO">TRASLADO</option>
+              <option value="INSITU">INSITU</option>
+            </select>
+          </template>
+          <template v-else-if="atributo.nombre === 'TipoCobertura'">
+            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
+              <option value="NINGUNA">NINGUNA</option>
+              <option value="I">I</option>
+              <option value="II">II</option>
+              <option value="III">III</option>
+              <option value="IV">IV</option>
+            </select>
+          </template>
+          <template v-else>
+            <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
+            <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
+              <option :value="true">Sí</option>
+              <option :value="false">No</option>
+            </select>
+            <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
+          </template>
+
             </div>
           </div>
             <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
@@ -215,6 +222,10 @@ export default {
       this.valoresAtributos = {};
       this.costoEstimado = null;
     },
+    formatNumero(valor) {
+            if (valor == null || isNaN(valor)) return 'S/ 0.00'; 
+            return `S/ ${Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        },
     toggleDetalle() {
       this.mostrarDetalle = !this.mostrarDetalle;
     },
