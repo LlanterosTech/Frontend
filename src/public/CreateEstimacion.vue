@@ -39,7 +39,7 @@
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium">Código PAM</label>
+          <label class="block text-sm font-medium">ID de PAM</label>
           <input type="text" v-model="estimacion.codPam" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
         </div>
         
@@ -53,7 +53,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
               <label class="block text-sm font-medium">
-                {{ atributo.nombre }} 
+                {{ obtenerDescripcionAtributo(atributo.nombre) }} 
               </label>
               <template v-if="atributo.nombre === 'TipoCierre'">
             <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
@@ -156,6 +156,15 @@ export default {
         codPam: null,
         tipoPamId: null,
         valores: {}
+      },
+      // Objeto de mapeo para los nombres de los atributos
+      atributoDescripciones: {
+        GeneracionDAR: "Es generador de Drenaje Ácido de Roca (DAR)?",
+        TipoCierre: "Tipo de Cierre",
+        TipoCobertura: "Tipo de Cobertura",
+        Cobertura: "¿Requiere Cobertura?",
+        DistanciaTraslado: "Distancia de Translado (km)",
+        // Agrega más mapeos aquí según sea necesario
       }
     };
   },
@@ -233,31 +242,31 @@ export default {
     async guardarEstimacion() {
       const storedUserId = localStorage.getItem("idUser");
       if (!storedUserId) {
-      this.error = "No se encontró un usuario autenticado.";
-      this.clearErrorAfterTimeout();
-      return;
+        this.error = "No se encontró un usuario autenticado.";
+        this.clearErrorAfterTimeout();
+        return;
       }
       this.estimacion.usuarioId = storedUserId;
       this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
       this.estimacion.valores = {};
       this.atributos.forEach(atributo => {
-      this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(this.valoresAtributos[atributo.atributoPamId]);
+        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(this.valoresAtributos[atributo.atributoPamId]);
       });
       console.log("Datos enviados al backend:", JSON.stringify(this.estimacion, null, 2));
       try {
-      const response = await bdService.createEstimacion(this.estimacion);
-      if (response && response.costoEstimado) {
-        this.costoEstimado = response.costoEstimado;
-        console.log("Total Estimado:", this.costoEstimado.totalEstimado); // Mostrar TotalEstimado en la consola
-        this.mostrarDetalle = true; // Mostrar detalle al guardar la estimación
-      } else {
-        console.warn("No se recibieron costos estimados en la respuesta.");
-      }
-      await this.cargarCostosByProyectoId();
+        const response = await bdService.createEstimacion(this.estimacion);
+        if (response && response.costoEstimado) {
+          this.costoEstimado = response.costoEstimado;
+          console.log("Total Estimado:", this.costoEstimado.totalEstimado); // Mostrar TotalEstimado en la consola
+          this.mostrarDetalle = true; // Mostrar detalle al guardar la estimación
+        } else {
+          console.warn("No se recibieron costos estimados en la respuesta.");
+        }
+        await this.cargarCostosByProyectoId();
       } catch (error) {
-      console.error("Error al crear la estimación:", error.response ? error.response.data : error);
-      this.error = "Error al crear estimación";
-      this.clearErrorAfterTimeout();
+        console.error("Error al crear la estimación:", error.response ? error.response.data : error);
+        this.error = "Error al crear estimación";
+        this.clearErrorAfterTimeout();
       }
     },
     clearErrorAfterTimeout() {
@@ -265,6 +274,9 @@ export default {
         this.error = null;
       }, 4000); // 4 segundos
     },
+    obtenerDescripcionAtributo(nombre) {
+      return this.atributoDescripciones[nombre] || nombre;
+    }
   }
 };
 </script>

@@ -42,7 +42,7 @@
               <tr>
                 <th>Proyecto</th>
                 <th>Tipo de PAM</th>
-                <th>Código PAM</th>
+                <th>ID de PAM</th>
                 <th>Fecha</th>
                 <th>Usuario</th>
                 <th>Área</th>

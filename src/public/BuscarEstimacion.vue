@@ -1,4 +1,4 @@
-    <template>
+<template>
         <div class="container">
         <div class="design">
             <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
@@ -36,7 +36,7 @@
                 <input type="text" v-model="tipoPam" placeholder="Ingrese tipo PAM" />
             </div>
             <div class="search-field">
-                <label>Código PAM</label>
+                <label>ID de PAM</label>
                 <input type="text" v-model="idPam" placeholder="Ingrese ID de PAM" />
             </div>
             </div>
@@ -47,7 +47,7 @@
                 <tr>
                     <th>Proyecto</th>
                     <th>Tipo de PAM</th>
-                    <th>Codigo PAM</th>
+                    <th>ID de PAM</th>
                     <th>Volumen (m³)</th>
                     <th>Área (m²)</th>
                     <th>Generación DAR</th>
@@ -108,27 +108,26 @@
 
             <div v-if="detalleVisible" class="detalle-overlay" :class="{ 'show': detalleVisible }">
                 <div class="detalle-box">
-                <button @click="toggleDetalle" class="btn-secondary btn-close">
-                    X
-                </button>
-                <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM</h2>
-                <div class="grid grid-cols-2 gap-4">
-                <p class="cost-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>
-                <p class="cost-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
-                <p class="cost-item"><strong>Utilidad:</strong> {{ formatNumero(detalleCosto.utilidades) }}</p>
-                <p class="cost-item"><strong>Subtotal:</strong> {{ formatNumero(detalleCosto.subTotal) }}</p>
-                <p class="cost-item"><strong>IGV:</strong> {{ formatNumero(detalleCosto.igv) }}</p>
-                <p class="cost-item"><strong>Subtotal Obra:</strong> {{ formatNumero(detalleCosto.subTotalObras) }}</p>
-                <p class="cost-item"><strong>Expediente Técnico:</strong> {{ formatNumero(detalleCosto.expedienteTecnico) }}</p>
-                <p class="cost-item"><strong>Supervisión:</strong> {{ formatNumero(detalleCosto.supervision) }}</p>
-                <p class="cost-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(detalleCosto.gestionProyecto) }}</p>
-                <p class="cost-item"><strong>Capacitación:</strong> {{ formatNumero(detalleCosto.capacitacion) }}</p>
-                <p class="cost-item"><strong>Contingencias:</strong> {{ formatNumero(detalleCosto.contingencias) }}</p>
-                <p class="cost-item total-estimado"><strong>Total Estimado:</strong> {{ formatNumero(detalleCosto.totalEstimado) }}</p>
+                    <button @click="toggleDetalle" class="btn-secondary btn-close">
+                        X
+                    </button>
+                    <h2  class="text-lg-font-semibold-mb-4">Costo Estimado del PAM - {{ estimaciones.codPam }}</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <p class="cost-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>
+                        <p class="cost-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
+                        <p class="cost-item"><strong>Utilidad:</strong> {{ formatNumero(detalleCosto.utilidades) }}</p>
+                        <p class="cost-item"><strong>Subtotal:</strong> {{ formatNumero(detalleCosto.subTotal) }}</p>
+                        <p class="cost-item"><strong>IGV:</strong> {{ formatNumero(detalleCosto.igv) }}</p>
+                        <p class="cost-item"><strong>Subtotal Obra:</strong> {{ formatNumero(detalleCosto.subTotalObras) }}</p>
+                        <p class="cost-item"><strong>Expediente Técnico:</strong> {{ formatNumero(detalleCosto.expedienteTecnico) }}</p>
+                        <p class="cost-item"><strong>Supervisión:</strong> {{ formatNumero(detalleCosto.supervision) }}</p>
+                        <p class="cost-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(detalleCosto.gestionProyecto) }}</p>
+                        <p class="cost-item"><strong>Capacitación:</strong> {{ formatNumero(detalleCosto.capacitacion) }}</p>
+                        <p class="cost-item"><strong>Contingencias:</strong> {{ formatNumero(detalleCosto.contingencias) }}</p>
+                        <p class="cost-item total-estimado"><strong>Total Estimado:</strong> {{ formatNumero(detalleCosto.totalEstimado) }}</p>
+                    </div>
                 </div>
-                </div>
-            </div>
-            </div>
+            </div>    </div>
         </div>
         <transition name="fade">
             <div v-if="error" class="alert-container">
@@ -156,7 +155,8 @@
         detalleVisible: false,
         detalleCosto: {},
         currentPage: 1,
-        itemsPerPage: 10
+        itemsPerPage: 10,
+        ultimasEstimaciones: []
         };
     },
     computed: {
@@ -182,148 +182,6 @@
         async goBack() {
         this.$router.go(-1);
         },
-        downloadFilteredPdf() {
-        const doc = new jsPDF("p", "mm", "a4");
-
-        // 📌 Título del reporte
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.text("Cálculo de Costos por PAM", 10, 15);
-
-        let startY = 25; // 📌 Margen inicial
-        let totalCostoProyectos = {}; // 📌 Acumulador del costo total por proyecto
-
-        // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
-        const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
-
-        estimacionesOrdenadas.forEach((estimacion) => {
-            // Si ya imprimimos una estimación en la página, forzamos una nueva
-            if (startY !== 25) {
-            doc.addPage();
-            startY = 25; // Reiniciar margen superior
-            }
-
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Proyecto: ${estimacion.proyecto.name}`, 10, startY);
-            doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 10, startY + 8);
-            doc.text(`Código PAM: ${estimacion.codPam}`, 10, startY + 16);
-
-            doc.setFont("helvetica", "normal");
-
-            const tableColumns = ["Descripción", "Valor"];
-                    const tableRows = [
-            ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
-            ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
-            ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
-            ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
-            ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
-            ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"],
-            ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
-            ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
-            ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
-            ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
-            ["IGV", this.formatNumero(estimacion.costoEstimado?.igv)],
-            ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)],
-            ["Expediente Técnico", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
-            ["Supervisión", this.formatNumero(estimacion.costoEstimado?.supervision)],
-            ["Gestión de Proyectos", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
-            ["Capacitación", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
-            ["Contingencias", this.formatNumero(estimacion.costoEstimado?.contingencias)]
-        ];
-
-            doc.autoTable({
-            startY: startY + 22,
-            head: [tableColumns],
-            body: tableRows,
-            theme: "grid",
-            styles: { fontSize: 10 },
-            headStyles: { fillColor: [41, 128, 185] },
-            alternateRowStyles: { fillColor: [240, 240, 240] }
-            });
-
-            // 🛠️ Verificar si finalY existe antes de usarlo
-            if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
-            startY = doc.lastAutoTable.finalY + 10;
-            } else {
-            startY += 30; // Un espacio predeterminado si no existe finalY
-            }
-
-            // 🔹 Sección de "Total Estimado" con fondo amarillo
-            doc.setFillColor(255, 255, 0);
-            doc.rect(10, startY, 90, 8, "F");
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text(
-            `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
-            12,
-            startY + 5
-            );
-
-            // Acumular el costo total por proyecto
-            const proyectoName = estimacion.proyecto.name;
-            if (!totalCostoProyectos[proyectoName]) {
-            totalCostoProyectos[proyectoName] = 0;
-            }
-            totalCostoProyectos[proyectoName] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
-
-            startY += 20; // Espaciado extra antes del siguiente bloque
-        });
-
-        // Agregar una nueva página para el costo total por proyecto
-        Object.keys(totalCostoProyectos).forEach((proyectoName) => {
-            doc.addPage();
-            doc.setFontSize(16);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Costo Total del Proyecto: ${proyectoName}`, 10, 20);
-            doc.setFontSize(14);
-            doc.text(`Total: S/ ${totalCostoProyectos[proyectoName].toFixed(2)}`, 10, 30);
-        });
-
-        doc.save("reporte_estimaciones.pdf");
-        },
-        downloadResumenEjecutivo() {
-        const doc = new jsPDF("p", "mm", "a4");
-
-        // 📌 Ajustar márgenes y reducir el tamaño de la fuente para optimizar espacio
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("Resumen Ejecutivo", 10, 10);
-
-        doc.setFontSize(12);
-        doc.text(`Proyecto: ${this.paginatedEstimaciones[0]?.proyecto.name || "N/A"}`, 10, 18);
-
-        let startY = 25; // 📌 Margen inicial optimizado
-
-        // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
-        const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
-
-        // Configuración de la tabla con margen ajustado
-        const tableColumns = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)", "Total Estimado"];
-        const tableRows = estimacionesOrdenadas.map(estimacion => [
-            estimacion.tipoPam.name,
-            estimacion.codPam,
-            estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
-            estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A",
-            `S/ ${estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A'}`
-        ]);
-
-        doc.autoTable({
-            startY: startY,
-            head: [tableColumns],
-            body: tableRows,
-            theme: "grid",
-            styles: { fontSize: 10, cellPadding: 2 },
-            headStyles: { fillColor: [41, 128, 185] },
-            alternateRowStyles: { fillColor: [240, 240, 240] },
-            margin: { top: 25 } // Ajuste del margen superior
-        });
-
-        doc.save("resumen_ejecutivo.pdf");
-    },
-
-
         async getEstimaciones() {
         try {
             const estimaciones = await bdService.getEstimaciones();
@@ -454,7 +312,153 @@
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
         }
+        },
+        downloadFilteredPdf() {
+      const doc = new jsPDF("p", "mm", "a4");
+
+      // 📌 Título del reporte
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("Cálculo de Costos por PAM", 10, 15);
+
+      let startY = 25; // 📌 Margen inicial
+      let totalCostoProyectos = {}; // 📌 Acumulador del costo total por proyecto
+
+      // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
+      const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+
+      estimacionesOrdenadas.forEach((estimacion) => {
+        // Si ya imprimimos una estimación en la página, forzamos una nueva
+        if (startY !== 25) {
+          doc.addPage();
+          startY = 25; // Reiniciar margen superior
         }
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Proyecto: ${estimacion.proyecto.name}`, 10, startY);
+        doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 10, startY + 8);
+        doc.text(`ID de PAM: ${estimacion.codPam}`, 10, startY + 16);
+
+        doc.setFont("helvetica", "normal");
+
+        const tableColumns = ["Descripción", "Valor"];
+        const tableRows = [
+          ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+          ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+          ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+          ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+          ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+          ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+          ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"],
+          ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
+          ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
+          ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
+          ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
+          ["IGV", this.formatNumero(estimacion.costoEstimado?.igv)],
+          ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)],
+          ["Expediente Técnico", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
+          ["Supervisión", this.formatNumero(estimacion.costoEstimado?.supervision)],
+          ["Gestión de Proyectos", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
+          ["Capacitación", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
+          ["Contingencias", this.formatNumero(estimacion.costoEstimado?.contingencias)]
+        ];
+
+        doc.autoTable({
+          startY: startY + 22,
+          head: [tableColumns],
+          body: tableRows,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [41, 128, 185] },
+          alternateRowStyles: { fillColor: [240, 240, 240] }
+        });
+
+        // 🛠️ Verificar si finalY existe antes de usarlo
+        if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
+          startY = doc.lastAutoTable.finalY + 10;
+        } else {
+          startY += 30; // Un espacio predeterminado si no existe finalY
+        }
+
+        // 🔹 Sección de "Total Estimado" con fondo amarillo
+        doc.setFillColor(255, 255, 0);
+        doc.rect(10, startY, 90, 8, "F");
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(
+          `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
+          12,
+          startY + 5
+        );
+
+        // Acumular el costo total por proyecto
+        const proyectoName = estimacion.proyecto.name;
+        if (!totalCostoProyectos[proyectoName]) {
+          totalCostoProyectos[proyectoName] = 0;
+        }
+        totalCostoProyectos[proyectoName] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
+
+        startY += 20; // Espaciado extra antes del siguiente bloque
+      });
+
+      // Agregar una nueva página para el costo total por proyecto
+      Object.keys(totalCostoProyectos).forEach((proyectoName) => {
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Costo Total del Proyecto: ${proyectoName}`, 10, 20);
+        doc.setFontSize(14);
+        doc.text(`Total: S/ ${totalCostoProyectos[proyectoName].toFixed(2)}`, 10, 30);
+      });
+
+      // Convertir el PDF a Blob y abrirlo en una nueva ventana
+      const pdfBlob = doc.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl);
+    },
+    downloadResumenEjecutivo() {
+      const doc = new jsPDF("p", "mm", "a4");
+
+      // 📌 Ajustar márgenes y reducir el tamaño de la fuente para optimizar espacio
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Resumen Ejecutivo", 10, 10);
+
+      doc.setFontSize(12);
+      doc.text(`Proyecto: ${this.paginatedEstimaciones[0]?.proyecto.name || "N/A"}`, 10, 18);
+
+      let startY = 25; // 📌 Margen inicial optimizado
+
+      // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
+      const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+
+      // Configuración de la tabla con margen ajustado
+      const tableColumns = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)", "Total Estimado"];
+      const tableRows = estimacionesOrdenadas.map(estimacion => [
+        estimacion.tipoPam.name,
+        estimacion.codPam,
+        estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
+        estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A",
+        `S/ ${estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A'}`
+      ]);
+
+      doc.autoTable({
+        startY: startY,
+        head: [tableColumns],
+        body: tableRows,
+        theme: "grid",
+        styles: { fontSize: 10, cellPadding: 2 },
+        headStyles: { fillColor: [41, 128, 185] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { top: 25 } // Ajuste del margen superior
+      });
+
+      // Convertir el PDF a Blob y abrirlo en una nueva ventana
+      const pdfBlob = doc.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl);
+    }
     }
     };
     </script>
