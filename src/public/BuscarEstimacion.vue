@@ -342,19 +342,73 @@
 
         doc.setFont("helvetica", "normal");
 
-        const tableColumns = ["Descripción", "Valor"];
-        const tableRows = [
+        // Sección de Características
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.setFillColor(0, 102, 204); // Azul
+        doc.rect(10, startY + 24, 190, 10, "F");
+        doc.text("Características", 12, startY + 31);
+
+        const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+        const tableRowsCaracteristicas = [
           ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
           ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
           ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
           ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
           ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
           ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-          ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"],
+          ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+        ];
+
+        doc.autoTable({
+          startY: startY + 35,
+          head: [tableColumnsCaracteristicas],
+          body: tableRowsCaracteristicas,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [0, 102, 204] },
+          alternateRowStyles: { fillColor: [240, 240, 240] }
+        });
+
+        // Sección de Estimación de Costo de Cierre
+        startY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.setFillColor(255, 165, 0); // Naranja
+        doc.rect(10, startY, 190, 10, "F");
+        doc.text("Estimación de Costo de Cierre", 12, startY + 7);
+
+        const tableColumnsCostoCierre = ["Descripción", "Valor"];
+        const tableRowsCostoCierre = [
           ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
           ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
           ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
-          ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
+          ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)]
+        ];
+
+        doc.autoTable({
+          startY: startY + 12,
+          head: [tableColumnsCostoCierre],
+          body: tableRowsCostoCierre,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [255, 165, 0] },
+          alternateRowStyles: { fillColor: [240, 240, 240] }
+        });
+
+        // Sección de Otros
+        startY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.setFillColor(34, 139, 34); // Verde
+        doc.rect(10, startY, 190, 10, "F");
+        doc.text("Otros", 12, startY + 7);
+
+        const tableColumnsOtros = ["Descripción", "Valor"];
+        const tableRowsOtros = [
           ["IGV", this.formatNumero(estimacion.costoEstimado?.igv)],
           ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)],
           ["Expediente Técnico", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
@@ -365,12 +419,12 @@
         ];
 
         doc.autoTable({
-          startY: startY + 22,
-          head: [tableColumns],
-          body: tableRows,
+          startY: startY + 12,
+          head: [tableColumnsOtros],
+          body: tableRowsOtros,
           theme: "grid",
           styles: { fontSize: 10 },
-          headStyles: { fillColor: [41, 128, 185] },
+          headStyles: { fillColor: [34, 139, 34] },
           alternateRowStyles: { fillColor: [240, 240, 240] }
         });
 

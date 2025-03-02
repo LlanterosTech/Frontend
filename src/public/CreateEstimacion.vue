@@ -40,7 +40,10 @@
         
         <div class="mb-4">
           <label class="block text-sm font-medium">ID de PAM</label>
-          <input type="text" v-model="estimacion.codPam" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
+          <div class="flex items-center">
+            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
+            <input type="checkbox" v-model="idPamBloqueado" class="ml-2" @change="bloquearIdPam"> {{ idPamBloqueado ? 'ID de PAM Generico' : 'ID de PAM Manual' }} 
+          </div>
         </div>
         
         <div class="mb-4">
@@ -56,35 +59,34 @@
                 {{ obtenerDescripcionAtributo(atributo.nombre) }} 
               </label>
               <template v-if="atributo.nombre === 'TipoCierre'">
-            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-              <option value="TRASLADO">TRASLADO</option>
-              <option value="INSITU">INSITU</option>
-            </select>
-          </template>
-          <template v-else-if="atributo.nombre === 'TipoCobertura'">
-            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-              <option value="NINGUNA">NINGUNA</option>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-            </select>
-          </template>
-          <template v-else>
-            <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
-            <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-              <option :value="true">Sí</option>
-              <option :value="false">No</option>
-            </select>
-            <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
-          </template>
-
+                <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
+                  <option value="TRASLADO">TRASLADO</option>
+                  <option value="INSITU">INSITU</option>
+                </select>
+              </template>
+              <template v-else-if="atributo.nombre === 'TipoCobertura'">
+                <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
+                  <option value="NINGUNA">NINGUNA</option>
+                  <option value="I">I</option>
+                  <option value="II">II</option>
+                  <option value="III">III</option>
+                  <option value="IV">IV</option>
+                </select>
+              </template>
+              <template v-else>
+                <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
+                <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
+                  <option :value="true">Sí</option>
+                  <option :value="false">No</option>
+                </select>
+                <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
+              </template>
             </div>
           </div>
-            <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-              Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
-              <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
-            </p>
+          <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+            Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
+            <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
+          </p>
         </div>
         
         <div class="flex justify-between mt-4">
@@ -150,6 +152,7 @@ export default {
       fecha: new Date().toISOString().split("T")[0],
       proyectoBloqueado: false,
       mostrarDetalle: false,
+      idPamBloqueado: false,
       estimacion: {
         usuarioId: localStorage.getItem('idUser'),
         proyectoId: null,
@@ -228,6 +231,11 @@ export default {
     },
     bloquearProyecto() {
       this.proyectoBloqueado = !this.proyectoBloqueado;
+    },
+    bloquearIdPam() {
+      if (this.idPamBloqueado) {
+        this.estimacion.codPam = null;
+      }
     },
     limpiarFormulario() {
       this.estimacion.codPam = null;
