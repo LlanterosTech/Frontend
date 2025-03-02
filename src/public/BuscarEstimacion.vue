@@ -286,43 +286,60 @@
         downloadResumenEjecutivo() {
         const doc = new jsPDF("p", "mm", "a4");
 
-        // 📌 Ajustar márgenes y reducir el tamaño de la fuente para optimizar espacio
+        // 📌 Título del Resumen Ejecutivo
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("Resumen Ejecutivo", 10, 10);
+        doc.setFontSize(18);
+        doc.text("Resumen Ejecutivo", 10, 15);
 
-        doc.setFontSize(12);
-        doc.text(`Proyecto: ${this.paginatedEstimaciones[0]?.proyecto.name || "N/A"}`, 10, 18);
-
-        let startY = 25; // 📌 Margen inicial optimizado
+        let startY = 25; // 📌 Margen inicial
 
         // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
         const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
 
-        // Configuración de la tabla con margen ajustado
-        const tableColumns = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)", "Total Estimado"];
-        const tableRows = estimacionesOrdenadas.map(estimacion => [
-            estimacion.tipoPam.name,
-            estimacion.codPam,
-            estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
-            estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A",
-            `S/ ${estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A'}`
-        ]);
+        estimacionesOrdenadas.forEach((estimacion) => {
+            // Si ya imprimimos una estimación en la página, forzamos una nueva
+            if (startY !== 25) {
+                doc.addPage();
+                startY = 25; // Reiniciar margen superior
+            }
 
-        doc.autoTable({
-            startY: startY,
-            head: [tableColumns],
-            body: tableRows,
-            theme: "grid",
-            styles: { fontSize: 10, cellPadding: 2 },
-            headStyles: { fillColor: [41, 128, 185] },
-            alternateRowStyles: { fillColor: [240, 240, 240] },
-            margin: { top: 25 } // Ajuste del margen superior
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Proyecto: ${estimacion.proyecto.name}`, 10, startY);
+            
+            doc.setFont("helvetica", "normal");
+
+            const tableColumns = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)", "Total Estimado"];
+            const tableRows = [
+                [
+                    estimacion.tipoPam.name,
+                    estimacion.codPam,
+                    estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
+                    estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A",
+                    `S/ ${estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A'}`
+                ]
+            ];
+
+            doc.autoTable({
+                startY: startY + 10,
+                head: [tableColumns],
+                body: tableRows,
+                theme: "grid",
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [41, 128, 185] },
+                alternateRowStyles: { fillColor: [240, 240, 240] }
+            });
+
+            // 🛠️ Verificar si finalY existe antes de usarlo
+            if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
+                startY = doc.lastAutoTable.finalY + 10;
+            } else {
+                startY += 30; // Un espacio predeterminado si no existe finalY
+            }
         });
 
         doc.save("resumen_ejecutivo.pdf");
     },
-
 
         async getEstimaciones() {
         try {

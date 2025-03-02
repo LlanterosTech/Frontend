@@ -14,8 +14,7 @@
       </button>
       <div class="estimacion">
         <h1 class="title">Crear Nueva Estimación</h1>
-       
-        <div class="mb-4">
+          <div class="mb-4">
           <label class="block text-sm font-medium">Proyecto</label>
           <div class="flex items-center">
             <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado" class="w-full p-2 border rounded input-standard">
@@ -26,9 +25,26 @@
             <button @click="bloquearProyecto" class="btn-secondary ml-2">
               {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
             </button>
+            <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy">+</button>
           </div>
         </div>
-        
+                <div v-if="modalNuevoProyecto" class="detalle-overlay show">
+          <div class="detalle-box">
+            <button @click="cerrarModalNuevoProyecto" class="btn-close">&times;</button> <!-- 🔥 Botón X dentro del modal -->
+            <h2 class="text-lg-font-semibold-mb-4">Crear Nuevo Proyecto</h2>
+
+            <div class="modal-content">
+              <label class="cost-item"><strong>Nombre del Proyecto:</strong></label>
+              <input v-model="nuevoProyecto.nombre" type="text" class="modal-input" placeholder="Ingrese el nombre del proyecto" />
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn-secondary" @click="guardarNuevoProyecto">Guardar</button>
+              <button class="btn-secondary" @click="cerrarModalNuevoProyecto">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
         <div class="mb-4">
           <label class="block text-sm font-medium">Tipo de PAM</label>
           <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
@@ -39,7 +55,7 @@
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium">Código PAM</label>
+          <label class="block text-sm font-medium">ID de PAM</label>
           <input type="text" v-model="estimacion.codPam" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
         </div>
         
@@ -53,7 +69,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
               <label class="block text-sm font-medium">
-                {{ atributo.nombre }} 
+                {{ obtenerDescripcionAtributo(atributo.nombre) }} 
               </label>
               <template v-if="atributo.nombre === 'TipoCierre'">
             <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
@@ -149,6 +165,8 @@ export default {
       totalProyecto: 0,
       fecha: new Date().toISOString().split("T")[0],
       proyectoBloqueado: false,
+      modalNuevoProyecto: false,
+      nuevoProyecto: { nombre: "" },
       mostrarDetalle: false,
       estimacion: {
         usuarioId: localStorage.getItem('idUser'),
@@ -156,6 +174,15 @@ export default {
         codPam: null,
         tipoPamId: null,
         valores: {}
+      },
+      // Objeto de mapeo para los nombres de los atributos
+      atributoDescripciones: {
+        GeneracionDAR: "Es generador de Drenaje Ácido de Roca (DAR)?",
+        TipoCierre: "Tipo de Cierre",
+        TipoCobertura: "Tipo de Cobertura",
+        Cobertura: "¿Requiere Cobertura?",
+        DistanciaTraslado: "Distancia de Translado (km)",
+        // Agrega más mapeos aquí según sea necesario
       }
     };
   },
@@ -196,6 +223,28 @@ export default {
         this.totalProyecto = 0;
       }
     },
+      async guardarNuevoProyecto() {
+      if (!this.nuevoProyecto.nombre.trim()) {
+        alert("El nombre del proyecto no puede estar vacío.");
+        return;
+      }
+
+      try {
+        // Llamamos al servicio para crear el proyecto
+        const nuevoProyecto = await bdService.createProyecto(this.nuevoProyecto.nombre);
+
+        // Volvemos a cargar la lista de proyectos para reflejar el nuevo
+        await this.cargarProyectos();
+
+        // Seleccionar automáticamente el nuevo proyecto en el `select`
+        this.estimacion.proyectoId = nuevoProyecto.proyectoId;
+
+        // Cerrar el modal
+        this.cerrarModalNuevoProyecto();
+      } catch (error) {
+        alert("Error al crear el proyecto.");
+      }
+    },
     async cargarAtributos() {
       if (!this.estimacion.tipoPamId) return;
       try {
@@ -217,6 +266,13 @@ export default {
         console.error("Error al cargar los atributos:", error);
       }
     },
+    mostrarModalNuevoProyecto() {
+      this.modalNuevoProyecto = true;
+    },
+    cerrarModalNuevoProyecto() {
+      this.modalNuevoProyecto = false;
+      this.nuevoProyecto.nombre = ""; // Limpiar input
+    },
     bloquearProyecto() {
       this.proyectoBloqueado = !this.proyectoBloqueado;
     },
@@ -233,31 +289,31 @@ export default {
     async guardarEstimacion() {
       const storedUserId = localStorage.getItem("idUser");
       if (!storedUserId) {
-      this.error = "No se encontró un usuario autenticado.";
-      this.clearErrorAfterTimeout();
-      return;
+        this.error = "No se encontró un usuario autenticado.";
+        this.clearErrorAfterTimeout();
+        return;
       }
       this.estimacion.usuarioId = storedUserId;
       this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
       this.estimacion.valores = {};
       this.atributos.forEach(atributo => {
-      this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(this.valoresAtributos[atributo.atributoPamId]);
+        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(this.valoresAtributos[atributo.atributoPamId]);
       });
       console.log("Datos enviados al backend:", JSON.stringify(this.estimacion, null, 2));
       try {
-      const response = await bdService.createEstimacion(this.estimacion);
-      if (response && response.costoEstimado) {
-        this.costoEstimado = response.costoEstimado;
-        console.log("Total Estimado:", this.costoEstimado.totalEstimado); // Mostrar TotalEstimado en la consola
-        this.mostrarDetalle = true; // Mostrar detalle al guardar la estimación
-      } else {
-        console.warn("No se recibieron costos estimados en la respuesta.");
-      }
-      await this.cargarCostosByProyectoId();
+        const response = await bdService.createEstimacion(this.estimacion);
+        if (response && response.costoEstimado) {
+          this.costoEstimado = response.costoEstimado;
+          console.log("Total Estimado:", this.costoEstimado.totalEstimado); // Mostrar TotalEstimado en la consola
+          this.mostrarDetalle = true; // Mostrar detalle al guardar la estimación
+        } else {
+          console.warn("No se recibieron costos estimados en la respuesta.");
+        }
+        await this.cargarCostosByProyectoId();
       } catch (error) {
-      console.error("Error al crear la estimación:", error.response ? error.response.data : error);
-      this.error = "Error al crear estimación";
-      this.clearErrorAfterTimeout();
+        console.error("Error al crear la estimación:", error.response ? error.response.data : error);
+        this.error = "Error al crear estimación";
+        this.clearErrorAfterTimeout();
       }
     },
     clearErrorAfterTimeout() {
@@ -265,6 +321,9 @@ export default {
         this.error = null;
       }, 4000); // 4 segundos
     },
+    obtenerDescripcionAtributo(nombre) {
+      return this.atributoDescripciones[nombre] || nombre;
+    }
   }
 };
 </script>
@@ -308,6 +367,7 @@ body {
   align-items: center;
   background: linear-gradient(to bottom right, #53704b, #7ba58d, #4fd87d);
 }
+
 
 .container {
   width: 100vw;
@@ -357,6 +417,18 @@ body {
   cursor: pointer;
   transition: transform 0.3s;
   margin-top: 10px;
+}
+.btn-nuevoproy{
+  padding: 10px 20px;
+  color: white;
+  font-size: 1rem;
+  background: #13863a;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  margin-top: 10px;
+  margin-left: 10px; 
 }
 
 .btn-secondary:hover {
@@ -622,16 +694,93 @@ body {
 
 .detalle-box {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
+  padding: 25px;
+  border-radius: 12px; /* Bordes más suaves */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); /* Sombra más suave */
   z-index: 1001;
-  max-width: 800px;
+  max-width: 380px; /* 🔥 Reducimos el ancho */
   width: 90%;
+  text-align: center;
+  position: relative;
 }
-
 .input-standard {
   height: 40px;
   box-sizing: border-box;
+}
+.btn-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #13863a;
+  font-size: 1.5rem;
+  transition: transform 0.3s;
+}
+
+.btn-close:hover {
+  transform: scale(1.2);
+}
+
+.detalle-box {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  max-width: 500px; /* 🔥 Aumentar el ancho del modal */
+  width: 95%;
+  text-align: center;
+  position: relative;
+}
+
+.detalle-overlay {
+  position: fixed;  /* 🔥 Fija el modal en toda la pantalla */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;  /* 🔥 Centra el modal */
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5); /* 🔥 FONDO OSCURO DIFUMINADO */
+  z-index: 1000; /* 🔥 Asegura que esté sobre otros elementos */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+/* 🔥 Hace visible el modal cuando se activa */
+.detalle-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.modal-content {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.modal-content label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  outline: none;
+}
+.modal-footer {
+  display: flex;
+  justify-content: center; /* Centra los botones */
+  gap: 15px; /* 🔥 Agrega espacio simétrico entre los botones */
+  margin-top: 15px;
 }
 </style>

@@ -70,6 +70,14 @@ const bdService = {
                 throw error;
             });
     },
+    async createProyecto(nombreProyecto) {
+        return api.post('proyecto/createproyecto', { name: nombreProyecto, descripcion: "Proyecto creado desde la UI" })
+            .then(response => response.data)
+            .catch(error => {
+                console.error("Error al crear el proyecto:", error);
+                throw error;
+            });
+    },
     async getCostoTotalByProyectoId(proyectoId) {
         return api.get(`estimacion/totalcost/${proyectoId}`)
             .then(response => response.data)
