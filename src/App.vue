@@ -33,4 +33,14 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
 }
+#app {
+  width: 90%;
+  max-width: 1200px;
+  min-width: 360px;
+  margin: auto;
+  min-height: 100vh; /* Garantiza que siempre ocupe la pantalla completa */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 </style>

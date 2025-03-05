@@ -10,26 +10,35 @@
     </div>
     <div class="estimacion-box" :class="{ 'blur-background': mostrarDetalle }">
       <button @click="goBack" class="btn-back">
-        <i class="fas fa-arrow-left"></i> <!-- Icono de flecha hacia la izquierda -->
+        <i class="fas fa-arrow-left"></i> 
       </button>
       <div class="estimacion">
         <h1 class="title">Crear Nueva Estimación</h1>
-       
-        <div class="mb-4">
-          <label class="texto">Proyecto</label>
-          <div class="flex items-center">
-            <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado" class="w-full p-2 border rounded input-standard">
-              <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
-                {{ proyecto.name }}
-              </option>
-            </select>
-            <button @click="bloquearProyecto" class="btn-secondary ml-2">
-              {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
-            </button>
-            <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy">+</button>
+                  <div class="proyecto-fecha-container">
+            <!-- Proyecto -->
+            <div class="contenedor-proyecto">
+              <label class="texto">Proyecto</label>
+              <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
+                class="w-full p-2 border rounded input-standard">
+                <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
+                  {{ proyecto.name }}
+                </option>
+              </select>
+              <div class="botones-proyecto">
+                <button @click="bloquearProyecto" class="btn-secondary">
+                  {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
+                </button>
+                <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy">+</button>
+              </div>
+            </div>
+            <div class="fecha-container">
+              <label class="texto">Fecha</label>
+              <input type="date" :value="fecha" class="p-2 border rounded bg-gray-200 input-standard" disabled />
+            </div>
           </div>
-        </div>
-<div v-if="modalNuevoProyecto" class="detalle-overlay show">
+
+
+          <div v-if="modalNuevoProyecto" class="detalle-overlay show">
           <div class="detalle-box">
             <button @click="cerrarModalNuevoProyecto" class="btn-close">&times;</button> <!-- 🔥 Botón X dentro del modal -->
             <h2 class="texto">Crear Nuevo Proyecto</h2>
@@ -63,44 +72,16 @@
             <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM
           </div>
         </div>
-        
-        <div class="mb-4">
-          <label class="texto">Fecha</label>
-          <input type="date" :value="fecha" class="w-full p-2 border rounded bg-gray-200 input-standard" disabled />
-        </div>
-        
         <div v-if="atributos.length" class="texto">
-          <h2 class="texto">Atributos</h2>
-          <div class="grid grid-cols-2 gap-4">
-            <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
-              <label class="block text-sm font-medium">
-                {{ obtenerDescripcionAtributo(atributo.nombre) }} 
-              </label>
-              <template v-if="atributo.nombre === 'TipoCierre'">
-                <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-                  <option value="TRASLADO">TRASLADO</option>
-                  <option value="INSITU">INSITU</option>
-                </select>
-              </template>
-              <template v-else-if="atributo.nombre === 'TipoCobertura'">
-                <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">Seleccionar Tipo de Cobertura</button>
-                <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
-              </template>
-              <template v-else>
-                <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
-                <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-                  <option :value="true">Sí</option>
-                  <option :value="false">No</option>
-                </select>
-                <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
-              </template>
-            </div>
-          </div>
-          <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-            Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
-            <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
-          </p>
-        </div>
+        <h2 class="texto"></h2>
+        <button @click="abrirModalAtributos" class="btn-secondary">
+          Ingresar Atributos
+        </button>
+        <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+          Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
+          <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
+        </p>
+      </div>
         
         <div class="flex justify-between mt-4">
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
@@ -110,7 +91,7 @@
             Nueva Estimación
           </button>
         </div>
-       
+    
       </div>
     </div>
     
@@ -156,6 +137,59 @@
     </div>
 
   </div>
+  <div v-if="modalAtributos" class="detalle-overlay show">
+  <div class="detalle-box">
+    <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
+    <h2 class="texto">Ingresar Atributos</h2>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
+        <label class="block text-sm font-medium">
+          {{ obtenerDescripcionAtributo(atributo.nombre) }}
+        </label>
+
+        <!-- 🔹 Si el atributo es "TipoCierre", usa un <select> -->
+        <template v-if="atributo.nombre === 'TipoCierre'">
+          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+            <option value="TRASLADO">TRASLADO</option>
+            <option value="INSITU">INSITU</option>
+          </select>
+        </template>
+
+        <!-- 🔹 Si el atributo es "TipoCobertura", usa un botón para abrir otro modal -->
+        <template v-else-if="atributo.nombre === 'TipoCobertura'">
+          <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
+            Seleccionar Tipo de Cobertura
+          </button>
+          <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
+        </template>
+
+        <!-- 🔹 Para booleanos (Sí/No), usa un select -->
+        <template v-else-if="atributo.tipoDato === 'bool'">
+          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+            <option :value="true">Sí</option>
+            <option :value="false">No</option>
+          </select>
+        </template>
+
+        <!-- 🔹 Para números, usa un input numérico -->
+        <template v-else-if="atributo.tipoDato === 'decimal'">
+          <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+        </template>
+
+        <!-- 🔹 Para cualquier otro tipo de dato, usa un input de texto -->
+        <template v-else>
+          <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+        </template>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" @click="guardarAtributos">Guardar</button>
+      <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script>
@@ -179,6 +213,7 @@ export default {
       fecha: new Date().toISOString().split("T")[0],
       proyectoBloqueado: false,
       modalNuevoProyecto: false,
+      modalAtributos: false,
       nuevoProyecto: { nombre: "" },
       mostrarDetalle: false,
       idPamBloqueado: true,
@@ -296,6 +331,16 @@ export default {
         console.error("Error al cargar los atributos:", error);
       }
     },
+
+    abrirModalAtributos() {
+      this.modalAtributos = true;
+    },
+    cerrarModalAtributos() {
+      this.modalAtributos = false;
+    },
+    guardarAtributos() {
+      this.cerrarModalAtributos();
+    },
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
     },
@@ -367,11 +412,14 @@ export default {
       return this.atributoDescripciones[nombre] || nombre;
     },
     mostrarModalCobertura(atributoPamId) {
-      this.atributoPamIdSeleccionado = atributoPamId;
-      this.mostrarModalCoberturas = true;
+      this.cerrarModalAtributos(); // 🔥 Cierra el modal de atributos primero
+    this.atributoPamIdSeleccionado = atributoPamId;
+    this.mostrarModalCoberturas = true;
     },
     cerrarModalCobertura() {
       this.mostrarModalCoberturas = false;
+      this.abrirModalAtributos(); // 🔥 Reabrir el modal de atributos después de cerrar el de cobertura
+
     },
     seleccionarCobertura(value) {
       this.valoresAtributos[this.atributoPamIdSeleccionado] = value;
@@ -387,6 +435,8 @@ export default {
 *, html, body {
   margin: 0;
   padding: 0;
+
+
 }
 .alert-container {
   position: absolute;
@@ -521,14 +571,17 @@ body {
 }
 
 .btn-back {
- 
   background: none;
   border: none;
   cursor: pointer;
   color: #13863a;
   font-size: 1.5rem;
   transition: transform 0.3s;
+  position: absolute;
+
 }
+
+
 
 .btn-back:hover {
   transform: scale(1.1);
@@ -594,6 +647,7 @@ body {
   box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
   z-index: 1;
   width: 80%;
+  position: relative;
   max-width: 1200px;
 }
 
@@ -903,8 +957,50 @@ body {
   border-radius: 5px;
   transition: transform 0.3s;
 }
-
 .cobertura-img:hover {
   transform: scale(1.05);
 }
+.proyecto-fecha-container {
+    display: flex;
+    justify-content: space-between; /* Divide el espacio entre los elementos */
+    align-items: flex-start; /* Asegura que los labels se alineen correctamente */
+    gap: 20px; /* Espacio entre Proyecto y Fecha */
+    width: 100%;
+}
+
+.contenedor-proyecto, .fecha-container {
+    flex: 1; /* Ambos elementos ocupan el mismo espacio */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Mantiene la alineación superior */
+}
+
+.contenedor-proyecto {
+    width: 50%; /* Ajuste del tamaño para evitar desajustes */
+}
+
+.fecha-container {
+    width: 50%; /* Igual tamaño que el contenedor de proyecto */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Asegura alineación correcta */
+}
+
+.botones-proyecto {
+    display: flex;
+    gap: 12px; /* Espaciado uniforme entre botones */
+    margin-top: 5px;
+    margin-bottom: 8px;
+}
+
+.fecha-container input {
+    width: 100%; /* Ajusta el ancho */
+    height: 40px; /* Ajusta la altura */
+    padding: 8px; /* Espaciado interno */
+    text-align: left; /* Evita que el texto de la fecha se centre */
+}
+
+
+
+
 </style>
