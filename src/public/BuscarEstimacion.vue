@@ -1,4 +1,4 @@
-    <template>
+<template>
         <div class="container">
         <div class="design">
             <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
@@ -36,7 +36,7 @@
                 <input type="text" v-model="tipoPam" placeholder="Ingrese tipo PAM" />
             </div>
             <div class="search-field">
-                <label>Código PAM</label>
+                <label>ID de PAM</label>
                 <input type="text" v-model="idPam" placeholder="Ingrese ID de PAM" />
             </div>
             </div>
@@ -47,7 +47,7 @@
                 <tr>
                     <th>Proyecto</th>
                     <th>Tipo de PAM</th>
-                    <th>Codigo PAM</th>
+                    <th>ID de PAM</th>
                     <th>Volumen (m³)</th>
                     <th>Área (m²)</th>
                     <th>Generación DAR</th>
@@ -58,8 +58,7 @@
                     <th class="highlight">Total Estimado</th>
                     <th>Fecha</th>
                     <th>Usuario</th>
-                    <th>Área de Registro</th>
-                    <th>Editar</th>
+                    <th>Departamento</th>
                     <th>Eliminar</th>
                     <th>Detalle</th>
                 </tr>
@@ -76,15 +75,11 @@
                     <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td>
                     <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td>
-                    <td class="highlight">S/&nbsp;{{ estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A' }}
+                    <td class="highlight">{{formatNumero( estimacion.costoEstimado?.totalEstimado) || 'N/A' }}
                     </td>                <td>{{ formatFecha(estimacion.fechaPam) }}</td>
                     <td>{{ estimacion.usuario.email }}</td>
                     <td>{{ estimacion.usuario.registerArea }}</td>
-                    <td>   
-                        <button @click="editarEstimacion(estimacion.estimacionId)" class="btn-action">
-                        <i class="fas fa-edit"></i>
-                        </button>
-                    </td>  
+                   
                         <td> 
                         <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
                         <i class="fas fa-trash"></i>
@@ -111,7 +106,7 @@
                 <button @click="toggleDetalle" class="btn-secondary btn-close">
                     X
                 </button>
-                <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM</h2>
+                <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM: {{ detalleEstimacion.tipoPam.name }} - {{ detalleEstimacion.codPam }}</h2>
                 <div class="grid grid-cols-2 gap-4">
                 <p class="cost-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>
                 <p class="cost-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
@@ -156,7 +151,8 @@
         detalleVisible: false,
         detalleCosto: {},
         currentPage: 1,
-        itemsPerPage: 10
+        itemsPerPage: 10,
+        detalleEstimacion: {}, // Nuevo estado para guardar la estimación seleccionada
         };
     },
     computed: {
@@ -179,6 +175,11 @@
         await this.getProyectosYTipos();
     },
     methods: {
+        formatNumero(valor) {
+      if (valor == null || isNaN(valor)) return 'S/ 0';
+      const roundedValue = Math.round(valor);
+      return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
+    },
         async goBack() {
         this.$router.go(-1);
         },
@@ -187,159 +188,335 @@
 
         // 📌 Título del reporte
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.text("Cálculo de Costos por PAM", 10, 15);
+        doc.setFontSize(20);
+        doc.text("Estimación de Costos por Proyecto y PAM", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
-        let startY = 25; // 📌 Margen inicial
-        let totalCostoProyectos = {}; // 📌 Acumulador del costo total por proyecto
+        let proyectosCostos = {}; // Objeto para almacenar el costo total por proyecto
 
         // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
         const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
 
+        // Calculamos el costo total por proyecto
         estimacionesOrdenadas.forEach((estimacion) => {
-            // Si ya imprimimos una estimación en la página, forzamos una nueva
-            if (startY !== 25) {
-            doc.addPage();
-            startY = 25; // Reiniciar margen superior
-            }
+          if (!proyectosCostos[estimacion.proyecto.name]) {
+            proyectosCostos[estimacion.proyecto.name] = 0;
+          }
+          proyectosCostos[estimacion.proyecto.name] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
+        });
 
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Proyecto: ${estimacion.proyecto.name}`, 10, startY);
-            doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 10, startY + 8);
-            doc.text(`Código PAM: ${estimacion.codPam}`, 10, startY + 16);
+        // Mostrar el costo total por proyecto en la primera página
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text("Costo Total por Proyecto", 15, 30);
 
-            doc.setFont("helvetica", "normal");
+        let startY = 40;
+        for (const [proyecto, costo] of Object.entries(proyectosCostos)) {
+          doc.setFontSize(14);
+          doc.text(`${proyecto}: ${this.formatNumero(costo)}`, 15, startY);
+          startY += 10;
+        }
 
-            const tableColumns = ["Descripción", "Valor"];
-                    const tableRows = [
+        // Mostrar la primera estimación en la primera página
+        if (estimacionesOrdenadas.length > 0) {
+          const estimacion = estimacionesOrdenadas[0];
+
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY + 10);
+          doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 18);
+          doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 26);
+
+          doc.setFont("helvetica", "normal");
+
+          // Sección de características
+          const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+          const tableRowsCaracteristicas = [
             ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
             ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
             ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
             ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
             ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
             ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"],
+            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+          ];
+
+          doc.autoTable({
+            startY: startY + 36,
+            head: [tableColumnsCaracteristicas],
+            body: tableRowsCaracteristicas,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [46, 204, 113] }, // Verde esmeralda
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
+          });
+
+          // Sección de estimación de costo de cierre
+          const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
+          const tableRowsCostoCierre = [
             ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
             ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
             ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
             ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
-            ["IGV", this.formatNumero(estimacion.costoEstimado?.igv)],
-            ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)],
-            ["Expediente Técnico", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
-            ["Supervisión", this.formatNumero(estimacion.costoEstimado?.supervision)],
-            ["Gestión de Proyectos", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
-            ["Capacitación", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
-            ["Contingencias", this.formatNumero(estimacion.costoEstimado?.contingencias)]
-        ];
+            ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)]
+          ];
 
-            doc.autoTable({
-            startY: startY + 22,
-            head: [tableColumns],
-            body: tableRows,
+          doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [tableColumnsCostoCierre],
+            body: tableRowsCostoCierre,
             theme: "grid",
             styles: { fontSize: 10 },
-            headStyles: { fillColor: [41, 128, 185] },
-            alternateRowStyles: { fillColor: [240, 240, 240] }
-            });
+            headStyles: { fillColor: [39, 174, 96] },  // Verde bosque
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
+          });
 
-            // 🛠️ Verificar si finalY existe antes de usarlo
-            if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
-            startY = doc.lastAutoTable.finalY + 10;
-            } else {
-            startY += 30; // Un espacio predeterminado si no existe finalY
-            }
+          // Sección de otros (con porcentaje)
+          const tableColumnsOtros = ["Otros", "Valor"];
+          const tableRowsOtros = [
+            ["IGV 18%", this.formatNumero(estimacion.costoEstimado?.igv)],
+            ["Expediente Técnico 6%", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
+            ["Supervisión 15%", this.formatNumero(estimacion.costoEstimado?.supervision)],
+            ["Gestión de Proyectos 5%", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
+            ["Capacitación 1%", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
+            ["Contingencias 6%", this.formatNumero(estimacion.costoEstimado?.contingencias)]
+          ];
 
-            // 🔹 Sección de "Total Estimado" con fondo amarillo
-            doc.setFillColor(255, 255, 0);
-            doc.rect(10, startY, 90, 8, "F");
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text(
+          doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [tableColumnsOtros],
+            body: tableRowsOtros,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [30, 132, 73] },   // Verde oscuro
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
+          });
+
+          // 🔹 Sección de "Total Estimado" con fondo amarillo
+          doc.setFontSize(19);
+          doc.setTextColor(0, 0, 0);
+          doc.text(
             `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
-            12,
-            startY + 5
-            );
+            doc.internal.pageSize.getWidth() / 2,
+            doc.lastAutoTable.finalY + 15,
+            { align: 'right' }
+          );
+          doc.setFontSize(8);
+          doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", doc.internal.pageSize.getWidth() / 2,
+            doc.lastAutoTable.finalY + 40, { align: 'center' });
 
-            // Acumular el costo total por proyecto
-            const proyectoName = estimacion.proyecto.name;
-            if (!totalCostoProyectos[proyectoName]) {
-            totalCostoProyectos[proyectoName] = 0;
-            }
-            totalCostoProyectos[proyectoName] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
+          // Agregar número de página
+          const pageCount = doc.internal.getNumberOfPages();
+          doc.setFontSize(8);
+          doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+        }
 
-            startY += 20; // Espaciado extra antes del siguiente bloque
-        });
+        // Mostrar las siguientes estimaciones en nuevas páginas
+        for (let i = 1; i < estimacionesOrdenadas.length; i++) {
+          const estimacion = estimacionesOrdenadas[i];
+          doc.addPage(); // Agregar una nueva página para cada estimación
 
-        // Agregar una nueva página para el costo total por proyecto
-        Object.keys(totalCostoProyectos).forEach((proyectoName) => {
+          let startY = 20; // Ajustar el margen superior para las páginas
+
+          doc.setFontSize(13);
+          doc.setFont("helvetica", "bold");
+          doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY);
+          doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 8);
+          doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 16);
+
+          doc.setFont("helvetica", "normal");
+
+          // Sección de características
+          const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+          const tableRowsCaracteristicas = [
+            ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+            ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+            ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+            ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+            ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+            ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+          ];
+
+          doc.autoTable({
+            startY: startY + 26,
+            head: [tableColumnsCaracteristicas],
+            body: tableRowsCaracteristicas,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [46, 204, 113] }, // Verde esmeralda
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
+          });
+
+          // Sección de estimación de costo de cierre
+          const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
+          const tableRowsCostoCierre = [
+            ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
+            ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
+            ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
+            ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
+            ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)]
+          ];
+
+          doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [tableColumnsCostoCierre],
+            body: tableRowsCostoCierre,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [39, 174, 96] },  // Verde bosque
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
+          });
+
+          // Sección de otros (con porcentaje)
+          const tableColumnsOtros = ["Otros", "Valor"];
+          const tableRowsOtros = [
+            ["IGV 18%", this.formatNumero(estimacion.costoEstimado?.igv)],
+            ["Expediente Técnico 6%", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
+            ["Supervisión 15%", this.formatNumero(estimacion.costoEstimado?.supervision)],
+            ["Gestión de Proyectos 5%", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
+            ["Capacitación 1%", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
+            ["Contingencias 6%", this.formatNumero(estimacion.costoEstimado?.contingencias)]
+          ];
+
+          doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [tableColumnsOtros],
+            body: tableRowsOtros,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [30, 132, 73] },   // Verde oscuro
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
+          });
+
+          // 🔹 Sección de "Total Estimado" con fondo amarillo
+          doc.setFontSize(19);
+          doc.setTextColor(0, 0, 0);
+          doc.text(
+            `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
+            doc.internal.pageSize.getWidth() / 2,
+            doc.lastAutoTable.finalY + 15,
+            { align: 'right' }
+          );
+          doc.setFontSize(8);
+          doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", doc.internal.pageSize.getWidth() / 2,
+            doc.lastAutoTable.finalY + 40, { align: 'center' });
+
+          // Agregar número de página
+          const pageCount = doc.internal.getNumberOfPages();
+          doc.setFontSize(8);
+          doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+        }
+
+        const pdfUrl = doc.output('bloburl');
+        window.open(pdfUrl, '_blank');
+          },
+
+downloadResumenEjecutivo() {
+    const doc = new jsPDF("p", "mm", "a4");
+
+    // 📌 Título del Resumen Ejecutivo
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Estimación de Costos por Proyecto y PAM", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+
+    let proyectosCostos = {}; // Objeto para almacenar el costo total por proyecto
+
+    // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
+    const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+
+    // Calculamos el costo total por proyecto
+    estimacionesOrdenadas.forEach((estimacion) => {
+        if (!proyectosCostos[estimacion.proyecto.name]) {
+            proyectosCostos[estimacion.proyecto.name] = 0;
+        }
+        proyectosCostos[estimacion.proyecto.name] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
+    });
+
+    // Mostrar el costo total por proyecto en la primera página
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Costo Total por Proyecto", 15, 30);
+
+    let startY = 40;
+    for (const [proyecto, costo] of Object.entries(proyectosCostos)) {
+        doc.setFontSize(14);
+        doc.text(`${proyecto}: ${this.formatNumero(costo)}`, 15, startY);
+        startY += 10;
+    }
+
+    let estimacionesPorPagina = 0;
+
+    estimacionesOrdenadas.forEach((estimacion) => {
+        if (estimacionesPorPagina >= 5) {
             doc.addPage();
-            doc.setFontSize(16);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Costo Total del Proyecto: ${proyectoName}`, 10, 20);
-            doc.setFontSize(14);
-            doc.text(`Total: S/ ${totalCostoProyectos[proyectoName].toFixed(2)}`, 10, 30);
-        });
+            startY = 20; // Reiniciar margen superior para las siguientes páginas
+            estimacionesPorPagina = 0;
+        }
 
-        doc.save("reporte_estimaciones.pdf");
-        },
-        downloadResumenEjecutivo() {
-        const doc = new jsPDF("p", "mm", "a4");
-
-        // 📌 Título del Resumen Ejecutivo
+        doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.text("Resumen Ejecutivo", 10, 15);
+        doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY);
 
-        let startY = 25; // 📌 Margen inicial
+        doc.setFont("helvetica", "normal");
 
-        // 🔹 ORDENAMOS LAS ESTIMACIONES POR CÓDIGO PAM
-        const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+        // Sección de características
+        const tableColumnsCaracteristicas = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)"];
+        const tableRowsCaracteristicas = [
+            [
+                estimacion.tipoPam.name,
+                estimacion.codPam,
+                estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
+                estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"
+            ]
+        ];
 
-        estimacionesOrdenadas.forEach((estimacion) => {
-            // Si ya imprimimos una estimación en la página, forzamos una nueva
-            if (startY !== 25) {
-                doc.addPage();
-                startY = 25; // Reiniciar margen superior
-            }
-
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Proyecto: ${estimacion.proyecto.name}`, 10, startY);
-            
-            doc.setFont("helvetica", "normal");
-
-            const tableColumns = ["Tipo PAM", "ID PAM", "Volumen (m³)", "Área (m²)", "Total Estimado"];
-            const tableRows = [
-                [
-                    estimacion.tipoPam.name,
-                    estimacion.codPam,
-                    estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A",
-                    estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A",
-                    `S/ ${estimacion.costoEstimado?.totalEstimado.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || 'N/A'}`
-                ]
-            ];
-
-            doc.autoTable({
-                startY: startY + 10,
-                head: [tableColumns],
-                body: tableRows,
-                theme: "grid",
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [41, 128, 185] },
-                alternateRowStyles: { fillColor: [240, 240, 240] }
-            });
-
-            // 🛠️ Verificar si finalY existe antes de usarlo
-            if (doc.lastAutoTable && doc.lastAutoTable.finalY) {
-                startY = doc.lastAutoTable.finalY + 10;
-            } else {
-                startY += 30; // Un espacio predeterminado si no existe finalY
-            }
+        doc.autoTable({
+            startY: startY + 10,
+            head: [tableColumnsCaracteristicas],
+            body: tableRowsCaracteristicas,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [39, 174, 96] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 } // Margen izquierdo y derecho
         });
 
-        doc.save("resumen_ejecutivo.pdf");
-    },
+        doc.setFontSize(19);
+        doc.setTextColor(0, 0, 0);
+        doc.text(
+            `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
+            doc.internal.pageSize.getWidth() - 15,
+            doc.lastAutoTable.finalY + 15,
+            { align: 'right' }
+        );
+
+        startY = doc.lastAutoTable.finalY + 30; // Espaciado extra antes del siguiente bloque
+        estimacionesPorPagina++;
+
+        // Agregar número de página
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+    });
+
+    // Agregar la información resultante como un footer
+    doc.setFontSize(8);
+    doc.text(
+        "La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)",
+        doc.internal.pageSize.getWidth() / 2,
+        doc.internal.pageSize.getHeight() - 20,
+        { align: 'center' }
+    );
+
+    const pdfUrl = doc.output('bloburl');
+    window.open(pdfUrl, '_blank');
+},
 
         async getEstimaciones() {
         try {
@@ -433,15 +610,13 @@
         verDetalle(estimacion) {
         this.detalleCosto = estimacion.costoEstimado;
         this.detalleVisible = true;
+        this.detalleEstimacion = estimacion; // Guardar la estimación completa
+
         },
         toggleDetalle() {
         this.detalleVisible = !this.detalleVisible;
         },
-        formatNumero(valor) {
-      if (valor == null || isNaN(valor)) return 'S/ 0';
-      const roundedValue = Math.round(valor);
-      return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
-    },
+        
         editarEstimacion(id) {
         // Lógica para editar la estimación
         console.log(`Editar estimación con ID: ${id}`);
@@ -504,7 +679,7 @@
 }
 
 .btn-download-pdf {
-    background-color: red;
+    background-color: rgb(24, 137, 41);
     color: white;
 }
 
@@ -514,7 +689,7 @@
 }
 
 .btn-download-resumen {
-    background-color: blue;
+    background-color: rgb(17, 82, 42);
     color: white;
 }
 
@@ -578,7 +753,7 @@
         padding: 5px;
         margin: 0 2px;
         color: white;
-        background-color: #4fd87d;
+        background-color: #548f4e;
         border: none;
         border-radius: 5px;
         cursor: pointer;
@@ -693,7 +868,7 @@
     }
 
     .highlight {
-        background-color: yellow;
+        background-color: #e0d495;
     }
 
     .btn-edit {

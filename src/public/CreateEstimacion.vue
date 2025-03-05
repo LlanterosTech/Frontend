@@ -14,8 +14,9 @@
       </button>
       <div class="estimacion">
         <h1 class="title">Crear Nueva Estimación</h1>
-          <div class="mb-4">
-          <label class="block text-sm font-medium">Proyecto</label>
+       
+        <div class="mb-4">
+          <label class="texto">Proyecto</label>
           <div class="flex items-center">
             <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado" class="w-full p-2 border rounded input-standard">
               <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
@@ -28,10 +29,10 @@
             <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy">+</button>
           </div>
         </div>
-                <div v-if="modalNuevoProyecto" class="detalle-overlay show">
+<div v-if="modalNuevoProyecto" class="detalle-overlay show">
           <div class="detalle-box">
             <button @click="cerrarModalNuevoProyecto" class="btn-close">&times;</button> <!-- 🔥 Botón X dentro del modal -->
-            <h2 class="text-lg-font-semibold-mb-4">Crear Nuevo Proyecto</h2>
+            <h2 class="texto">Crear Nuevo Proyecto</h2>
 
             <div class="modal-content">
               <label class="cost-item"><strong>Nombre del Proyecto:</strong></label>
@@ -45,66 +46,64 @@
           </div>
         </div>
 
+        
         <div class="mb-4">
-          <label class="block text-sm font-medium">Tipo de PAM</label>
+          <label class="texto">Tipo de PAM</label>
           <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
+            <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
             <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
               {{ tipoPam.name }}
             </option>
           </select>
         </div>
-        
         <div class="mb-4">
-          <label class="block text-sm font-medium">ID de PAM</label>
-          <input type="text" v-model="estimacion.codPam" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
+          <label class="texto">ID de PAM</label>
+          <div class="flex items-center">
+            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
+            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM
+          </div>
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium">Fecha</label>
+          <label class="texto">Fecha</label>
           <input type="date" :value="fecha" class="w-full p-2 border rounded bg-gray-200 input-standard" disabled />
         </div>
         
-        <div v-if="atributos.length" class="mb-4">
-          <h2 class="text-lg font-semibold">Atributos</h2>
+        <div v-if="atributos.length" class="texto">
+          <h2 class="texto">Atributos</h2>
           <div class="grid grid-cols-2 gap-4">
             <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
               <label class="block text-sm font-medium">
                 {{ obtenerDescripcionAtributo(atributo.nombre) }} 
               </label>
               <template v-if="atributo.nombre === 'TipoCierre'">
-            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-              <option value="TRASLADO">TRASLADO</option>
-              <option value="INSITU">INSITU</option>
-            </select>
-          </template>
-          <template v-else-if="atributo.nombre === 'TipoCobertura'">
-            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-              <option value="NINGUNA">NINGUNA</option>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-            </select>
-          </template>
-          <template v-else>
-            <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
-            <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard">
-              <option :value="true">Sí</option>
-              <option :value="false">No</option>
-            </select>
-            <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" />
-          </template>
-
+                <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+                  <option value="TRASLADO">TRASLADO</option>
+                  <option value="INSITU">INSITU</option>
+                </select>
+              </template>
+              <template v-else-if="atributo.nombre === 'TipoCobertura'">
+                <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">Seleccionar Tipo de Cobertura</button>
+                <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
+              </template>
+              <template v-else>
+                <input v-if="atributo.tipoDato === 'decimal'" type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+                <select v-else-if="atributo.tipoDato === 'bool'" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+                  <option :value="true">Sí</option>
+                  <option :value="false">No</option>
+                </select>
+                <input v-else type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+              </template>
             </div>
           </div>
-            <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-              Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
-              <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
-            </p>
+          <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+            Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
+            <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
+          </p>
         </div>
         
         <div class="flex justify-between mt-4">
-          <button @click="guardarEstimacion" class="btn-primary">
+          <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
             Guardar Estimación
           </button>
           <button @click="limpiarFormulario" class="btn-primary">
@@ -120,7 +119,7 @@
         <p @click="toggleDetalle" class="X">
           X
         </p>
-        <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
+        <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM - {{ estimacion.codPam }}</h2>
         <div class="grid grid-cols-2 gap-4">
           <p><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
           <p><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
@@ -142,6 +141,20 @@
         <p class="error-message">{{ error }}</p>
       </div>
     </transition>
+
+    <div v-if="mostrarModalCoberturas" class="modal-overlay">
+      <div class="modal-box">
+        <button @click="cerrarModalCobertura" class="btn-close">&times;</button>
+        <h2 class="texto">Seleccionar Tipo de Cobertura</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div v-for="(tipo, index) in tiposCobertura" :key="tipo.value" class="cobertura-option" @click="seleccionarCobertura(tipo.value)">
+            <img :src="tipo.img" :alt="tipo.label" :class="{'cobertura-img': true, 'cobertura-img-small': index === 0}"/>
+            <p>{{ tipo.label }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -168,6 +181,16 @@ export default {
       modalNuevoProyecto: false,
       nuevoProyecto: { nombre: "" },
       mostrarDetalle: false,
+      idPamBloqueado: true,
+      mostrarModalCoberturas: false, // Estado para mostrar el modal de cobertura
+      atributoPamIdSeleccionado: null, // Estado para almacenar el atributoPamId seleccionado
+      tiposCobertura: [
+        { value: 'NINGUNA', label: 'Ninguna', img: require('@/assets/ninguna.png') },
+        { value: 'I', label: 'Cobertura I', img: require('@/assets/tipo1.jpg') },
+        { value: 'II', label: 'Cobertura II', img: require('@/assets/tipo2.jpg') },
+        { value: 'III', label: 'Cobertura III', img: require('@/assets/tipo3.jpg') },
+        { value: 'IV', label: 'Cobertura IV', img: require('@/assets/tipo4.jpg') }
+      ],
       estimacion: {
         usuarioId: localStorage.getItem('idUser'),
         proyectoId: null,
@@ -177,13 +200,15 @@ export default {
       },
       // Objeto de mapeo para los nombres de los atributos
       atributoDescripciones: {
-        GeneracionDAR: "Es generador de Drenaje Ácido de Roca (DAR)?",
+        GeneracionDAR: "¿Es generador de Drenaje Ácido de Roca (DAR)?",
         TipoCierre: "Tipo de Cierre",
         TipoCobertura: "Tipo de Cobertura",
         Cobertura: "¿Requiere Cobertura?",
-        DistanciaTraslado: "Distancia de Translado (km)",
+        DistanciaTraslado: "Distancia de Traslado (km)",
         // Agrega más mapeos aquí según sea necesario
-      }
+      },
+      detalleEstimacion: {},
+      estimacionGuardada: false, // Estado para controlar si la estimación ha sido guardada
     };
   },
   async created() {
@@ -204,6 +229,11 @@ export default {
     async cargarTiposPAM() {
       this.tiposPAM = await bdService.getTiposPAM();
     },
+    toggleIdPam() {
+      if (this.idPamBloqueado) {
+        this.estimacion.codPam = null;
+      }
+    },
     async cargarCostosByProyectoId() {
       if (!this.estimacion.proyectoId) {
         console.warn("⚠️ No hay proyectoId definido");
@@ -223,7 +253,7 @@ export default {
         this.totalProyecto = 0;
       }
     },
-      async guardarNuevoProyecto() {
+    async guardarNuevoProyecto() {
       if (!this.nuevoProyecto.nombre.trim()) {
         alert("El nombre del proyecto no puede estar vacío.");
         return;
@@ -282,6 +312,7 @@ export default {
       this.atributos = [];
       this.valoresAtributos = {};
       this.costoEstimado = null;
+      this.estimacionGuardada = false; // Restablecer el estado de la estimación guardada
     },
     toggleDetalle() {
       this.mostrarDetalle = !this.mostrarDetalle;
@@ -296,9 +327,19 @@ export default {
       this.estimacion.usuarioId = storedUserId;
       this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
       this.estimacion.valores = {};
+      let valid = true;
       this.atributos.forEach(atributo => {
-        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(this.valoresAtributos[atributo.atributoPamId]);
+        const valor = this.valoresAtributos[atributo.atributoPamId];
+        if (atributo.tipoDato !== 'bool' && !valor) {
+          valid = false;
+        }
+        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
       });
+      if (!valid) {
+        this.error = "Todos los atributos son obligatorios.";
+        this.clearErrorAfterTimeout();
+        return;
+      }
       console.log("Datos enviados al backend:", JSON.stringify(this.estimacion, null, 2));
       try {
         const response = await bdService.createEstimacion(this.estimacion);
@@ -306,6 +347,7 @@ export default {
           this.costoEstimado = response.costoEstimado;
           console.log("Total Estimado:", this.costoEstimado.totalEstimado); // Mostrar TotalEstimado en la consola
           this.mostrarDetalle = true; // Mostrar detalle al guardar la estimación
+          this.estimacionGuardada = true; // Marcar la estimación como guardada
         } else {
           console.warn("No se recibieron costos estimados en la respuesta.");
         }
@@ -323,6 +365,17 @@ export default {
     },
     obtenerDescripcionAtributo(nombre) {
       return this.atributoDescripciones[nombre] || nombre;
+    },
+    mostrarModalCobertura(atributoPamId) {
+      this.atributoPamIdSeleccionado = atributoPamId;
+      this.mostrarModalCoberturas = true;
+    },
+    cerrarModalCobertura() {
+      this.mostrarModalCoberturas = false;
+    },
+    seleccionarCobertura(value) {
+      this.valoresAtributos[this.atributoPamIdSeleccionado] = value;
+      this.cerrarModalCobertura();
     }
   }
 };
@@ -366,6 +419,11 @@ body {
   justify-content: center;
   align-items: center;
   background: linear-gradient(to bottom right, #53704b, #7ba58d, #4fd87d);
+}
+
+.texto{
+  font-size: 20px;
+  margin-bottom: 8px;
 }
 
 
@@ -782,5 +840,71 @@ body {
   justify-content: center; /* Centra los botones */
   gap: 15px; /* 🔥 Agrega espacio simétrico entre los botones */
   margin-top: 15px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  max-width: 500px;
+  width: 95%;
+  text-align: center;
+  position: relative;
+}
+
+.btn-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #13863a;
+  font-size: 1.5rem;
+  transition: transform 0.3s;
+}
+
+.btn-close:hover {
+  transform: scale(1.2);
+}
+
+.cobertura-option {
+  cursor: pointer;
+  text-align: center;
+}
+
+.cobertura-img {
+  width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: transform 0.3s;
+}
+
+.cobertura-img-small {
+  width: 80%; /* Ajusta el tamaño según sea necesario */
+  height: 80%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: transform 0.3s;
+}
+
+.cobertura-img:hover {
+  transform: scale(1.05);
 }
 </style>

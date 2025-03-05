@@ -45,7 +45,7 @@
                 <th>ID de PAM</th>
                 <th>Fecha</th>
                 <th>Usuario</th>
-                <th>Área</th>
+                <th>Departamento</th>
                 <th>Total Estimado</th>
                 <th>Acción</th>
               </tr>
@@ -67,15 +67,11 @@
                   <button @click="verDetalle(estimacion)" class="btn-action">
                     <i class="fas fa-eye"></i>
                   </button>
-                  <button @click="editarEstimacion(estimacion.estimacionId)" class="btn-action">
-                    <i class="fas fa-edit"></i>
-                  </button>
+                  
                   <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
                     <i class="fas fa-trash"></i>
                   </button>
-                  <button @click="descargarPDF(estimacion.estimacionId)" class="btn-action">
-                    <i class="fas fa-file-pdf"></i>
-                  </button>
+                  
                 </td>
               </tr>
             </tbody>
@@ -85,7 +81,8 @@
             <button @click="toggleDetalle" class="btn-secondary btn-close">
               X
             </button>
-            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM</h2>
+            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM: {{ detalleEstimacion.tipoPam.name }} - {{ detalleEstimacion.codPam }}
+            </h2>
             <div class="grid grid-cols-2 gap-4">
               <p class="cost-item"><strong>Costo Directo:</strong>  {{ formatNumero(detalleCosto.costoDirecto) }}</p>
               <p class="cost-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
@@ -119,6 +116,7 @@ export default {
       ordenAscendente: false, // Por defecto, las estimaciones están en orden ascendente
       detalleVisible: false,
       detalleCosto: {},
+      detalleEstimacion: {}
     };
   },
   computed: {
@@ -174,6 +172,7 @@ export default {
     verDetalle(estimacion) {
       this.detalleCosto = estimacion.costoEstimado;
       this.detalleVisible = true;
+      this.detalleEstimacion = estimacion;
     },
     toggleDetalle() {
       this.detalleVisible = !this.detalleVisible;
@@ -359,7 +358,7 @@ body {
   padding: 5px;
   margin: 0 2px;
   color: white;
-  background-color: #4fd87d;
+  background-color: #548f4e;
   border: none;
   border-radius: 5px;
   cursor: pointer;
