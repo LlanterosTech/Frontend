@@ -42,7 +42,7 @@ const routes = [
         name: 'BuscarEstimacion',
         component: BuscarEstimacion,
         meta: { title: 'Buscar Estimación' }
-        },
+    },
     // Ruta de captura para redirigir a InitPage o LoginPage
     {
         path: '/:catchAll(.*)',
@@ -63,11 +63,26 @@ const router = createRouter({
     routes
 });
 
+// Función para verificar si el token es válido
+function isTokenValid(token) {
+    // Aquí puedes agregar la lógica para verificar si el token es válido
+    // Por ejemplo, decodificar el token y verificar su fecha de expiración
+    // Esta es una implementación simplificada
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiration = payload.exp * 1000;
+        return Date.now() < expiration;
+    } catch (e) {
+        return false;
+    }
+}
+
 // 🔹 Proteger rutas
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title || 'App';
 
-    const isAuthenticated = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
+    const isAuthenticated = token && isTokenValid(token);
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         next('/login'); // Redirige al login si no está autenticado
@@ -82,8 +97,11 @@ router.beforeEach((to, from, next) => {
 // 🔹 Cuando se recarga la página, redirigir a la última ruta visitada
 window.addEventListener('load', () => {
     const lastRoute = localStorage.getItem('lastRoute');
-    if (lastRoute && localStorage.getItem('token')) {
+    const token = localStorage.getItem('token');
+    if (lastRoute && token && isTokenValid(token)) {
         router.push(lastRoute);
+    } else {
+        router.push('/login'); // Redirige al login si el token no es válido
     }
 });
 

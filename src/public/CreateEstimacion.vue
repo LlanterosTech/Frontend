@@ -235,6 +235,8 @@ export default {
       },
       // Objeto de mapeo para los nombres de los atributos
       atributoDescripciones: {
+        Volumen: "Volumen (m³)",
+        Área: "Área (m²)",
         GeneracionDAR: "¿Es generador de Drenaje Ácido de Roca (DAR)?",
         TipoCierre: "Tipo de Cierre",
         TipoCobertura: "Tipo de Cobertura",
@@ -1000,7 +1002,8 @@ body {
     text-align: left; /* Evita que el texto de la fecha se centre */
 }
 
-
-
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
 
 </style>
