@@ -15,15 +15,16 @@
       <div class="estimacion">
         <h1 class="title">Crear Nueva Estimación</h1>
                   <div class="proyecto-fecha-container">
-            <!-- Proyecto -->
             <div class="contenedor-proyecto">
               <label class="texto">Proyecto</label>
-              <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
-                class="w-full p-2 border rounded input-standard">
-                <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
-                  {{ proyecto.name }}
-                </option>
+                <select required="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
+                      class="w-full p-2 border rounded input-standardproy">
+                  <option value="" disabled selected hidden>Ingrese el Proyecto</option>
+                  <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
+                      {{ proyecto.name }}
+                  </option>
               </select>
+
               <div class="botones-proyecto">
                 <button @click="bloquearProyecto" class="btn-secondary">
                   {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
@@ -54,12 +55,10 @@
             </div>
           </div>
         </div>
-
-        
         <div class="mb-4">
           <label class="texto">Tipo de PAM</label>
-          <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
-            <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
+          <select required="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standardtipopam">
+            <option value="" disabled selected hidden>Ingrese el Pasivo Ambiental Minero</option>
             <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
               {{ tipoPam.name }}
             </option>
@@ -1005,5 +1004,22 @@ body {
 .mb-2 {
   margin-bottom: 0.5rem;
 }
+.input-standardproy {
+    background-color: #f3f4f6; 
+    border: 1px solid #d1d5db; 
+    color: black; 
+}
 
+.input-standardproy:focus {
+    background-color: white;
+}
+.input-standardtipopam{
+  background-color: #f3f4f6; 
+    border: 1px solid #d1d5db; 
+    color: black; 
+}
+.input-standardtipopam:focus{
+  background-color: white;
+
+}
 </style>
