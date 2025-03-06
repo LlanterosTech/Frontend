@@ -77,12 +77,12 @@
         <button @click="abrirModalAtributos" class="btn-secondary">
           Ingresar Atributos
         </button>
-        <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-          Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
+       
+      </div>
+      <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+          Costo Estimado:  {{ formatNumero(costoEstimado.totalEstimado) }}
           <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
         </p>
-      </div>
-        
         <div class="flex justify-between mt-4">
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
             Guardar

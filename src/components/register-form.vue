@@ -23,17 +23,16 @@
           <div class="text-input">
             <i class="ri-user-fill"></i>
             <input id="area" v-model="formData.registerArea" type="text" placeholder="Area / Invitado" required>
+            <button type="button" @click="setAreaInvitado" class="btn-invitado">Invitado</button>
           </div>
           <button type="submit" class="register-btn">Registrarse</button>
-       
         </form>
         <p v-if="error">{{ error }}</p>
         <div class="create">
           <a @click.prevent="goToLogin" href="#">¿Ya tienes cuenta? Inicia Sesion</a>
           <i class="ri-arrow-right-fill"></i>
-          </div>
+        </div>
       </div>
-      
     </div>
   </div>
 </template>
@@ -48,7 +47,7 @@ export default {
       formData: {
         email: "",
         password: "",
-        area: "",
+        registerArea: "", // Cambiado de 'area' a 'registerArea' para coincidir con el v-model
       },
       error: null,
     };
@@ -66,6 +65,9 @@ export default {
     },
     async goToLogin() {
       this.$router.push("/login");
+    },
+    setAreaInvitado() {
+      this.formData.registerArea = "Invitado";
     },
   },
 };
@@ -170,7 +172,6 @@ body {
   justify-content: center;
 }
 
-
 .text-input {
   background: #e6e6e6;
   height: 55px;
@@ -180,6 +181,7 @@ body {
   border-radius: 12px;
   padding: 0 18px;
   margin: 12px 0;
+  position: relative; /* Añadido para posicionar el botón */
 }
 
 .text-input input {
@@ -193,6 +195,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.btn-invitado {
+  position: absolute;
+  right: 10px;
+  background: #74c905;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.btn-invitado:hover {
+  transform: scale(1.1);
 }
 
 .register h3.title {
