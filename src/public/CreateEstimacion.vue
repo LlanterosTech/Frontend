@@ -85,8 +85,8 @@
         <div v-if="atributos.length" class="texto">
         <h2 class="texto"></h2>
         <button @click="abrirModalAtributos" class="btn-secondary">
-          Ingresar Atributos
-        </button>
+        {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
+      </button>
         <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
           Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
           <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
@@ -228,6 +228,7 @@ export default {
       modalAtributos: false,
       nuevoProyecto: { nombre: "" },
       mostrarDetalle: false,
+      atributosIngresados: false, // Estado para cambiar el botón
       idPamBloqueado: true,
       mostrarModalCoberturas: false, // Estado para mostrar el modal de cobertura
       atributoPamIdSeleccionado: null, // Estado para almacenar el atributoPamId seleccionado
@@ -353,6 +354,7 @@ export default {
       this.modalAtributos = false;
     },
     guardarAtributos() {
+      this.atributosIngresados = true; // Cambia el estado para actualizar el botón
       this.cerrarModalAtributos();
     },
     mostrarModalNuevoProyecto() {
