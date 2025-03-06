@@ -13,17 +13,17 @@
         <i class="fas fa-arrow-left"></i> 
       </button>
       <div class="estimacion">
-        <h1 class="title">Crear Nueva Estimación</h1>
+        <h1 class="title">Registro de Estimación</h1>
                   <div class="proyecto-fecha-container">
+            <!-- Proyecto -->
             <div class="contenedor-proyecto">
               <label class="texto">Proyecto</label>
               <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
-                class="w-full p-2 border rounded input-standardproy">
+                class="w-full p-2 border rounded input-standard">
                 <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
                   {{ proyecto.name }}
                 </option>
               </select>
-
               <div class="botones-proyecto">
                 <button @click="bloquearProyecto" class="btn-secondary">
                   {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
@@ -54,47 +54,42 @@
             </div>
           </div>
         </div>
+
+        
         <div class="mb-4">
           <label class="texto">Tipo de PAM</label>
-                <select
-        v-model="estimacion.tipoPamId"
-        @change="cargarAtributos"
-        :disabled="proyectoBloqueado"
-        class="w-full p-2 border rounded input-standardtipopam"
-      >
-        <option value="" disabled selected hidden>Ingrese el Pasivo Ambiental Minero</option>
-        <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
-          {{ tipoPam.name }}
-        </option>
-      </select>
-
-
-
+          <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
+            <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
+            <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
+              {{ tipoPam.name }}
+            </option>
+          </select>
         </div>
         <div class="mb-4">
           <label class="texto">ID de PAM</label>
           <div class="flex items-center">
-            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
-            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM
-          </div>
+            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del PAM" />
+            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2s">
+            <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>                  </div>
         </div>
         <div v-if="atributos.length" class="texto">
         <h2 class="texto"></h2>
         <button @click="abrirModalAtributos" class="btn-secondary">
         {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
       </button>
-        <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
-          Costo Estimado de la Estimación:  {{ formatNumero(costoEstimado.totalEstimado) }}
+
+       
+      </div>
+      <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+          Costo Estimado:  {{ formatNumero(costoEstimado.totalEstimado) }}
           <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
         </p>
-      </div>
-        
         <div class="flex justify-between mt-4">
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
-            Guardar Estimación
+            Guardar
           </button>
           <button @click="limpiarFormulario" class="btn-primary">
-            Nueva Estimación
+            Nuevo
           </button>
         </div>
     
@@ -106,21 +101,26 @@
         <p @click="toggleDetalle" class="X">
           X
         </p>
-        <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM - {{ estimacion.codPam }}</h2>
-        <div class="grid grid-cols-2 gap-4">
-          <p><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
-          <p><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
-          <p><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
-          <p><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
-          <p><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
-          <p><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
-          <p><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
-          <p><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
-          <p><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
-          <p><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
-          <p><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
-          <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
-        </div>
+        <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
+        <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
+      <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
+      <p class="costo-item"><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
+      <p class="costo-item"><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
+      <p class="costo-item"><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
+      <p class="costo-item"><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
+      <p class="costo-item"><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
+      <p class="costo-item"><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
+      <p class="costo-item"><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
+      <p class="costo-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
+      <p class="costo-item"><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
+      <p class="costo-item"><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
+    </div>
+
+    <!-- Total Estimado fuera de la cuadrícula -->
+    <div class="total-estimado-container">
+      <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
+    </div>
+
       </div>
     </div>
     <transition name="fade">
@@ -146,7 +146,7 @@
   <div v-if="modalAtributos" class="detalle-overlay show">
   <div class="detalle-box">
     <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
-    <h2 class="texto">Ingresar Atributos</h2>
+    <h2 class="texto">Atributos del PAM</h2>
 
     <div class="grid grid-cols-2 gap-4">
       <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
@@ -198,13 +198,15 @@
 </div>
 </template>
 
+
+
 <script>
 import bdService from "@/main/services/bdservice";
 import { Eye } from 'lucide-vue-next';
 
 export default {
   components: {
-    Eye, // 👈 Asegura que esté declarado
+    Eye,
   },
   data() {
     return {
@@ -222,10 +224,9 @@ export default {
       modalAtributos: false,
       nuevoProyecto: { nombre: "" },
       mostrarDetalle: false,
-      atributosIngresados: false, // Estado para cambiar el botón
       idPamBloqueado: true,
-      mostrarModalCoberturas: false, // Estado para mostrar el modal de cobertura
-      atributoPamIdSeleccionado: null, // Estado para almacenar el atributoPamId seleccionado
+      mostrarModalCoberturas: false,
+      atributoPamIdSeleccionado: null,
       tiposCobertura: [
         { value: 'NINGUNA', label: 'Ninguna', img: require('@/assets/ninguna.png') },
         { value: 'I', label: 'Cobertura I', img: require('@/assets/tipo1.jpg') },
@@ -240,19 +241,18 @@ export default {
         tipoPamId: null,
         valores: {}
       },
-      // Objeto de mapeo para los nombres de los atributos
       atributoDescripciones: {
         Volumen: "Volumen (m³)",
         Área: "Área (m²)",
-        GeneracionDAR: "¿Es generador de Drenaje Ácido de Roca (DAR)?",
+        GeneracionDAR: "¿Es Generador de Drenaje Ácido de Roca (DAR)?",
         TipoCierre: "Tipo de Cierre",
         TipoCobertura: "Tipo de Cobertura",
-        Cobertura: "¿Requiere Cobertura?",
+        Cobertura: '¿Requiere Cobertura?',
         DistanciaTraslado: "Distancia de Traslado (km)",
-        // Agrega más mapeos aquí según sea necesario
       },
       detalleEstimacion: {},
-      estimacionGuardada: false, // Estado para controlar si la estimación ha sido guardada
+      estimacionGuardada: false, 
+      atributosIngresados: false, 
     };
   },
   async created() {
@@ -304,16 +304,12 @@ export default {
       }
 
       try {
-        // Llamamos al servicio para crear el proyecto
         const nuevoProyecto = await bdService.createProyecto(this.nuevoProyecto.nombre);
 
-        // Volvemos a cargar la lista de proyectos para reflejar el nuevo
         await this.cargarProyectos();
 
-        // Seleccionar automáticamente el nuevo proyecto en el `select`
         this.estimacion.proyectoId = nuevoProyecto.proyectoId;
 
-        // Cerrar el modal
         this.cerrarModalNuevoProyecto();
       } catch (error) {
         alert("Error al crear el proyecto.");
@@ -348,7 +344,7 @@ export default {
       this.modalAtributos = false;
     },
     guardarAtributos() {
-      this.atributosIngresados = true; // Cambia el estado para actualizar el botón
+      this.atributosIngresados = true;
       this.cerrarModalAtributos();
     },
     mostrarModalNuevoProyecto() {
@@ -356,7 +352,7 @@ export default {
     },
     cerrarModalNuevoProyecto() {
       this.modalNuevoProyecto = false;
-      this.nuevoProyecto.nombre = ""; // Limpiar input
+      this.nuevoProyecto.nombre = ""; 
     },
     bloquearProyecto() {
       this.proyectoBloqueado = !this.proyectoBloqueado;
@@ -367,7 +363,7 @@ export default {
       this.atributos = [];
       this.valoresAtributos = {};
       this.costoEstimado = null;
-      this.estimacionGuardada = false; // Restablecer el estado de la estimación guardada
+      this.estimacionGuardada = false; 
     },
     toggleDetalle() {
       this.mostrarDetalle = !this.mostrarDetalle;
@@ -381,6 +377,7 @@ export default {
       }
       this.estimacion.usuarioId = storedUserId;
       this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
+      this.estimacion.tipoPam = this.detalleEstimacion;
       this.estimacion.valores = {};
       let valid = true;
       this.atributos.forEach(atributo => {
@@ -400,10 +397,9 @@ export default {
         const response = await bdService.createEstimacion(this.estimacion);
         if (response && response.costoEstimado) {
           this.costoEstimado = response.costoEstimado;
-          console.log("Total Estimado:", this.costoEstimado.totalEstimado); // Mostrar TotalEstimado en la consola
-          this.mostrarDetalle = true; // Mostrar detalle al guardar la estimación
-          this.estimacionGuardada = true; // Marcar la estimación como guardada
-        } else {
+          console.log("Total Estimado:", this.costoEstimado.totalEstimado);
+          this.mostrarDetalle = true; 
+          this.estimacionGuardada = true; 
           console.warn("No se recibieron costos estimados en la respuesta.");
         }
         await this.cargarCostosByProyectoId();
@@ -422,13 +418,13 @@ export default {
       return this.atributoDescripciones[nombre] || nombre;
     },
     mostrarModalCobertura(atributoPamId) {
-      this.cerrarModalAtributos(); // 🔥 Cierra el modal de atributos primero
+      this.cerrarModalAtributos(); 
     this.atributoPamIdSeleccionado = atributoPamId;
     this.mostrarModalCoberturas = true;
     },
     cerrarModalCobertura() {
       this.mostrarModalCoberturas = false;
-      this.abrirModalAtributos(); // 🔥 Reabrir el modal de atributos después de cerrar el de cobertura
+      this.abrirModalAtributos(); 
 
     },
     seleccionarCobertura(value) {
@@ -448,6 +444,9 @@ export default {
 
 
 }
+
+
+
 .alert-container {
   position: absolute;
   top: 20px;
@@ -464,7 +463,7 @@ export default {
   transition: opacity 0.5s;
 }
 
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+.fade-enter, .fade-leave-to  {
   opacity: 0;
 }
 
@@ -510,7 +509,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 0; /* Asegúrate de que las plantas estén en el fondo */
+  z-index: 0; 
 }
 
 .btn-primary {
@@ -670,7 +669,7 @@ body {
 
 .estimacion h1.title {
   margin: 20px 0;
-  font-size: 2.5rem;
+  font-size: 2rem;
 }
 
 .mb-4 {
@@ -784,10 +783,50 @@ body {
 .mt-4 {
   margin-top: 1rem;
 }
+.costo-estimado-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  
+  gap: 16px;
+  padding: 16px;
+}
+
+.costo-item {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.total-estimado-container {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #f5f5f5; 
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .total-estimado {
-  font-size: 1.2rem;
   font-weight: bold;
-  color: #1f4401; /* Color rojo para resaltar */
+  font-size: 16px;
+  color: #006400; 
+}
+
+.costo-item strong {
+  font-weight: bold;
+  color: #555;
+}
+
+.costo-item {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .costo-estimado-grid {
+    grid-template-columns: 1fr; 
+  }
 }
 .text-blue-600 {
   color: #3182ce;
@@ -817,10 +856,10 @@ body {
 .detalle-box {
   background: white;
   padding: 25px;
-  border-radius: 12px; /* Bordes más suaves */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); /* Sombra más suave */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); 
   z-index: 1001;
-  max-width: 380px; /* 🔥 Reducimos el ancho */
+  max-width: 380px; 
   width: 90%;
   text-align: center;
   position: relative;
@@ -851,29 +890,28 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
   z-index: 1001;
-  max-width: 500px; /* 🔥 Aumentar el ancho del modal */
+  max-width: 500px; 
   width: 95%;
   text-align: center;
   position: relative;
 }
 
 .detalle-overlay {
-  position: fixed;  /* 🔥 Fija el modal en toda la pantalla */
+  position: fixed;  
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  display: flex;  /* 🔥 Centra el modal */
+  display: flex; 
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.5); /* 🔥 FONDO OSCURO DIFUMINADO */
-  z-index: 1000; /* 🔥 Asegura que esté sobre otros elementos */
+  background: rgba(0, 0, 0, 0.5); 
+  z-index: 1000; 
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
-/* 🔥 Hace visible el modal cuando se activa */
 .detalle-overlay.show {
   opacity: 1;
   visibility: visible;
@@ -881,6 +919,10 @@ body {
 .modal-content {
   margin-top: 10px;
   text-align: left;
+}
+
+.ml-2s {
+  font-size: 10rem; 
 }
 
 .modal-content label {
@@ -901,8 +943,8 @@ body {
 }
 .modal-footer {
   display: flex;
-  justify-content: center; /* Centra los botones */
-  gap: 15px; /* 🔥 Agrega espacio simétrico entre los botones */
+  justify-content: center; 
+  gap: 15px; 
   margin-top: 15px;
 }
 
@@ -961,7 +1003,7 @@ body {
 }
 
 .cobertura-img-small {
-  width: 80%; /* Ajusta el tamaño según sea necesario */
+  width: 80%; 
   height: 80%;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -972,63 +1014,49 @@ body {
 }
 .proyecto-fecha-container {
     display: flex;
-    justify-content: space-between; /* Divide el espacio entre los elementos */
-    align-items: flex-start; /* Asegura que los labels se alineen correctamente */
-    gap: 20px; /* Espacio entre Proyecto y Fecha */
+    justify-content: space-between; 
+    align-items: flex-start; 
+    gap: 20px; 
     width: 100%;
 }
 
 .contenedor-proyecto, .fecha-container {
-    flex: 1; /* Ambos elementos ocupan el mismo espacio */
+    flex: 1; 
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Mantiene la alineación superior */
+    justify-content: flex-start; 
 }
-
+.checkbox-text {
+  margin-left: 3px;
+  font-size: 0.8rem; 
+}
 .contenedor-proyecto {
-    width: 50%; /* Ajuste del tamaño para evitar desajustes */
+    width: 50%; 
 }
 
 .fecha-container {
-    width: 50%; /* Igual tamaño que el contenedor de proyecto */
+    width: 50%; 
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Asegura alineación correcta */
+    align-items: flex-start; 
 }
 
 .botones-proyecto {
     display: flex;
-    gap: 12px; /* Espaciado uniforme entre botones */
+    gap: 12px; 
     margin-top: 5px;
     margin-bottom: 8px;
 }
 
 .fecha-container input {
-    width: 100%; /* Ajusta el ancho */
-    height: 40px; /* Ajusta la altura */
-    padding: 8px; /* Espaciado interno */
-    text-align: left; /* Evita que el texto de la fecha se centre */
+    width: 100%; 
+    height: 40px; 
+    padding: 8px; 
+    text-align: left; 
 }
 
 .mb-2 {
   margin-bottom: 0.5rem;
 }
-.input-standardproy {
-    background-color: #f3f4f6; 
-    border: 1px solid #d1d5db; 
-    color: black; 
-}
 
-.input-standardproy:focus {
-    background-color: white;
-}
-.input-standardtipopam{
-  background-color: #f3f4f6; 
-    border: 1px solid #d1d5db; 
-    color: black; 
-}
-.input-standardtipopam:focus{
-  background-color: white;
-
-}
 </style>

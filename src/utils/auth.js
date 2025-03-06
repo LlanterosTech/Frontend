@@ -12,6 +12,6 @@ export function startInactivityTimer() {
 export function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
-        userService.logoutUser();  // Llama a la función de cierre de sesión
+        userService.logoutUser(); 
     }, 0.50 * 60 * 1000); // 15 minutos de inactividad
 }

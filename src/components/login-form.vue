@@ -45,7 +45,7 @@ export default {
       email: "",
       password: "",
       error: null,
-      recaptchaSiteKey: "6Lc7S94qAAAAAE2ohl9u4JgSRLkqFCBd-ypbg9Wd" // Reemplaza con tu clave de sitio reCAPTCHA
+      recaptchaSiteKey: "6Lc7S94qAAAAAE2ohl9u4JgSRLkqFCBd-ypbg9Wd" 
     };
   },
   async mounted() {
@@ -64,7 +64,7 @@ export default {
           theme: "light"
         });
       });
-    }, 500); // Espera medio segundo para asegurar que el DOM esté listo
+    }, 500); 
   } catch (error) {
     console.error("Error al cargar reCAPTCHA:", error);
     this.error = "No se pudo cargar el reCAPTCHA. Intenta recargar la página.";
@@ -114,7 +114,7 @@ export default {
     clearErrorAfterTimeout() {
       setTimeout(() => {
         this.error = null;
-      }, 4000); // 4 segundos
+      }, 4000); 
     },
     goToRegister() {
       this.$router.push("/register");
@@ -159,7 +159,7 @@ body {
 
 .plant {
   position: absolute;
-  width: 420px; /* Tamaño aumentado */
+  width: 420px; 
   height: auto;
   opacity: 0.9;
 }
