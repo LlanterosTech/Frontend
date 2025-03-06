@@ -13,7 +13,7 @@
         <i class="fas fa-arrow-left"></i> 
       </button>
       <div class="estimacion">
-        <h1 class="title">Crear Nueva Estimación</h1>
+        <h1 class="title">Registro de Estimación</h1>
                   <div class="proyecto-fecha-container">
             <!-- Proyecto -->
             <div class="contenedor-proyecto">
@@ -68,9 +68,9 @@
         <div class="mb-4">
           <label class="texto">ID de PAM</label>
           <div class="flex items-center">
-            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el código PAM" />
-            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM
-          </div>
+            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del PAM" />
+            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2s">
+            <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>                  </div>
         </div>
         <div v-if="atributos.length" class="texto">
         <h2 class="texto"></h2>
@@ -85,10 +85,10 @@
         
         <div class="flex justify-between mt-4">
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
-            Guardar Estimación
+            Guardar
           </button>
           <button @click="limpiarFormulario" class="btn-primary">
-            Nueva Estimación
+            Nuevo
           </button>
         </div>
     
@@ -100,21 +100,26 @@
         <p @click="toggleDetalle" class="X">
           X
         </p>
-        <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM - {{ estimacion.codPam }}</h2>
-        <div class="grid grid-cols-2 gap-4">
-          <p><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
-          <p><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
-          <p><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
-          <p><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
-          <p><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
-          <p><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
-          <p><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
-          <p><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
-          <p><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
-          <p><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
-          <p><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
-          <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
-        </div>
+        <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
+        <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
+      <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
+      <p class="costo-item"><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
+      <p class="costo-item"><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
+      <p class="costo-item"><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
+      <p class="costo-item"><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
+      <p class="costo-item"><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
+      <p class="costo-item"><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
+      <p class="costo-item"><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
+      <p class="costo-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
+      <p class="costo-item"><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
+      <p class="costo-item"><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
+    </div>
+
+    <!-- Total Estimado fuera de la cuadrícula -->
+    <div class="total-estimado-container">
+      <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
+    </div>
+
       </div>
     </div>
     <transition name="fade">
@@ -140,15 +145,15 @@
   <div v-if="modalAtributos" class="detalle-overlay show">
   <div class="detalle-box">
     <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
-    <h2 class="texto">Ingresar Atributos</h2>
+    <h2 class="texto">Atributos del PAM</h2>
 
     <div class="grid grid-cols-2 gap-4">
-      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
-        <label class="block text-sm font-medium">
+      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2 flex flex-col">
+        <label class="block text-sm font-medium mb-1 w-full">
           {{ obtenerDescripcionAtributo(atributo.nombre) }}
         </label>
 
-        <!-- 🔹 Si el atributo es "TipoCierre", usa un <select> -->
+        <!-- Si el atributo es "TipoCierre", usa un <select> -->
         <template v-if="atributo.nombre === 'TipoCierre'">
           <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option value="TRASLADO">TRASLADO</option>
@@ -156,7 +161,7 @@
           </select>
         </template>
 
-        <!-- 🔹 Si el atributo es "TipoCobertura", usa un botón para abrir otro modal -->
+        <!-- Si el atributo es "TipoCobertura", usa un botón para abrir otro modal -->
         <template v-else-if="atributo.nombre === 'TipoCobertura'">
           <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
             Seleccionar Tipo de Cobertura
@@ -164,7 +169,7 @@
           <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
         </template>
 
-        <!-- 🔹 Para booleanos (Sí/No), usa un select -->
+        <!-- Para booleanos (Sí/No), usa un select -->
         <template v-else-if="atributo.tipoDato === 'bool'">
           <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option :value="true">Sí</option>
@@ -172,19 +177,19 @@
           </select>
         </template>
 
-        <!-- 🔹 Para números, usa un input numérico -->
+        <!-- Para números, usa un input numérico -->
         <template v-else-if="atributo.tipoDato === 'decimal'">
           <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
         </template>
 
-        <!-- 🔹 Para cualquier otro tipo de dato, usa un input de texto -->
+        <!-- Para cualquier otro tipo de dato, usa un input de texto -->
         <template v-else>
           <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
         </template>
       </div>
     </div>
 
-    <div class="modal-footer">
+    <div class="modal-footer flex justify-between">
       <button class="btn-secondary" @click="guardarAtributos">Guardar</button>
       <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
     </div>
@@ -237,10 +242,10 @@ export default {
       atributoDescripciones: {
         Volumen: "Volumen (m³)",
         Área: "Área (m²)",
-        GeneracionDAR: "¿Es generador de Drenaje Ácido de Roca (DAR)?",
+        GeneracionDAR: "¿Es Generador de Drenaje Ácido de Roca (DAR)?",
         TipoCierre: "Tipo de Cierre",
         TipoCobertura: "Tipo de Cobertura",
-        Cobertura: "¿Requiere Cobertura?",
+        Cobertura: '¿Requiere Cobertura?',
         DistanciaTraslado: "Distancia de Traslado (km)",
         // Agrega más mapeos aquí según sea necesario
       },
@@ -373,6 +378,7 @@ export default {
       }
       this.estimacion.usuarioId = storedUserId;
       this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
+      this.estimacion.tipoPam = this.detalleEstimacion;
       this.estimacion.valores = {};
       let valid = true;
       this.atributos.forEach(atributo => {
@@ -440,6 +446,9 @@ export default {
 
 
 }
+
+
+
 .alert-container {
   position: absolute;
   top: 20px;
@@ -662,7 +671,7 @@ body {
 
 .estimacion h1.title {
   margin: 20px 0;
-  font-size: 2.5rem;
+  font-size: 2rem;
 }
 
 .mb-4 {
@@ -776,10 +785,56 @@ body {
 .mt-4 {
   margin-top: 1rem;
 }
+.costo-estimado-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  /* 2 columnas de igual tamaño */
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Estilo para los elementos dentro de la cuadrícula */
+.costo-item {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Estilo para el total estimado, ahora en un contenedor separado */
+.total-estimado-container {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #f5f5f5; /* Fondo ligeramente gris para destacar */
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Para el total estimado */
 .total-estimado {
-  font-size: 1.2rem;
   font-weight: bold;
-  color: #1f4401; /* Color rojo para resaltar */
+  font-size: 16px;
+  color: #006400; /* Un verde más oscuro para resaltar */
+}
+
+/* Para los títulos en negrita */
+.costo-item strong {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Añadir un borde para mejorar la separación entre elementos */
+.costo-item {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 600px) {
+  .costo-estimado-grid {
+    grid-template-columns: 1fr; /* En pantallas pequeñas, solo una columna */
+  }
 }
 .text-blue-600 {
   color: #3182ce;
@@ -873,6 +928,10 @@ body {
 .modal-content {
   margin-top: 10px;
   text-align: left;
+}
+
+.ml-2s {
+  font-size: 10rem; /* Cambia el tamaño del texto aquí */
 }
 
 .modal-content label {
@@ -976,7 +1035,10 @@ body {
     flex-direction: column;
     justify-content: flex-start; /* Mantiene la alineación superior */
 }
-
+.checkbox-text {
+  margin-left: 3px;
+  font-size: 0.8rem; /* Cambia el tamaño del texto aquí */
+}
 .contenedor-proyecto {
     width: 50%; /* Ajuste del tamaño para evitar desajustes */
 }

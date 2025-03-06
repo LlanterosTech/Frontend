@@ -107,20 +107,23 @@
                     X
                 </button>
                 <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM: {{ detalleEstimacion.tipoPam.name }} - {{ detalleEstimacion.codPam }}</h2>
-                <div class="grid grid-cols-2 gap-4">
-                <p class="cost-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>
-                <p class="cost-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
-                <p class="cost-item"><strong>Utilidad:</strong> {{ formatNumero(detalleCosto.utilidades) }}</p>
-                <p class="cost-item"><strong>Subtotal:</strong> {{ formatNumero(detalleCosto.subTotal) }}</p>
-                <p class="cost-item"><strong>IGV:</strong> {{ formatNumero(detalleCosto.igv) }}</p>
-                <p class="cost-item"><strong>Subtotal Obra:</strong> {{ formatNumero(detalleCosto.subTotalObras) }}</p>
-                <p class="cost-item"><strong>Expediente Técnico:</strong> {{ formatNumero(detalleCosto.expedienteTecnico) }}</p>
-                <p class="cost-item"><strong>Supervisión:</strong> {{ formatNumero(detalleCosto.supervision) }}</p>
-                <p class="cost-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(detalleCosto.gestionProyecto) }}</p>
-                <p class="cost-item"><strong>Capacitación:</strong> {{ formatNumero(detalleCosto.capacitacion) }}</p>
-                <p class="cost-item"><strong>Contingencias:</strong> {{ formatNumero(detalleCosto.contingencias) }}</p>
-                <p class="cost-item total-estimado"><strong>Total Estimado:</strong> {{ formatNumero(detalleCosto.totalEstimado) }}</p>
+                <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
+                <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>
+                <p class="costo-item"><strong>Gastos Generales:</strong> {{ formatNumero(detalleCosto.gastosGenerales) }}</p>
+                <p class="costo-item"><strong>Utilidad:</strong> {{ formatNumero(detalleCosto.utilidades) }}</p>
+                <p class="costo-item"><strong>Subtotal:</strong> {{ formatNumero(detalleCosto.subTotal) }}</p>
+                <p class="costo-item"><strong>IGV:</strong> {{ formatNumero(detalleCosto.igv) }}</p>
+                <p class="costo-item"><strong>Subtotal Obra:</strong> {{ formatNumero(detalleCosto.subTotalObras) }}</p>
+                <p class="costo-item"><strong>Expediente Técnico:</strong> {{ formatNumero(detalleCosto.expedienteTecnico) }}</p>
+                <p class="costo-item"><strong>Supervisión:</strong> {{ formatNumero(detalleCosto.supervision) }}</p>
+                <p class="costo-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(detalleCosto.gestionProyecto) }}</p>
+                <p class="costo-item"><strong>Capacitación:</strong> {{ formatNumero(detalleCosto.capacitacion) }}</p>
+                <p class="costo-item"><strong>Contingencias:</strong> {{ formatNumero(detalleCosto.contingencias) }}</p>
                 </div>
+                <div class="total-estimado-container">
+      <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(detalleCosto.totalEstimado) }}</p>
+    </div>
+
                 </div>
             </div>
             </div>
@@ -735,7 +738,57 @@
         overflow: hidden;
         z-index: 0; /* Asegúrate de que las plantas estén en el fondo */
     }
+    .costo-estimado-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  /* 2 columnas de igual tamaño */
+  gap: 16px;
+  padding: 16px;
+}
 
+/* Estilo para los elementos dentro de la cuadrícula */
+.costo-item {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Estilo para el total estimado, ahora en un contenedor separado */
+.total-estimado-container {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #f5f5f5; /* Fondo ligeramente gris para destacar */
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Para el total estimado */
+.total-estimado {
+  font-weight: bold;
+  font-size: 16px;
+  color: #006400; /* Un verde más oscuro para resaltar */
+}
+
+/* Para los títulos en negrita */
+.costo-item strong {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Añadir un borde para mejorar la separación entre elementos */
+.costo-item {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 600px) {
+  .costo-estimado-grid {
+    grid-template-columns: 1fr; /* En pantallas pequeñas, solo una columna */
+  }
+}
     .plant {
         position: absolute;
         width: 420px;
