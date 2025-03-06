@@ -17,12 +17,8 @@
                   <div class="proyecto-fecha-container">
             <div class="contenedor-proyecto">
               <label class="texto">Proyecto</label>
-                <select
-                :required="!estimacion.proyectoId"
-                @change="cargarTiposPAM"
-                :disabled="proyectoBloqueado"
+              <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
                 class="w-full p-2 border rounded input-standardproy">
-                <option value="" disabled selected hidden>Ingrese el Proyecto</option>
                 <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
                   {{ proyecto.name }}
                 </option>
@@ -215,8 +211,6 @@ export default {
       proyectos: [],
       tiposPAM: [],
       atributos: [],
-      proyectoId: "",
-      tipoPamId: "",
       error: null,
       costosByProyecto: [],
       valoresAtributos: {},
