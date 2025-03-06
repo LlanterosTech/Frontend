@@ -23,7 +23,7 @@ export default {
 
 <style scoped>
 .logout-btn {
-  position: fixed; /* Cambiado a fixed para que esté siempre visible */
+  position: fixed; 
   top: 20px;
   right: 20px;
   padding: 10px;
@@ -34,7 +34,7 @@ export default {
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.3s;
-  z-index: 1000; /* Asegúrate de que el botón esté por encima de otros elementos */
+  z-index: 1000; 
 }
 
 .logout-btn:hover {

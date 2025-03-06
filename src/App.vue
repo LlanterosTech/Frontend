@@ -21,14 +21,13 @@ export default {
   },
   created() {
     if (localStorage.getItem('token')) {
-      startInactivityTimer(userService.logoutUser); // Iniciar el temporizador
+      startInactivityTimer(userService.logoutUser);
     }
   }
 };
 </script>
 
 <style>
-/* Estilos globales opcionales */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -38,7 +37,7 @@ body {
   max-width: 1200px;
   min-width: 360px;
   margin: auto;
-  min-height: 100vh; /* Garantiza que siempre ocupe la pantalla completa */
+  min-height: 100vh; 
   display: flex;
   flex-direction: column;
   align-items: center;

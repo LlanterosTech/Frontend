@@ -1,13 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5162/amsac/v1',
+    baseURL: 'http://198.150.0.223:5162/amsac/v1',
     headers: {
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
 });
-axios.defaults.timeout = 60000; // 60 segundos
+axios.defaults.timeout = 60000; 
 
 api.interceptors.request.use(
     config => {
@@ -25,12 +25,17 @@ api.interceptors.response.use(
     async error => {
         const originalRequest = error.config;
 
-        // Si hay un error 401 (No autorizado) intenta renovar el token.
         if (error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
+
+                if (!refreshToken) {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                    return Promise.reject(error);
+                }
 
                 const { data } = await api.post('/authentication/refresh-token', { refreshToken });
 
@@ -41,7 +46,6 @@ api.interceptors.response.use(
 
                 return api(originalRequest);
             } catch (refreshError) {
-                // Si falla la renovación, redirigir al login.
                 localStorage.clear();
                 window.location.href = '/login';
                 return Promise.reject(refreshError);

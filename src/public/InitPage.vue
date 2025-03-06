@@ -115,7 +115,7 @@ export default {
   data() {
     return {
       ultimasEstimaciones: [],
-      ordenAscendente: false, // Por defecto, las estimaciones están en orden ascendente
+      ordenAscendente: false,
       detalleVisible: false,
       detalleCosto: {},
       detalleEstimacion: {}
@@ -130,15 +130,15 @@ export default {
     async cargarEstimaciones() {
       try {
         const estimaciones = await bdService.getEstimaciones();
-        console.log("Datos obtenidos:", estimaciones); // 🔹 Imprimir los datos recibidos
+        console.log("Datos obtenidos:", estimaciones); 
 
         for (let estimacion of estimaciones) {
           try {
             const usuario = await userService.getAuthUser(estimacion.usuarioId);
-            estimacion.usuario = usuario; // Agrega el usuario a la estimación
+            estimacion.usuario = usuario; 
           } catch (error) {
             console.error(`Error obteniendo el usuario para ID ${estimacion.usuarioId}:`, error);
-            estimacion.usuario = { email: "Desconocido", area: "No definido" }; // Fallback
+            estimacion.usuario = { email: "Desconocido", area: "No definido" }; 
           }
         }
         this.ultimasEstimaciones = estimaciones.slice(-5);
@@ -149,8 +149,8 @@ export default {
 
 
     cambiarOrden() {
-      this.ordenAscendente = !this.ordenAscendente; // Alterna el estado
-      this.ultimasEstimaciones.reverse(); // Invierte el orden del array
+      this.ordenAscendente = !this.ordenAscendente; 
+      this.ultimasEstimaciones.reverse(); 
       this.$forceUpdate();
     },
     formatNumero(valor) {
@@ -180,7 +180,6 @@ export default {
       this.detalleVisible = !this.detalleVisible;
     },
     editarEstimacion(id) {
-      // Lógica para editar la estimación
       console.log(`Editar estimación con ID: ${id}`);
     },
     eliminarEstimacion(id) {
@@ -196,7 +195,6 @@ export default {
       }
     },
     descargarPDF(id) {
-      // Lógica para descargar el PDF de la estimación
       console.log(`Descargar PDF de la estimación con ID: ${id}`);
     }
   },
@@ -238,7 +236,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 0; /* Asegúrate de que las plantas estén en el fondo */
+  z-index: 0; 
 }
 
 .plant {
@@ -283,7 +281,7 @@ body {
   padding: 50px;
   border-radius: 15px;
   box-shadow: 0 0 25px 12px rgb(0 0 0 / 30%);
-  z-index: 1; /* Asegúrate de que el init-box esté encima de las plantas */
+  z-index: 1; 
   width: 80%;
   max-width: 1500px;
 }
@@ -343,11 +341,11 @@ body {
 }
 
 .btn-orden {
-  padding: 0; /* Eliminar padding */
-  color: #4fd87d; /* Cambiar color a verde */
+  padding: 0;
+  color: #4fd87d; 
   font-size: 1.4rem;
   border: none;
-  background: none; /* Eliminar fondo */
+  background: none; 
   cursor: pointer;
   transition: transform 0.3s;
 }
@@ -413,12 +411,11 @@ body {
 }
 .costo-estimado-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);  /* 2 columnas de igual tamaño */
+  grid-template-columns: repeat(2, 1fr); 
   gap: 16px;
   padding: 16px;
 }
 
-/* Estilo para los elementos dentro de la cuadrícula */
 .costo-item {
   font-size: 14px;
   line-height: 1.6;
@@ -426,40 +423,35 @@ body {
   color: #333;
 }
 
-/* Estilo para el total estimado, ahora en un contenedor separado */
 .total-estimado-container {
   margin-top: 20px;
   padding: 16px;
-  background-color: #f5f5f5; /* Fondo ligeramente gris para destacar */
+  background-color: #f5f5f5;
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Para el total estimado */
 .total-estimado {
   font-weight: bold;
   font-size: 16px;
-  color: #006400; /* Un verde más oscuro para resaltar */
+  color: #006400; 
 }
 
-/* Para los títulos en negrita */
 .costo-item strong {
   font-weight: bold;
   color: #555;
 }
 
-/* Añadir un borde para mejorar la separación entre elementos */
 .costo-item {
   border-bottom: 1px solid #ccc;
   padding-bottom: 8px;
 }
 
-/* Ajuste para pantallas pequeñas */
 @media (max-width: 600px) {
   .costo-estimado-grid {
-    grid-template-columns: 1fr; /* En pantallas pequeñas, solo una columna */
+    grid-template-columns: 1fr;
   }
 }
 .btn-action:hover {
@@ -510,7 +502,7 @@ body {
 .total-estimado {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #1f4401; /* Color rojo para resaltar */
+  color: #1f4401; 
 }
 .text-lg-font-semibold-mb-4 {
   font-size: 1.5rem;

@@ -47,7 +47,7 @@ export default {
       formData: {
         email: "",
         password: "",
-        registerArea: "", // Cambiado de 'area' a 'registerArea' para coincidir con el v-model
+        registerArea: "", 
       },
       error: null,
     };
@@ -55,10 +55,10 @@ export default {
   methods: {
     async handleRegister() {
       try {
-        this.error = null; // Limpia errores anteriores
+        this.error = null; 
         await userService.registerUser(this.formData);
         console.log("Registration successful");
-        this.$router.push("/login"); // Redirige al login o a otra página
+        this.$router.push("/login"); 
       } catch (err) {
         this.error = err || "Failed to register. Please try again.";
       }
@@ -120,7 +120,7 @@ body {
 
 .plant {
   position: absolute;
-  width: 420px; /* Tamaño aumentado */
+  width: 420px;
   height: auto;
   opacity: 0.9;
 }
@@ -181,7 +181,7 @@ body {
   border-radius: 12px;
   padding: 0 18px;
   margin: 12px 0;
-  position: relative; /* Añadido para posicionar el botón */
+  position: relative;
 }
 
 .text-input input {
