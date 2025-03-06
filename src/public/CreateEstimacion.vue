@@ -17,12 +17,15 @@
                   <div class="proyecto-fecha-container">
             <div class="contenedor-proyecto">
               <label class="texto">Proyecto</label>
-                <select required="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
-                      class="w-full p-2 border rounded input-standardproy">
-                  <option value="" disabled selected hidden>Ingrese el Proyecto</option>
-                  <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
-                      {{ proyecto.name }}
-                  </option>
+                <select
+                :required="!estimacion.proyectoId"
+                @change="cargarTiposPAM"
+                :disabled="proyectoBloqueado"
+                class="w-full p-2 border rounded input-standardproy">
+                <option value="" disabled selected hidden>Ingrese el Proyecto</option>
+                <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
+                  {{ proyecto.name }}
+                </option>
               </select>
 
               <div class="botones-proyecto">
@@ -57,12 +60,20 @@
         </div>
         <div class="mb-4">
           <label class="texto">Tipo de PAM</label>
-          <select required="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standardtipopam">
-            <option value="" disabled selected hidden>Ingrese el Pasivo Ambiental Minero</option>
-            <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
-              {{ tipoPam.name }}
-            </option>
-          </select>
+                <select
+        v-model="estimacion.tipoPamId"
+        @change="cargarAtributos"
+        :disabled="proyectoBloqueado"
+        class="w-full p-2 border rounded input-standardtipopam"
+      >
+        <option value="" disabled selected hidden>Ingrese el Pasivo Ambiental Minero</option>
+        <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
+          {{ tipoPam.name }}
+        </option>
+      </select>
+
+
+
         </div>
         <div class="mb-4">
           <label class="texto">ID de PAM</label>
@@ -204,6 +215,8 @@ export default {
       proyectos: [],
       tiposPAM: [],
       atributos: [],
+      proyectoId: "",
+      tipoPamId: "",
       error: null,
       costosByProyecto: [],
       valoresAtributos: {},
