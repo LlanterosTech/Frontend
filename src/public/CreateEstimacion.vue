@@ -75,8 +75,9 @@
         <div v-if="atributos.length" class="texto">
         <h2 class="texto"></h2>
         <button @click="abrirModalAtributos" class="btn-secondary">
-          Ingresar Atributos
-        </button>
+        {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
+      </button>
+
        
       </div>
       <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
@@ -148,12 +149,12 @@
     <h2 class="texto">Atributos del PAM</h2>
 
     <div class="grid grid-cols-2 gap-4">
-      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2 flex flex-col">
-        <label class="block text-sm font-medium mb-1 w-full">
+      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
+        <label class="block text-sm font-medium">
           {{ obtenerDescripcionAtributo(atributo.nombre) }}
         </label>
 
-        <!-- Si el atributo es "TipoCierre", usa un <select> -->
+        <!-- 🔹 Si el atributo es "TipoCierre", usa un <select> -->
         <template v-if="atributo.nombre === 'TipoCierre'">
           <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option value="TRASLADO">TRASLADO</option>
@@ -161,7 +162,7 @@
           </select>
         </template>
 
-        <!-- Si el atributo es "TipoCobertura", usa un botón para abrir otro modal -->
+        <!-- 🔹 Si el atributo es "TipoCobertura", usa un botón para abrir otro modal -->
         <template v-else-if="atributo.nombre === 'TipoCobertura'">
           <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
             Seleccionar Tipo de Cobertura
@@ -169,7 +170,7 @@
           <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
         </template>
 
-        <!-- Para booleanos (Sí/No), usa un select -->
+        <!-- 🔹 Para booleanos (Sí/No), usa un select -->
         <template v-else-if="atributo.tipoDato === 'bool'">
           <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option :value="true">Sí</option>
@@ -177,25 +178,27 @@
           </select>
         </template>
 
-        <!-- Para números, usa un input numérico -->
+        <!-- 🔹 Para números, usa un input numérico -->
         <template v-else-if="atributo.tipoDato === 'decimal'">
           <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
         </template>
 
-        <!-- Para cualquier otro tipo de dato, usa un input de texto -->
+        <!-- 🔹 Para cualquier otro tipo de dato, usa un input de texto -->
         <template v-else>
           <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
         </template>
       </div>
     </div>
 
-    <div class="modal-footer flex justify-between">
+    <div class="modal-footer">
       <button class="btn-secondary" @click="guardarAtributos">Guardar</button>
       <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
     </div>
   </div>
 </div>
 </template>
+
+
 
 <script>
 import bdService from "@/main/services/bdservice";
@@ -251,6 +254,7 @@ export default {
       },
       detalleEstimacion: {},
       estimacionGuardada: false, // Estado para controlar si la estimación ha sido guardada
+      atributosIngresados: false, // Estado para controlar si los atributos han sido ingresados
     };
   },
   async created() {
@@ -346,6 +350,7 @@ export default {
       this.modalAtributos = false;
     },
     guardarAtributos() {
+      this.atributosIngresados = true;
       this.cerrarModalAtributos();
     },
     mostrarModalNuevoProyecto() {
