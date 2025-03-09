@@ -51,7 +51,7 @@
                         <!-- <th>Área (m²)</th> --> <!-- ELIMINAR -->
                         <!-- <th>Generación DAR</th> --> <!-- ELIMINAR -->
                         <!-- <th>Cobertura</th> --> <!-- ELIMINAR -->
-                        <th>Tipo de cierre</th>
+                        <!--<th>Tipo de cierre</th> -->
                         <!-- <th>Tipo de cobertura</th> --> <!-- ELIMINAR -->
                         <!-- <th>Distancia (Km)</th> --> <!-- ELIMINAR -->
                         <th class="highlight">Total Estimado</th>
@@ -72,7 +72,7 @@
                         <!-- <td>{{ obtenerAtributo(estimacion.valores, 2) || 'N/A' }}</td> --> <!-- ELIMINAR -->
                         <!-- <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 3)) }}</td> --> <!-- ELIMINAR -->
                         <!-- <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 4)) }}</td> --> <!-- ELIMINAR -->
-                        <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td>
+                        <!-- <td> <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td> --> <!-- ELIMINAR -->
                         <!-- <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td> --> <!-- ELIMINAR -->
                         <!-- <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td> --> <!-- ELIMINAR -->
                         <td class="highlight">{{ formatNumero(estimacion.costoEstimado?.totalEstimado) || 'N/A' }}</td>
@@ -183,44 +183,128 @@
         await this.getProyectosYTipos();
     },
     methods: {
-
         descargarEstimacionPDF(estimacion) {
-        const doc = new jsPDF("p", "mm", "a4");
+    const doc = new jsPDF("p", "mm", "a4");
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(20);
-        doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
-        doc.setFontSize(14);
-        doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, 30);
-        doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, 40);
-        doc.text(`Código PAM: ${estimacion.codPam}`, 15, 50);
-        doc.text(`Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`, 15, 60);
+    // **Encabezado con Proyecto, Tipo de PAM e ID de PAM**
+    doc.setFontSize(14);
+    doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, 30);
+    doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, 40);
+    doc.text(`ID de PAM: ${estimacion.codPam}`, 15, 50);
 
-        const tableColumns = ["Descripción", "Valor"];
-        const tableRows = [
-            ["Tipo de Cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
-            ["Usuario", estimacion.usuario.email || "Desconocido"],
-            ["Departamento", estimacion.usuario.registerArea || "No definido"],
-            ["Fecha", this.formatFecha(estimacion.fechaPam)],
-        ];
+    // **Primera tabla: Información del usuario**
+    const tableColumnsUsuario = ["Descripción", "Valor"];
+    const tableRowsUsuario = [
+        ["Usuario", estimacion.usuario.email || "Desconocido"],
+        ["Departamento", estimacion.usuario.registerArea || "No definido"],
+        ["Fecha", this.formatFecha(estimacion.fechaPam) || "N/A"]
+    ];
 
-        doc.autoTable({
-            startY: 70,
-            head: [tableColumns],
-            body: tableRows,
-            theme: "grid",
-            styles: { fontSize: 10 },
-            headStyles: { fillColor: [39, 174, 96] },
-            alternateRowStyles: { fillColor: [240, 240, 240] },
-            margin: { left: 15, right: 15 }
-        });
+    doc.autoTable({
+        startY: 60,
+        head: [tableColumnsUsuario],
+        body: tableRowsUsuario,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39, 174, 96] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
 
-        
-        const pdfUrl = doc.output('bloburl');
-        window.open(pdfUrl, '_blank');
-    },
+    // **Segunda tabla: Características**
+    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+    const tableRowsCaracteristicas = [
+        ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+        ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+        ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+        ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+        ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+        ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+        ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+    ];
 
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [tableColumnsCaracteristicas],
+        body: tableRowsCaracteristicas,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [46, 204, 113] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Tercera tabla: Desglose del Total Estimado**
+    const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
+    const tableRowsCostoCierre = [
+        ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
+        ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
+        ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
+        ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
+        ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)]
+    ];
+
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [tableColumnsCostoCierre],
+        body: tableRowsCostoCierre,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39, 174, 96] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Cuarta tabla: Otros costos adicionales**
+    const tableColumnsOtros = ["Otros", "Valor"];
+    const tableRowsOtros = [
+        ["IGV 18%", this.formatNumero(estimacion.costoEstimado?.igv)],
+        ["Expediente Técnico 6%", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
+        ["Supervisión 15%", this.formatNumero(estimacion.costoEstimado?.supervision)],
+        ["Gestión de Proyectos 5%", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
+        ["Capacitación 1%", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
+        ["Contingencias 6%", this.formatNumero(estimacion.costoEstimado?.contingencias)]
+    ];
+
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [tableColumnsOtros],
+        body: tableRowsOtros,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [30, 132, 73] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Total Estimado final**
+    doc.setFontSize(19);
+    doc.setTextColor(0, 0, 0);
+    doc.text(
+        `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
+        doc.internal.pageSize.getWidth() / 2,
+        doc.lastAutoTable.finalY + 15,
+        { align: 'right' }
+    );
+
+    // **Nota de precisión**
+    doc.setFontSize(8);
+    doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", 
+        doc.internal.pageSize.getWidth() / 2, doc.lastAutoTable.finalY + 40, { align: 'center' });
+
+    // **Número de página**
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+
+    // **Generar el PDF**
+    const pdfUrl = doc.output('bloburl');
+    window.open(pdfUrl, '_blank');
+},
 
     
         formatNumero(valor) {
