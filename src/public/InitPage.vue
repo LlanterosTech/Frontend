@@ -71,6 +71,9 @@
                   <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
                     <i class="fas fa-trash"></i>
                   </button>
+                  <button @click="descargarPDF(estimacion)" class="btn-action btn-pdf">
+                  <i class="fas fa-file-pdf"></i>
+                </button>
                   
                 </td>
               </tr>
@@ -110,6 +113,8 @@
 <script>
 import bdService from "@/main/services/bdservice";
 import userService from "@/main/services/userservice";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default {
   data() {
@@ -127,6 +132,53 @@ export default {
     }
   },
   methods: {
+
+        descargarPDF(estimacion) {
+      const doc = new jsPDF("p", "mm", "a4");
+
+      // Título del documento
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("Resumen de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+
+      doc.setFontSize(12);
+      doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, 30);
+      doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, 40);
+      doc.text(`Código PAM: ${estimacion.codPam}`, 15, 50);
+      doc.text(`Fecha: ${this.formatFecha(estimacion.fechaPam)}`, 15, 60);
+      doc.text(`Usuario: ${estimacion.usuario.email}`, 15, 70);
+      doc.text(`Departamento: ${estimacion.usuario.registerArea}`, 15, 80);
+
+      // Tabla de costos
+      const columns = ["Descripción", "Valor"];
+      const rows = [
+        ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
+        ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
+        ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
+        ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
+        ["IGV", this.formatNumero(estimacion.costoEstimado?.igv)],
+        ["Total Estimado", this.formatNumero(estimacion.costoEstimado?.totalEstimado)]
+      ];
+
+      doc.autoTable({
+        startY: 90,
+        head: [columns],
+        body: rows,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39, 174, 96] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+      });
+
+      // Pie de página
+      doc.setFontSize(10);
+      doc.text("Este documento es un resumen de la estimación de costos.", 15, doc.internal.pageSize.getHeight() - 20);
+
+      // 🔹 Genera un URL temporal del PDF y ábrelo en una nueva pestaña
+      const pdfUrl = doc.output("bloburl");
+      window.open(pdfUrl, "_blank");
+    },
     async cargarEstimaciones() {
       try {
         const estimaciones = await bdService.getEstimaciones();
@@ -194,17 +246,17 @@ export default {
         });
       }
     },
-    descargarPDF(id) {
-      console.log(`Descargar PDF de la estimación con ID: ${id}`);
-    }
+    
   },
   mounted() {
     this.cargarEstimaciones();
   }
+  
 };
 </script>
 
 <style scoped>
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
@@ -295,7 +347,7 @@ body {
 
 .init h1.title {
   margin: 20px 0;
-  font-size: 3.2rem;
+  font-size: 3.075rem;
 }
 
 .init p.subtitle {
@@ -467,7 +519,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.8rem;
+  font-size: 1.7375rem;
   margin-bottom: 10px;
 }
 

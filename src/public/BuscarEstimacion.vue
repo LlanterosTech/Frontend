@@ -1,4 +1,4 @@
-<template>
+`<template>
         <div class="container">
         <div class="design">
             <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
@@ -121,7 +121,7 @@
                 <p class="costo-item"><strong>Contingencias:</strong> {{ formatNumero(detalleCosto.contingencias) }}</p>
                 </div>
                 <div class="total-estimado-container">
-      <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(detalleCosto.totalEstimado) }}</p>
+    <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(detalleCosto.totalEstimado) }}</p>
     </div>
 
                 </div>
@@ -179,9 +179,9 @@
     },
     methods: {
         formatNumero(valor) {
-      if (valor == null || isNaN(valor)) return 'S/ 0';
-      const roundedValue = Math.round(valor);
-      return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
+    if (valor == null || isNaN(valor)) return 'S/ 0';
+    const roundedValue = Math.round(valor);
+    return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
     },
         async goBack() {
         this.$router.go(-1);
@@ -198,10 +198,10 @@
     const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
 
     estimacionesOrdenadas.forEach((estimacion) => {
-      if (!proyectosCostos[estimacion.proyecto.name]) {
+    if (!proyectosCostos[estimacion.proyecto.name]) {
         proyectosCostos[estimacion.proyecto.name] = 0;
-      }
-      proyectosCostos[estimacion.proyecto.name] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
+    }
+    proyectosCostos[estimacion.proyecto.name] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
     });
 
     doc.setFontSize(13);
@@ -210,9 +210,9 @@
 
     let startY = 40;
     for (const [proyecto, costo] of Object.entries(proyectosCostos)) {
-      doc.setFontSize(12);
-      doc.text(`${proyecto}: ${this.formatNumero(costo)}`, 15, startY);
-      startY += 10;
+    doc.setFontSize(12);
+    doc.text(`${proyecto}: ${this.formatNumero(costo)}`, 15, startY);
+    startY += 10;
     }
 
     doc.setLineWidth(0.5);
@@ -220,18 +220,18 @@
     startY += 10;
 
     if (estimacionesOrdenadas.length > 0) {
-      const estimacion = estimacionesOrdenadas[0];
+    const estimacion = estimacionesOrdenadas[0];
 
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY + 2);
-      doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 10);
-      doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 18);
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY + 2);
+    doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 10);
+    doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 18);
 
-      doc.setFont("helvetica", "normal");
+    doc.setFont("helvetica", "normal");
 
-      const tableColumnsCaracteristicas = ["Descripción", "Valor"];
-      const tableRowsCaracteristicas = [
+    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+    const tableRowsCaracteristicas = [
         ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
         ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
         ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
@@ -239,9 +239,9 @@
         ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
         ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
         ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
-      ];
+    ];
 
-      doc.autoTable({
+    doc.autoTable({
         startY: startY + 29,
         head: [tableColumnsCaracteristicas],
         body: tableRowsCaracteristicas,
@@ -300,32 +300,31 @@
         doc.internal.pageSize.getWidth() / 2,
         doc.lastAutoTable.finalY + 15,
         { align: 'right' }
-      );
-      doc.setFontSize(8);
-      doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", doc.internal.pageSize.getWidth() / 2,
+    );
+    doc.setFontSize(8);
+    doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", doc.internal.pageSize.getWidth() / 2,
         doc.lastAutoTable.finalY + 40, { align: 'center' });
 
-      const pageCount = doc.internal.getNumberOfPages();
-      doc.setFontSize(8);
-      doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
     }
 
     for (let i = 1; i < estimacionesOrdenadas.length; i++) {
-      const estimacion = estimacionesOrdenadas[i];
-      doc.addPage();
+    const estimacion = estimacionesOrdenadas[i];
+    doc.addPage();
 
-      let startY = 20; 
+    let startY = 20; 
 
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY);
-      doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 8);
-      doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 16);
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY);
+    doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 8);
+    doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 16);
+    doc.setFont("helvetica", "normal");
 
-      doc.setFont("helvetica", "normal");
-
-      const tableColumnsCaracteristicas = ["Descripción", "Valor"];
-      const tableRowsCaracteristicas = [
+    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+    const tableRowsCaracteristicas = [
         ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
         ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
         ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
@@ -333,9 +332,9 @@
         ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
         ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
         ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
-      ];
+    ];
 
-      doc.autoTable({
+    doc.autoTable({
         startY: startY + 26,
         head: [tableColumnsCaracteristicas],
         body: tableRowsCaracteristicas,
@@ -1027,3 +1026,4 @@
         font-size: 0.9rem;
     }
     </style>
+`

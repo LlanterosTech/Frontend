@@ -15,29 +15,31 @@
       <div class="estimacion">
         <h1 class="title">Registro de Estimación</h1>
                   <div class="proyecto-fecha-container">
-            <!-- Proyecto -->
             <div class="contenedor-proyecto">
               <label class="texto">Proyecto</label>
-              <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado"
-                class="w-full p-2 border rounded input-standard">
-                <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
-                  {{ proyecto.name }}
-                </option>
-              </select>
-              <div class="botones-proyecto">
-                <button @click="bloquearProyecto" class="btn-secondary">
-                  {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
-                </button>
-                <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy">+</button>
+              <div class="proyecto-input">
+                <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado" 
+                  class="w-full p-2 border rounded input-standard">
+                  <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
+                    {{ proyecto.name }}
+                  </option>
+                </select>
+
+                <div class="botones-proyecto">
+                  <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy"></button>
+                  <button @click="bloquearProyecto" class="Fijar-desfijar">
+                    {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
+                  </button>
+                </div>
               </div>
             </div>
+
             <div class="fecha-container">
               <label class="texto">Fecha</label>
-              <input type="date" :value="fecha" class="p-2 border rounded bg-gray-200 input-standard" disabled />
+              <input type="date" :value="fecha" class="input-fecha" disabled />
             </div>
           </div>
-
-
+    
           <div v-if="modalNuevoProyecto" class="detalle-overlay show">
           <div class="detalle-box">
             <button @click="cerrarModalNuevoProyecto" class="btn-close">&times;</button> <!-- 🔥 Botón X dentro del modal -->
@@ -49,14 +51,21 @@
             </div>
 
             <div class="modal-footer">
-              <button class="btn-secondary" @click="guardarNuevoProyecto">Guardar</button>
+              <button class="btn-secondary" @click="guardarNuevoProyecto">Calcular</button>
               <button class="btn-secondary" @click="cerrarModalNuevoProyecto">Cancelar</button>
             </div>
           </div>
         </div>
 
-        
         <div class="mb-4">
+          <label class="texto">ID de PAM</label>
+          <div class="flex items-center">
+            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del PAM" />
+            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2s">
+            <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>                  </div>
+        </div>
+        <div class="mb-4 flex items-center gap-4">
+        <div class="w-full">
           <label class="texto">Tipo de PAM</label>
           <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
             <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
@@ -65,20 +74,10 @@
             </option>
           </select>
         </div>
-        <div class="mb-4">
-          <label class="texto">ID de PAM</label>
-          <div class="flex items-center">
-            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del PAM" />
-            <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2s">
-            <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>                  </div>
-        </div>
-        <div v-if="atributos.length" class="texto">
-        <h2 class="texto"></h2>
-        <button @click="abrirModalAtributos" class="btn-secondary">
-        {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
-      </button>
-
-       
+        
+        <button v-if="atributos.length" @click="abrirModalAtributos" class="btn-secondary">
+          {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
+        </button>
       </div>
       <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
           Costo Estimado:  {{ formatNumero(costoEstimado.totalEstimado) }}
@@ -86,7 +85,7 @@
         </p>
         <div class="flex justify-between mt-4">
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
-            Guardar
+            Calcular
           </button>
           <button @click="limpiarFormulario" class="btn-primary">
             Nuevo
@@ -185,7 +184,7 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-secondary" @click="guardarAtributos">Guardar</button>
+      <button class="btn-secondary" @click="guardarAtributos">Grabar</button>
       <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
     </div>
   </div>
@@ -310,27 +309,34 @@ export default {
       }
     },
     async cargarAtributos() {
-      if (!this.estimacion.tipoPamId) return;
-      try {
-        const response = await bdService.getAtributosByTipoPamId(this.estimacion.tipoPamId);
-        this.atributos = response || [];
-        this.valoresAtributos = {};
-        this.atributos.forEach(atributo => {
-          if (atributo.tipoDato === "decimal") {
-            this.valoresAtributos[atributo.atributoPamId] = 0.0;
-          } else if (atributo.tipoDato === "bool") {
-            this.valoresAtributos[atributo.atributoPamId] = false;
-          } else {
-            this.valoresAtributos[atributo.atributoPamId] = "";
-          }
-        });
-        console.log("Atributos cargados:", this.atributos);
-        console.log("Valores asignados:", this.valoresAtributos);
-      } catch (error) {
-        console.error("Error al cargar los atributos:", error);
-      }
-    },
+  if (!this.estimacion.tipoPamId) return;
+  try {
+    const response = await bdService.getAtributosByTipoPamId(this.estimacion.tipoPamId);
+    this.atributos = response || [];
+    this.valoresAtributos = {};
 
+    // Inicializa valores por defecto
+    this.atributos.forEach(atributo => {
+      if (atributo.tipoDato === "decimal") {
+        this.valoresAtributos[atributo.atributoPamId] = 0.0;
+      } else if (atributo.tipoDato === "bool") {
+        this.valoresAtributos[atributo.atributoPamId] = false;
+      } else {
+        this.valoresAtributos[atributo.atributoPamId] = "";
+      }
+    });
+
+    console.log("Atributos cargados:", this.atributos);
+    console.log("Valores asignados:", this.valoresAtributos);
+
+    // Abrir automáticamente el modal de atributos solo si no ha ingresado valores antes
+    if (this.atributos.length > 0 && !this.atributosIngresados) {
+      this.modalAtributos = true;
+    }
+  } catch (error) {
+    console.error("Error al cargar los atributos:", error);
+  }
+},
     abrirModalAtributos() {
       this.modalAtributos = true;
     },
@@ -529,17 +535,57 @@ body {
   transition: transform 0.3s;
   margin-top: 10px;
 }
-.btn-nuevoproy{
-  padding: 10px 20px;
+.btn-nuevoproy {
+  width: 50px;
+  height: 50px;
+  background: url('@/assets/addproy.png') no-repeat center center;
+  background-size: contain;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+.btn-nuevoproy::after {
+  content: "Crear nuevo proyecto";
+  visibility: hidden;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.8);
   color: white;
-  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: -35px; 
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.8rem;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  z-index: 1000; 
+}
+
+
+.btn-nuevoproy:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
+
+.Fijar-desfijar {
+  width: 70px;
+  height: 40px;
+  padding: 6px 12px;
+  color: white;
+  font-size: 0.9rem;
   background: #13863a;
   border: none;
-  border-radius: 30px;
+  border-radius: 20px;
   cursor: pointer;
   transition: transform 0.3s;
-  margin-top: 10px;
-  margin-left: 10px; 
+  flex-shrink: 0;
+}
+.botones-proyecto {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espacio entre los botones */
 }
 
 .btn-secondary:hover {
@@ -978,7 +1024,13 @@ body {
   font-size: 1.5rem;
   transition: transform 0.3s;
 }
-
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.checkbox-text {
+  margin-left: 3px;
+  font-size: 0.8rem; 
+}
 .btn-close:hover {
   transform: scale(1.2);
 }
@@ -1006,51 +1058,48 @@ body {
 .cobertura-img:hover {
   transform: scale(1.05);
 }
+
+
 .proyecto-fecha-container {
-    display: flex;
-    justify-content: space-between; 
-    align-items: flex-start; 
-    gap: 20px; 
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  border-bottom: 2px solid rgb(167, 167, 167); /* Línea negra de separación */
+  padding-bottom: 10px; /* Espaciado para evitar que quede pegado */
+  margin-bottom: 15px; /* Espaciado con el siguiente bloque */
 }
 
-.contenedor-proyecto, .fecha-container {
-    flex: 1; 
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; 
-}
-.checkbox-text {
-  margin-left: 3px;
-  font-size: 0.8rem; 
-}
 .contenedor-proyecto {
-    width: 50%; 
+  display: flex;
+  flex-direction: column;
+  width: 50%;
 }
-
 .fecha-container {
-    width: 50%; 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; 
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  text-align: center;
+}
+.proyecto-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.botones-proyecto {
-    display: flex;
-    gap: 12px; 
-    margin-top: 5px;
-    margin-bottom: 8px;
+.input-standard {
+  width: 100%;
 }
 
-.fecha-container input {
-    width: 100%; 
-    height: 40px; 
-    padding: 8px; 
-    text-align: left; 
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
+.input-fecha {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ffffff;
+  border-radius: 5px;
+  background-color: #ffffff;
+  text-align: center;
+  
 }
 
 </style>
