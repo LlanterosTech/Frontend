@@ -41,63 +41,50 @@
             </div>
             </div>
             <div class="table-container">
-            <table class="table">
+                <table class="table">
                     <thead>
-                    <tr>
-                        <th>Proyecto</th>
-                        <th>Tipo de PAM</th>
-                        <th>ID de PAM</th>
-                        <!-- <th>Volumen (m³)</th> --> <!-- ELIMINAR -->
-                        <!-- <th>Área (m²)</th> --> <!-- ELIMINAR -->
-                        <!-- <th>Generación DAR</th> --> <!-- ELIMINAR -->
-                        <!-- <th>Cobertura</th> --> <!-- ELIMINAR -->
-                        <!--<th>Tipo de cierre</th> -->
-                        <!-- <th>Tipo de cobertura</th> --> <!-- ELIMINAR -->
-                        <!-- <th>Distancia (Km)</th> --> <!-- ELIMINAR -->
-                        <th class="highlight">Total Estimado</th>
-                        <th>Fecha</th>
-                        <th>Usuario</th>
-                        <th>Departamento</th>
-                        <th>Eliminar</th>
-                        <th>Detalle</th>
-                        <th>Descargar</th> 
-                    </tr>
-                </thead>
+                        <tr class="encabezados-ultimas">
+                            <th>Proyecto</th>
+                            <th>Tipo de PAM</th>
+                            <th>ID de PAM</th>
+                            <th class="highlight">Total Estimado</th>
+                            <th>Fecha</th>
+                            <th>Usuario</th>
+                            <th>Departamento</th>
+                            <th>Acción</th>
+
+                        </tr>
+                    </thead>
                     <tbody>
-                    <tr v-for="estimacion in paginatedEstimaciones" :key="estimacion.estimacionId">
-                        <td>{{ estimacion.proyecto.name }}</td>
-                        <td>{{ estimacion.tipoPam.name }}</td>
-                        <td>{{ estimacion.codPam }}</td>
-                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 1) || 'N/A' }}</td> --> <!-- ELIMINAR -->
-                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 2) || 'N/A' }}</td> --> <!-- ELIMINAR -->
-                        <!-- <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 3)) }}</td> --> <!-- ELIMINAR -->
-                        <!-- <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 4)) }}</td> --> <!-- ELIMINAR -->
-                        <!-- <td> <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td> --> <!-- ELIMINAR -->
-                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td> --> <!-- ELIMINAR -->
-                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td> --> <!-- ELIMINAR -->
-                        <td class="highlight">{{ formatNumero(estimacion.costoEstimado?.totalEstimado) || 'N/A' }}</td>
-                        <td>{{ formatFecha(estimacion.fechaPam) }}</td>
-                        <td>{{ estimacion.usuario.email }}</td>
-                        <td>{{ estimacion.usuario.registerArea }}</td>
-                        <td>
-                            <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button @click="verDetalle(estimacion)" class="btn-action">
+                        <tr v-for="estimacion in paginatedEstimaciones" :key="estimacion.estimacionId">
+                            <td>{{ estimacion.proyecto.name }}</td>
+                            <td>{{ estimacion.tipoPam.name }}</td>
+                            <td>{{ estimacion.codPam }}</td>
+                            <td class="highlight">{{ formatNumero(estimacion.costoEstimado?.totalEstimado) || 'N/A' }}</td>
+                            <td>{{ formatFecha(estimacion.fechaPam) }}</td>
+                            <td>{{ estimacion.usuario.email }}</td>
+                            <td>{{ estimacion.usuario.registerArea }}</td>
+
+                            <!-- Botón Eliminar -->
+                            <td class="acciones">
+                           
+
+                            <button @click="verDetalle(estimacion)" class="btn-actiondetalle">
                                 <i class="fas fa-eye"></i>
                             </button>
-                        </td>
-                        <td>
-                            <button @click="descargarEstimacionPDF(estimacion)" class="btn-action btn-download">
+                            <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-actiondelete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+
+                            <button @click="descargarEstimacionPDF(estimacion)" class="btn-actiondescargar btn-download">
                                 <i class="fas fa-file-pdf"></i>
                             </button>
                         </td>
 
-                    </tr>
-                </tbody>
+                        </tr>
+                    </tbody>
                 </table>
+
                 <div class="pagination">
                 <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
                 <span>Página {{ currentPage }} de {{ totalPages }}</span>
@@ -822,6 +809,8 @@
     }
     .highlight {
     white-space: nowrap;
+    
+    
     }
     .container {
         width: 100vw;
@@ -911,6 +900,36 @@
 
 
     .btn-action {
+        padding: 5px;
+        margin: 0 2px;
+        color: white;
+        background-color: #548f4e;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    .btn-actiondetalle {
+        padding: 5px;
+        margin: 0 2px;
+        color: white;
+        background-color: #62a1ff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    .btn-actiondelete {
+        padding: 5px;
+        margin: 0 2px;
+        color: white;
+        background-color: #f87c5d;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    .btn-actiondescargar {
         padding: 5px;
         margin: 0 2px;
         color: white;
@@ -1030,6 +1049,9 @@
 
     .highlight {
         background-color: #e0d495;
+        text-align: right !important;
+
+        
     }
 
     .btn-edit {
@@ -1155,5 +1177,15 @@
         color: white;
         font-size: 0.9rem;
     }
+    .encabezados-ultimas th {
+    text-align: center;
+}
+.acciones {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    gap: 5px; 
+}
+
     </style>
 `

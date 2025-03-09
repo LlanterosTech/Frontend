@@ -42,22 +42,22 @@
             </thead>
             <tbody>
               <tr v-for="estimacion in ultimasEstimaciones" :key="estimacion.estimacionId">
-                <td>{{ estimacion.proyecto.name }}</td>
-                <td>{{ estimacion.tipoPam.name }}</td>
+                <td class="text-center">{{ estimacion.proyecto.name }}</td>
+                <td class="text-center">{{ estimacion.tipoPam.name }}</td>
                 <td>{{ estimacion.codPam }}</td>
-                <td>{{ formatFecha(estimacion.fechaPam) }}</td>
+                <td class="text-center">{{formatFecha(estimacion.fechaPam) }}</td>
 
                 <td>{{ estimacion.usuario.email }}</td>
                 <td>{{ estimacion.usuario.registerArea }}</td>
                 <td class="text-right">
                   <p class="estimado-ultimas">{{ formatNumero(estimacion.costoEstimado.totalEstimado) }}</p>
                 </td>
-                <td>
-                  <button @click="verDetalle(estimacion)" class="btn-action">
+                <td class="acciones">
+                  <button @click="verDetalle(estimacion)" class="btn-action-ver">
                     <i class="fas fa-eye"></i>
                   </button>
                   
-                  <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
+                  <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action-del">
                     <i class="fas fa-trash"></i>
                   </button>
                   <button @click="descargarPDF(estimacion)" class="btn-action btn-pdf">
@@ -369,6 +369,26 @@ body {
   cursor: pointer;
   transition: transform 0.3s;
 }
+.btn-action-ver {
+  padding: 5px;
+  margin: 0 2px;
+  color: white;
+  background-color: #62a1ff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.btn-action-del {
+  padding: 5px;
+  margin: 0 2px;
+  color: white;
+  background-color: #f87c5d;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
 .detalle-overlay {
   position: fixed;
   top: 0;
@@ -518,8 +538,16 @@ body {
 .estimado-ultimas {
     text-align: right;
 }
-.encabezados-ultimas {
+.encabezados-ultimas th  {
   text-align: center;
-
+}
+.text-center {
+    text-align: center !important;
+}
+.acciones {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    gap: 5px; 
 }
 </style>
