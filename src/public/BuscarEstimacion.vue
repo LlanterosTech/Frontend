@@ -1048,7 +1048,6 @@
     }
 
     .highlight {
-        background-color: #e0d495;
         text-align: right !important;
 
         
