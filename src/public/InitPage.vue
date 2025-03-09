@@ -167,7 +167,6 @@ export default {
       doc.setFontSize(10);
       doc.text("Este documento es un resumen de la estimación de costos.", 15, doc.internal.pageSize.getHeight() - 20);
 
-      // 🔹 Genera un URL temporal del PDF y ábrelo en una nueva pestaña
       const pdfUrl = doc.output("bloburl");
       window.open(pdfUrl, "_blank");
     },
@@ -275,51 +274,6 @@ body {
   position: relative;
 }
 
-.design {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 0; 
-}
-
-.plant {
-  position: absolute;
-  width: 15%;
-  height: auto;
-  opacity: 0.9;
-
-}
-
-.plant-1 {
-  bottom: -10px;
-  left: -20px;
-}
-
-.plant-2 {
-  top: -50px;
-  left: -60px;
-}
-
-.plant-3 {
-  top: -50px;
-  left: 180px;
-}
-
-.plant-4 {
-  bottom: -150px;
-  left: 200px;
-}
-
-.plant-5 {
-  top: 30px;
-  left: 250px;
-}
-
-.plant-6 {
-  bottom: 30px;
-  left: 80px;
-}
 
 .fondo {
   background: url("@/assets/senora-carrusel-ai-brush-removebg-vm9tw8af.png") no-repeat center center fixed;

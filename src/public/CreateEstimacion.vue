@@ -1,13 +1,5 @@
 <template>
-  <div class="container">
-    <div class="design">
-      <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
-      <img src="@/assets/Group_2.png" class="plant plant-2" alt="Plant 2">
-      <img src="@/assets/Group_2.png" class="plant plant-3" alt="Plant 3">
-      <img src="@/assets/Group_2.png" class="plant plant-4" alt="Plant 4">
-      <img src="@/assets/Group_2.png" class="plant plant-5" alt="Plant 5">
-      <img src="@/assets/Group_2.png" class="plant plant-6" alt="Plant 6">
-    </div>
+  <div class="container fondo">
     <div class="estimacion-box" :class="{ 'blur-background': mostrarDetalle }">
       <button @click="goBack" class="btn-back">
         <i class="fas fa-arrow-left"></i> 
@@ -51,7 +43,7 @@
             </div>
 
             <div class="modal-footer">
-              <button class="btn-secondary" @click="guardarNuevoProyecto">Calcular</button>
+              <button class="btn-secondary" @click="guardarNuevoProyecto">Guardar</button>
               <button class="btn-secondary" @click="cerrarModalNuevoProyecto">Cancelar</button>
             </div>
           </div>
@@ -303,6 +295,7 @@ export default {
 
         this.estimacion.proyectoId = nuevoProyecto.proyectoId;
 
+        this.cargarTiposPAM();
         this.cerrarModalNuevoProyecto();
       } catch (error) {
         alert("Error al crear el proyecto.");
@@ -495,6 +488,13 @@ body {
   position: relative;
 }
 
+.fondo {
+  background: url("@/assets/senora-carrusel-ai-brush-removebg-vm9tw8af.png") no-repeat center center fixed;
+  background-size: 100%; /* Reduce el tamaño al 80% del contenedor */
+  background-position: bottom center; /* Ajusta la posición para que no se pierda la alineación */
+  background-attachment: fixed;
+}
+
 .blur-background {
   filter: blur(5px);
 }
@@ -650,43 +650,6 @@ body {
 
 .btn-close:hover {
   transform: scale(1.1);
-}
-
-.plant {
-  position: absolute;
-  width: 420px;
-  height: auto;
-  opacity: 0.9;
-}
-
-.plant-1 {
-  bottom: -10px;
-  left: -20px;
-}
-
-.plant-2 {
-  top: -50px;
-  left: -60px;
-}
-
-.plant-3 {
-  top: -50px;
-  left: 180px;
-}
-
-.plant-4 {
-  bottom: -150px;
-  left: 200px;
-}
-
-.plant-5 {
-  top: 30px;
-  left: 250px;
-}
-
-.plant-6 {
-  bottom: 30px;
-  left: 80px;
 }
 
 .estimacion-box {

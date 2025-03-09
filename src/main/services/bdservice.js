@@ -56,17 +56,17 @@ const bdService = {
     },
     async getProyectos() {
         return api.get(`proyecto`)
-            .then(response => response.data)
+            .then(response => response.data.filter(proyecto => proyecto.estado === true))
             .catch(error => {
-                console.error("Error al obtener los atributos del tipo PAM:", error);
+                console.error("Error al obtener los proyectos:", error);
                 throw error;
             });
     },
     async getTiposPAM() {
         return api.get(`tipo-pam/tipopams`)
-            .then(response => response.data)
+            .then(response => response.data.filter(tipoPam => tipoPam.status === true))
             .catch(error => {
-                console.error("Error al obtener los atributos del tipo PAM:", error);
+                console.error("Error al obtener los tipos PAM:", error);
                 throw error;
             });
     },
