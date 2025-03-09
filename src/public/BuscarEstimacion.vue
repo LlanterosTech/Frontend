@@ -40,57 +40,61 @@
                 <input type="text" v-model="idPam" placeholder="Ingrese el Identificador PAM" />
             </div>
             </div>
-
             <div class="table-container">
             <table class="table">
-                <thead>
-                <tr>
-                    <th>Proyecto</th>
-                    <th>Tipo de PAM</th>
-                    <th>ID de PAM</th>
-                    <th>Volumen (m³)</th>
-                    <th>Área (m²)</th>
-                    <th>Generación DAR</th>
-                    <th>Cobertura</th>
-                    <th>Tipo de cierre</th>
-                    <th>Tipo de cobertura</th>
-                    <th>Distancia (Km)</th>
-                    <th class="highlight">Total Estimado</th>
-                    <th>Fecha</th>
-                    <th>Usuario</th>
-                    <th>Departamento</th>
-                    <th>Eliminar</th>
-                    <th>Detalle</th>
-                </tr>
+                    <thead>
+                    <tr>
+                        <th>Proyecto</th>
+                        <th>Tipo de PAM</th>
+                        <th>ID de PAM</th>
+                        <!-- <th>Volumen (m³)</th> --> <!-- ELIMINAR -->
+                        <!-- <th>Área (m²)</th> --> <!-- ELIMINAR -->
+                        <!-- <th>Generación DAR</th> --> <!-- ELIMINAR -->
+                        <!-- <th>Cobertura</th> --> <!-- ELIMINAR -->
+                        <th>Tipo de cierre</th>
+                        <!-- <th>Tipo de cobertura</th> --> <!-- ELIMINAR -->
+                        <!-- <th>Distancia (Km)</th> --> <!-- ELIMINAR -->
+                        <th class="highlight">Total Estimado</th>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Departamento</th>
+                        <th>Eliminar</th>
+                        <th>Detalle</th>
+                        <th>Descargar</th> 
+                    </tr>
                 </thead>
-                <tbody>
-                <tr v-for="estimacion in paginatedEstimaciones" :key="estimacion.estimacionId">
-                    <td>{{ estimacion.proyecto.name }}</td>
-                    <td>{{ estimacion.tipoPam.name }}</td>
-                    <td>{{ estimacion.codPam }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 1) || 'N/A' }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 2) || 'N/A' }}</td>
-                    <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 3)) }}</td>
-                    <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 4)) }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td>
-                    <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td>
-                    <td class="highlight">{{formatNumero( estimacion.costoEstimado?.totalEstimado) || 'N/A' }}
-                    </td>                <td>{{ formatFecha(estimacion.fechaPam) }}</td>
-                    <td>{{ estimacion.usuario.email }}</td>
-                    <td>{{ estimacion.usuario.registerArea }}</td>
-                   
-                        <td> 
-                        <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
-                        <i class="fas fa-trash"></i>
-                        </button>
+                    <tbody>
+                    <tr v-for="estimacion in paginatedEstimaciones" :key="estimacion.estimacionId">
+                        <td>{{ estimacion.proyecto.name }}</td>
+                        <td>{{ estimacion.tipoPam.name }}</td>
+                        <td>{{ estimacion.codPam }}</td>
+                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 1) || 'N/A' }}</td> --> <!-- ELIMINAR -->
+                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 2) || 'N/A' }}</td> --> <!-- ELIMINAR -->
+                        <!-- <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 3)) }}</td> --> <!-- ELIMINAR -->
+                        <!-- <td>{{ convertirBooleano(obtenerAtributo(estimacion.valores, 4)) }}</td> --> <!-- ELIMINAR -->
+                        <td>{{ obtenerAtributo(estimacion.valores, 5) || 'N/A' }}</td>
+                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 6) || 'N/A' }}</td> --> <!-- ELIMINAR -->
+                        <!-- <td>{{ obtenerAtributo(estimacion.valores, 7) || 'N/A' }}</td> --> <!-- ELIMINAR -->
+                        <td class="highlight">{{ formatNumero(estimacion.costoEstimado?.totalEstimado) || 'N/A' }}</td>
+                        <td>{{ formatFecha(estimacion.fechaPam) }}</td>
+                        <td>{{ estimacion.usuario.email }}</td>
+                        <td>{{ estimacion.usuario.registerArea }}</td>
+                        <td>
+                            <button @click="eliminarEstimacion(estimacion.estimacionId)" class="btn-action">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                         <td>
-                        <button @click="verDetalle(estimacion)" class="btn-action">
-                        <i class="fas fa-eye"></i>
-                        </button>
+                            <button @click="verDetalle(estimacion)" class="btn-action">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </td>
-                        
+                        <td>
+                            <button @click="descargarEstimacionPDF(estimacion)" class="btn-action btn-download">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                        </td>
+
                     </tr>
                 </tbody>
                 </table>
@@ -173,11 +177,52 @@
         tipoPam: 'buscarEstimacion',
         idPam: 'buscarEstimacion'
     },
+    
     async mounted() {
         await this.getEstimaciones();
         await this.getProyectosYTipos();
     },
     methods: {
+
+        descargarEstimacionPDF(estimacion) {
+        const doc = new jsPDF("p", "mm", "a4");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+
+        doc.setFontSize(14);
+        doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, 30);
+        doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, 40);
+        doc.text(`Código PAM: ${estimacion.codPam}`, 15, 50);
+        doc.text(`Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`, 15, 60);
+
+        const tableColumns = ["Descripción", "Valor"];
+        const tableRows = [
+            ["Tipo de Cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+            ["Usuario", estimacion.usuario.email || "Desconocido"],
+            ["Departamento", estimacion.usuario.registerArea || "No definido"],
+            ["Fecha", this.formatFecha(estimacion.fechaPam)],
+        ];
+
+        doc.autoTable({
+            startY: 70,
+            head: [tableColumns],
+            body: tableRows,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [39, 174, 96] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 }
+        });
+
+        
+        const pdfUrl = doc.output('bloburl');
+        window.open(pdfUrl, '_blank');
+    },
+
+
+    
         formatNumero(valor) {
     if (valor == null || isNaN(valor)) return 'S/ 0';
     const roundedValue = Math.round(valor);
@@ -398,16 +443,16 @@
       doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", doc.internal.pageSize.getWidth() / 2,
         doc.lastAutoTable.finalY + 40, { align: 'center' });
 
-      const pageCount = doc.internal.getNumberOfPages();
-      doc.setFontSize(8);
-      doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
     }
 
     const pdfUrl = doc.output('bloburl');
     window.open(pdfUrl, '_blank');
-  },
+},
 
-  downloadResumenEjecutivo() {
+    downloadResumenEjecutivo() {
     const doc = new jsPDF("p", "mm", "a4");
 
     doc.setFont("helvetica", "bold");
@@ -502,7 +547,8 @@
 
     const pdfUrl = doc.output('bloburl');
     window.open(pdfUrl, '_blank');
-  },
+},
+
 
         async getEstimaciones() {
         try {
