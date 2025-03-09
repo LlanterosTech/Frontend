@@ -27,9 +27,9 @@ export default {
   top: 20px;
   right: 20px;
   padding: 10px;
-  color: white;
+  color: #fa0202;
   font-size: 1.5rem;
-  background: #fa0202;
+  background: #fff6f6;
   border: none;
   border-radius: 50%;
   cursor: pointer;

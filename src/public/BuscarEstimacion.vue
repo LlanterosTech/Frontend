@@ -1,13 +1,6 @@
 `<template>
-        <div class="container">
-        <div class="design">
-            <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
-            <img src="@/assets/Group_2.png" class="plant plant-2" alt="Plant 2">
-            <img src="@/assets/Group_2.png" class="plant plant-3" alt="Plant 3">
-            <img src="@/assets/Group_2.png" class="plant plant-4" alt="Plant 4">
-            <img src="@/assets/Group_2.png" class="plant plant-5" alt="Plant 5">
-            <img src="@/assets/Group_2.png" class="plant plant-6" alt="Plant 6">
-        </div>
+        <div class="container fondo">
+       
             <div class="init-box">
             <div class="top-buttons">
                 <button @click="goBack" class="btn-back">
@@ -650,7 +643,12 @@
     gap: 10px; 
     margin-top: 10px; 
 }
-
+.fondo {
+  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
 .btn-download-pdf,
 .btn-download-resumen {
     padding: 10px 20px;
@@ -757,17 +755,7 @@
     grid-template-columns: 1fr; 
   }
 }
-    .plant {
-        position: absolute;
-        width: 420px;
-        height: auto;
-        opacity: 0.9;
-    }
-
-    .plant-1 {
-        bottom: -10px;
-        left: -20px;
-    }
+   
 
     .btn-back {
 
@@ -794,30 +782,7 @@
     .btn-action:hover {
         transform: scale(1.1);
     }
-    .plant-2 {
-        top: -50px;
-        left: -60px;
-    }
-
-    .plant-3 {
-        top: -50px;
-        left: 180px;
-    }
-
-    .plant-4 {
-        bottom: -150px;
-        left: 200px;
-    }
-
-    .plant-5 {
-        top: 30px;
-        left: 250px;
-    }
-
-    .plant-6 {
-        bottom: 30px;
-        left: 80px;
-    }
+ 
 
     .init-box {
         background: rgba(255, 255, 255, 0.9);

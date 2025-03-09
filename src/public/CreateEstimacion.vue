@@ -1,4 +1,6 @@
 <template>
+  <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
+
   <div class="container fondo">
     <div class="estimacion-box" :class="{ 'blur-background': mostrarDetalle }">
       <button @click="goBack" class="btn-back">
@@ -10,19 +12,21 @@
             <div class="contenedor-proyecto">
               <label class="texto">Proyecto</label>
               <div class="proyecto-input">
-                <select v-model="estimacion.proyectoId" @change="cargarTiposPAM" :disabled="proyectoBloqueado" 
-                  class="w-full p-2 border rounded input-standard">
-                  <option v-for="proyecto in proyectos" :key="proyecto.proyectoId" :value="proyecto.proyectoId">
-                    {{ proyecto.name }}
-                  </option>
-                </select>
+                <div class="custom-dropdown">
+  <button @click="toggleDropdown" class="dropdown-button">
+    {{ selectedProjectName || "Seleccione un Proyecto" }}
+  </button>
+  <div v-if="dropdownOpen" class="dropdown-list">
+    <div v-for="proyecto in proyectos" :key="proyecto.proyectoId"
+      @click="selectProject(proyecto)" class="dropdown-item">
+      {{ proyecto.name }}
+    </div>
+  </div>
+</div>
 
-                <div class="botones-proyecto">
-                  <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy"></button>
-                  <button @click="bloquearProyecto" class="Fijar-desfijar">
-                    {{ proyectoBloqueado ? 'Desfijar' : 'Fijar' }}
-                  </button>
-                </div>
+              <div class="botones-proyecto">
+                <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy"></button>
+              </div>
               </div>
             </div>
 
@@ -67,15 +71,17 @@
           </select>
         </div>
         
-        <button v-if="atributos.length" @click="abrirModalAtributos" class="btn-secondary">
-          {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
-        </button>
+       
       </div>
       <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
           Costo Estimado:  {{ formatNumero(costoEstimado.totalEstimado) }}
           <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
         </p>
         <div class="flex justify-between mt-4">
+         
+          <button v-if="atributos.length" @click="abrirModalAtributos" class="btn-primary">
+          {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
+        </button>
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
             Calcular
           </button>
@@ -113,11 +119,7 @@
 
       </div>
     </div>
-    <transition name="fade">
-      <div v-if="error" class="alert-container">
-        <p class="error-message">{{ error }}</p>
-      </div>
-    </transition>
+
 
     <div v-if="mostrarModalCoberturas" class="modal-overlay">
       <div class="modal-box">
@@ -188,13 +190,16 @@
 <script>
 import bdService from "@/main/services/bdservice";
 import { Eye } from 'lucide-vue-next';
-
+import AlertComponent from "@/components/AlertComponent.vue";
 export default {
   components: {
     Eye,
+    AlertComponent,
   },
   data() {
     return {
+      alertMessage: null,
+      alertType: "error",
       proyectos: [],
       tiposPAM: [],
       atributos: [],
@@ -238,6 +243,8 @@ export default {
       detalleEstimacion: {},
       estimacionGuardada: false, 
       atributosIngresados: false, 
+      dropdownOpen: false,
+      selectedProjectName: null,
     };
   },
   async created() {
@@ -247,13 +254,32 @@ export default {
     async goBack() {
       this.$router.go(-1);
     },
-    async cargarProyectos() {
-      this.proyectos = await bdService.getProyectos();
-    },
+    toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  },
+  selectProject(proyecto) {
+    this.estimacion.proyectoId = proyecto.proyectoId;
+    this.selectedProjectName = proyecto.name;
+    this.cargarTiposPAM();
+    this.dropdownOpen = false; // Cerrar el dropdown
+  },
     formatNumero(valor) {
       if (valor == null || isNaN(valor)) return 'S/ 0';
       const roundedValue = Math.round(valor);
       return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
+    },
+    async cargarProyectos() {
+      this.proyectos = await bdService.getProyectos();
+    },
+    showAlert(message, type = "error") {
+      this.alertMessage = message;
+      this.alertType = type;
+      setTimeout(() => {
+        this.alertMessage = null;
+      }, 4000);
+    },
+    clearAlert() {
+      this.alertMessage = null;
     },
     async cargarTiposPAM() {
       this.tiposPAM = await bdService.getTiposPAM();
@@ -284,7 +310,7 @@ export default {
     },
     async guardarNuevoProyecto() {
       if (!this.nuevoProyecto.nombre.trim()) {
-        alert("El nombre del proyecto no puede estar vacío.");
+        this.showAlert("El nombre del proyecto no puede estar vacío.", "error");
         return;
       }
 
@@ -298,7 +324,7 @@ export default {
         this.cargarTiposPAM();
         this.cerrarModalNuevoProyecto();
       } catch (error) {
-        alert("Error al crear el proyecto.");
+        this.showAlert("Error al crear proyecto. Puede que el proyecto ya exista.", "error");
       }
     },
     async cargarAtributos() {
@@ -337,9 +363,25 @@ export default {
       this.modalAtributos = false;
     },
     guardarAtributos() {
-      this.atributosIngresados = true;
-      this.cerrarModalAtributos();
-    },
+    this.atributosIngresados = true;
+    let valid = true;
+
+    this.atributos.forEach(atributo => {
+        const valor = this.valoresAtributos[atributo.atributoPamId];
+        if (atributo.tipoDato !== 'bool' && !valor) {
+            valid = false;
+        }
+        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
+    });
+
+    if (!valid) {
+        this.showAlert("Todos los atributos son obligatorios.", "error");
+        return;
+    }
+
+    this.showAlert("Atributos guardados correctamente.", "success");
+    this.cerrarModalAtributos();
+},
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
     },
@@ -402,6 +444,7 @@ export default {
         this.clearErrorAfterTimeout();
       }
     },
+
     clearErrorAfterTimeout() {
       setTimeout(() => {
         this.error = null;
@@ -438,7 +481,12 @@ export default {
 
 }
 
-
+.fondo {
+  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
 
 .alert-container {
   position: absolute;
@@ -456,9 +504,52 @@ export default {
   transition: opacity 0.5s;
 }
 
+.dropdown-scroll {
+    max-height: 150px; /* Ajusta según el tamaño de las opciones */
+    overflow-y: auto; /* Habilita el scroll vertical */
+}
+
 .fade-enter, .fade-leave-to  {
   opacity: 0;
 }
+
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-button {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 150px; /* 👈 Limita a 4 opciones */
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 10;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f0f0f0;
+}
+
 
 .error-message {
   color: white;
@@ -488,12 +579,6 @@ body {
   position: relative;
 }
 
-.fondo {
-  background: url("@/assets/senora-carrusel-ai-brush-removebg-vm9tw8af.png") no-repeat center center fixed;
-  background-size: 100%; /* Reduce el tamaño al 80% del contenedor */
-  background-position: bottom center; /* Ajusta la posición para que no se pierda la alineación */
-  background-attachment: fixed;
-}
 
 .blur-background {
   filter: blur(5px);
@@ -522,6 +607,13 @@ body {
   cursor: pointer;
   transition: transform 0.3s;
   margin-left: 10px;
+}
+
+.fondo {
+  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .btn-secondary {

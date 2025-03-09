@@ -5,6 +5,7 @@ import CreateEstimacion from "@/public/CreateEstimacion.vue";
 import InitPage from "@/public/InitPage.vue";
 import MainContainer from '@/components/main-container.vue';
 import BuscarEstimacion from "@/public/BuscarEstimacion.vue";
+import HistoralEstimacion from '@/public/HistoralEstimacion.vue';
 
 const routes = [
     {
@@ -41,7 +42,13 @@ const routes = [
         path: '/buscar-estimacion',
         name: 'BuscarEstimacion',
         component: BuscarEstimacion,
-        meta: { title: 'Buscar Estimación' }
+        meta: { title: 'Buscar Estimación', requiresAuth: true }
+    },
+    {
+        path: '/historial-estimaciones',
+        name: 'HistorialEstimaciones',
+        component: HistoralEstimacion,
+        meta: { title: 'Historial Estimaciones', requiresAuth: true }
     },
     {
         path: '/:catchAll(.*)',
