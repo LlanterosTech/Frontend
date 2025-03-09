@@ -76,7 +76,7 @@
             <button @click="toggleDetalle" class="btn-secondary btn-close">
               X
             </button>
-            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM:  - {{ detalleEstimacion.codPam }}
+            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM: {{ detalleEstimacion.tipoPam.name }} - {{ detalleEstimacion.codPam }}
             </h2>
             <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
                 <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>

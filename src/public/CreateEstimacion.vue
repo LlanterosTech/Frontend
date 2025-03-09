@@ -58,9 +58,9 @@
         </div>
 
         <div class="mb-4">
-          <label class="texto">ID de PAM</label>
+          <label class="texto">Identificador PAM</label>
           <div class="flex items-center">
-            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del PAM" />
+            <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del Pasivo Ambiental Minero" />
             <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2s">
             <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>                  </div>
         </div>
@@ -536,8 +536,8 @@ body {
   margin-top: 10px;
 }
 .btn-nuevoproy {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   background: url('@/assets/addproy.png') no-repeat center center;
   background-size: contain;
   border: none;
@@ -1066,7 +1066,7 @@ body {
   justify-content: space-between;
   gap: 20px;
   width: 100%;
-  border-bottom: 2px solid rgb(167, 167, 167); /* Línea negra de separación */
+  border-bottom: 2px solid rgb(118, 177, 126); /* Línea negra de separación */
   padding-bottom: 10px; /* Espaciado para evitar que quede pegado */
   margin-bottom: 15px; /* Espaciado con el siguiente bloque */
 }
