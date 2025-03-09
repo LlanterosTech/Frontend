@@ -18,8 +18,6 @@
             🔍 Buscar Estimaciones
           </button>
         </div>
-
-        <!-- Tabla de Últimas Estimaciones -->
         <div class="table-container">
           <h2 class="table-title">
             Últimas Estimaciones
@@ -31,7 +29,7 @@
           
           <table class="table">
             <thead>
-              <tr>
+              <tr class="encabezados-ultimas">
                 <th>Proyecto</th>
                 <th>Tipo de PAM</th>
                 <th>ID de PAM</th>
@@ -51,9 +49,8 @@
 
                 <td>{{ estimacion.usuario.email }}</td>
                 <td>{{ estimacion.usuario.registerArea }}</td>
-                <td>
-                  <p class="font-bold text-green-600"> {{ formatNumero(estimacion.costoEstimado.totalEstimado)}}</p>
-                 
+                <td class="text-right">
+                  <p class="estimado-ultimas">{{ formatNumero(estimacion.costoEstimado.totalEstimado) }}</p>
                 </td>
                 <td>
                   <button @click="verDetalle(estimacion)" class="btn-action">
@@ -482,6 +479,7 @@ body {
 .table {
   width: 100%;
   border-collapse: collapse;
+  text-align: center;
 }
 
 .table th, .table td {
@@ -516,5 +514,12 @@ body {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 1rem;
+}
+.estimado-ultimas {
+    text-align: right;
+}
+.encabezados-ultimas {
+  text-align: center;
+
 }
 </style>
