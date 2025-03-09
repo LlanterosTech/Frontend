@@ -1,13 +1,5 @@
 <template>
-  <div class="container">
-    <div class="design">
-      <img src="@/assets/Group_2.png" class="plant plant-1" alt="Plant 1">
-      <img src="@/assets/Group_2.png" class="plant plant-2" alt="Plant 2">
-      <img src="@/assets/Group_2.png" class="plant plant-3" alt="Plant 3">
-      <img src="@/assets/Group_2.png" class="plant plant-4" alt="Plant 4">
-      <img src="@/assets/Group_2.png" class="plant plant-5" alt="Plant 5">
-      <img src="@/assets/Group_2.png" class="plant plant-6" alt="Plant 6">
-    </div>
+  <div class="container fondo">
     <div class="init-box">
       <div class="init">
         <h1 class="title">Gestión de Estimaciones</h1>
@@ -81,7 +73,7 @@
             <button @click="toggleDetalle" class="btn-secondary btn-close">
               X
             </button>
-            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM: {{ detalleEstimacion.tipoPam.name }} - {{ detalleEstimacion.codPam }}
+            <h2 class="text-lg-font-semibold-mb-4">Costo Estimado del PAM:  - {{ detalleEstimacion.codPam }}
             </h2>
             <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
                 <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(detalleCosto.costoDirecto) }}</p>
@@ -241,9 +233,10 @@ body {
 
 .plant {
   position: absolute;
-  width: 420px;
+  width: 15%;
   height: auto;
   opacity: 0.9;
+
 }
 
 .plant-1 {
@@ -275,6 +268,15 @@ body {
   bottom: 30px;
   left: 80px;
 }
+
+.fondo {
+  background: url("@/assets/senora-carrusel-ai-brush-removebg-vm9tw8af.png") no-repeat center center fixed;
+  background-size: 100%; /* Reduce el tamaño al 80% del contenedor */
+  background-position: bottom center; /* Ajusta la posición para que no se pierda la alineación */
+  background-attachment: fixed;
+}
+
+
 
 .init-box {
   background: rgba(255, 255, 255, 0.9);
