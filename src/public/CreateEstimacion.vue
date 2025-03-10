@@ -155,7 +155,7 @@
 
         <template v-else-if="atributo.nombre === 'TipoCobertura'">
           <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
-            Seleccionar Tipo de Cobertura
+            Seleccionar
           </button>
           <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
         </template>
@@ -958,6 +958,7 @@ body {
   width: 90%;
   text-align: center;
   position: relative;
+ 
 }
 .input-standard {
   height: 40px;
@@ -1130,6 +1131,7 @@ body {
   display: flex;
   flex-direction: column;
   width: 50%;
+  font-family: sans-serif;
 }
 .fecha-container {
   display: flex;
@@ -1155,6 +1157,11 @@ body {
   background-color: #ffffff;
   text-align: center;
   
+}
+.input-standard{
+  font-size: 16px;
+  font-family: poppins, sans-serif;
+
 }
 
 </style>

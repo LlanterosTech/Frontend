@@ -110,6 +110,91 @@ body, html {
   margin-top: 30px;
 }
 
+.btn-primary:hover {
+  transform: scale(1.1);
+}
+
+.btn-secondary {
+  padding: 14px 40px;
+  color: white;
+  font-size: 1.4rem;
+  background: #74c905;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.btn-secondary:hover {
+  transform: scale(1.1);
+}
+
+.btn-orden {
+  padding: 0;
+  color: #4fd87d; 
+  font-size: 1.4rem;
+  border: none;
+  background: none; 
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.btn-orden:hover {
+  transform: scale(1.1);
+}
+
+.btn-action {
+  padding: 5px;
+  margin: 0 2px;
+  color: white;
+  background-color: #548f4e;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.btn-action-ver {
+  padding: 5px;
+  margin: 0 2px;
+  color: white;
+  background-color: #62a1ff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.btn-action-del {
+  padding: 5px;
+  margin: 0 2px;
+  color: white;
+  background-color: #f87c5d;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.detalle-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.detalle-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+
 .option {
   background: white;
   padding: 20px;
@@ -146,5 +231,20 @@ body, html {
   font-size: 0.9rem;
   color: white;
   text-align: center;
+}
+.estimado-ultimas {
+    text-align: right;
+}
+.encabezados-ultimas th  {
+  text-align: center;
+}
+.text-center {
+    text-align: center !important;
+}
+.acciones {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    gap: 5px; 
 }
 </style>
