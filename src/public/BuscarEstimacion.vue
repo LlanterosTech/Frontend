@@ -7,7 +7,7 @@
                     <i class="fas fa-arrow-left"></i>
                 </button>
             </div>
-                <div class="download-buttons">
+                <div v-if="selectedProyectos.length > 0 || selectedTiposPAM.length > 0" class="download-buttons">
             <button @click="downloadFilteredPdf" class="btn-download-pdf">
                 <i class="fas fa-file-pdf"></i> Descargar PDF
             </button>
@@ -228,7 +228,7 @@
         downloadFilteredPdf() {
     const doc = new jsPDF("p", "mm", "a4");
 
-    doc.setFont("helvetica", "bold");
+    doc.setFont("helvetica");
     doc.setFontSize(20);
     doc.text("Estimación de Costos por Proyecto y PAM", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
@@ -243,7 +243,7 @@
     });
 
     doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
+    doc.setFont("helvetica");
     doc.text("Costo Total por Proyecto", 15, 30);
     doc.setLineWidth(0.2);
     doc.line(15, 32, 80, 32);  // Subrayado
@@ -267,7 +267,7 @@
         }
 
         doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
+        doc.setFont("helvetica");
         doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY);
         doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 8);
         doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 16);
@@ -352,24 +352,42 @@
         doc.setTextColor(0, 0, 0);
         doc.text(
             `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
-            doc.internal.pageSize.getWidth() - 15,
+            doc.internal.pageSize.getWidth() - 30,
             doc.lastAutoTable.finalY + 15,
             { align: 'right' }
+            
         );
 
-        doc.setFontSize(8);
-        doc.text(
-            "La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)",
-            doc.internal.pageSize.getWidth() / 2,
-            doc.internal.pageSize.getHeight() - 20,
-            { align: 'center' }
-        );
+       
 
-        const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+
+
     });
+    const pageCount = doc.internal.getNumberOfPages();
+for (let i = 1; i <= pageCount; i++) {  
+    doc.setPage(i);
 
+    // Espacio mínimo garantizado antes del pie de página
+    let footerY = doc.internal.pageSize.getHeight() - 15; // Ajustar margen inferior
+    
+   
+
+    // Texto de referencia alineado al centro
+    doc.setFontSize(8);
+    doc.text(
+        "La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)",
+        doc.internal.pageSize.getWidth() / 2,
+        footerY,
+        { align: 'center' }
+    );
+
+    // Numeración alineada a la derecha
+    doc.text(
+        `Página ${i} de ${pageCount}`,
+        doc.internal.pageSize.getWidth() - 40,  // Más separado del borde derecho
+        footerY + 5 // Ajustado para no tocar la línea
+    );
+}
     const pdfUrl = doc.output('bloburl');
     window.open(pdfUrl, '_blank');
 },
@@ -450,12 +468,20 @@ downloadResumenEjecutivo() {
     }
 
     // Agregar número de página
+    doc.setFontSize(8);
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFontSize(8);
-        doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+        doc.text(
+            "La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)",
+            doc.internal.pageSize.getWidth() / 2,
+            doc.internal.pageSize.getHeight() - 20,
+            { align: 'center' }
+        );
+        doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.getWidth() - 30, doc.internal.pageSize.getHeight() - 10);
     }
+
+       
 
     // Mostrar el PDF generado
     const pdfUrl = doc.output('bloburl');
@@ -620,6 +646,8 @@ downloadResumenEjecutivo() {
     gap: 10px; 
     margin-top: 10px; 
 }
+
+
 .fondo {
   background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
   background-size: cover;
@@ -636,6 +664,37 @@ downloadResumenEjecutivo() {
     display: flex;
     align-items: center;
 }
+
+/* Estilo del placeholder (texto dentro del input) */
+::v-deep .multiselect__placeholder {
+    font-size: 1    4px;
+    color: #666;
+}
+
+/* Estilo de los elementos seleccionados */
+/* Cambiar el tamaño del texto en las opciones de la lista desplegable */
+::v-deep .multiselect__option {
+    font-size: 13px !important; /* Ajusta el tamaño según tu preferencia */
+}
+
+/* Cambiar el tamaño del texto en la opción seleccionada (con fondo verde) */
+::v-deep .multiselect__option--highlight {
+    font-size: 13px !important; /* Ajusta el tamaño según tu preferencia */
+}
+
+/* Cambiar el tamaño del texto de la sugerencia al costado ("Press enter to select") */
+::v-deep .multiselect__option span {
+    font-size: 13px !important; /* Ajusta el tamaño según tu preferencia */
+}
+
+/* Oculta solo el texto de sugerencia "Press enter to select" */
+::v-deep .multiselect__option::after {
+    content: "" !important; /* Elimina el texto adicional */
+    display: none !important; /* Oculta el pseudo-elemento */
+}
+
+
+
 
 .btn-download-pdf {
     background-color: rgb(24, 137, 41);
@@ -968,4 +1027,3 @@ downloadResumenEjecutivo() {
         font-size: 0.9rem;
     }
     </style>
-`
