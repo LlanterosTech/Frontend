@@ -1,4 +1,4 @@
-`<template>
+<template>
         <div class="container fondo">
        
             <div class="init-box">
@@ -53,7 +53,6 @@
             <input type="text" v-model="idPam" placeholder="Ingrese el Identificador PAM" />
           </div>
         </div>
-
 
             <div class="table-container">
                 <table class="table">
@@ -165,6 +164,7 @@
         currentPage: 1,
         itemsPerPage: 10,
         detalleEstimacion: {}, 
+        error: null,
         };
     },
     components: {
@@ -214,62 +214,46 @@
         descargarEstimacionPDF(estimacion) {
     const doc = new jsPDF("p", "mm", "a4");
 
-    doc.setFont("helvetica");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
     doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
-    let proyectosCostos = {}; 
+    // **Encabezado con Proyecto, Tipo de PAM e ID de PAM**
+    doc.setFontSize(14);
+    doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, 30);
+    doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, 40);
+    doc.text(`ID de PAM: ${estimacion.codPam}`, 15, 50);
 
-    const estimacionesOrdenadas = [...this.paginatedEstimaciones].sort((a, b) => a.codPam - b.codPam);
+    // **Primera tabla: Información del usuario**
+    const tableColumnsUsuario = ["Descripción", "Valor"];
+    const tableRowsUsuario = [
+        ["Usuario", estimacion.usuario.email || "Desconocido"],
+        ["Departamento", estimacion.usuario.registerArea || "No definido"],
+        ["Fecha", this.formatFecha(estimacion.fechaPam) || "N/A"]
+    ];
 
-    estimacionesOrdenadas.forEach((estimacion) => {
-        if (!proyectosCostos[estimacion.proyecto.name]) {
-            proyectosCostos[estimacion.proyecto.name] = 0;
-        }
-        proyectosCostos[estimacion.proyecto.name] += Number(estimacion.costoEstimado?.totalEstimado) || 0;
+    doc.autoTable({
+        startY: 60,
+        head: [tableColumnsUsuario],
+        body: tableRowsUsuario,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39, 174, 96] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
     });
 
-    doc.setFontSize(12);
-    doc.setFont("helvetica");
-    doc.text("Costo Total por Proyecto", 15, 30);
-    doc.setLineWidth(0.2);
-    doc.line(15, 32, 80, 32);  // Subrayado
-    let startY = 40;
-    for (const [proyecto, costo] of Object.entries(proyectosCostos)) {
-        doc.setFontSize(10);
-        doc.text(`- ${proyecto}: ${this.formatNumero(costo)}`, 15, startY);
-        startY += 6; // Modified margin-bottom
-    }
-
-    doc.setLineWidth(0.5);
-    doc.line(15, startY, doc.internal.pageSize.getWidth() - 15, startY);
-    startY += 10;
-
-    const spaceBetweenTables = 3; 
-
-    estimacionesOrdenadas.forEach((estimacion, index) => {
-        if (index !== 0) {
-            doc.addPage();
-            startY = 20;
-        }
-
-        doc.setFontSize(10);
-        doc.setFont("helvetica");
-        doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, startY);
-        doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, startY + 8);
-        doc.text(`Código PAM: ${estimacion.codPam}`, 15, startY + 16);
-        doc.setFont("helvetica", "normal");
-
-        const tableColumnsCaracteristicas = ["Descripción", "Valor"];
-        const tableRowsCaracteristicas = [
-            ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
-            ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
-            ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
-            ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
-            ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
-            ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
-        ];
+    // **Segunda tabla: Características**
+    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+    const tableRowsCaracteristicas = [
+        ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+        ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+        ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+        ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+        ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+        ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+        ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+    ];
 
     doc.autoTable({
         startY: doc.lastAutoTable.finalY + 10,
@@ -525,6 +509,7 @@ for (let i = 1; i <= pageCount; i++) {
     const pdfUrl = doc.output('bloburl');
     window.open(pdfUrl, '_blank');
 },
+},
 
 downloadResumenEjecutivo() {
     const doc = new jsPDF("p", "mm", "a4");
@@ -620,10 +605,9 @@ downloadResumenEjecutivo() {
     // Mostrar el PDF generado
     const pdfUrl = doc.output('bloburl');
     window.open(pdfUrl, '_blank');
-}
-,
+},
 
-        async getEstimaciones() {
+    async getEstimaciones() {
         try {
             const estimaciones = await bdService.getEstimaciones();
             console.log("Datos obtenidos:", estimaciones); 
@@ -640,6 +624,8 @@ downloadResumenEjecutivo() {
             this.estimaciones = estimaciones;
         } catch (error) {
             console.error("Error al cargar las estimaciones:", error);
+            this.error = "Error al cargar las estimaciones.";
+            this.clearErrorAfterTimeout();
         }
         },
         formatFecha(fecha) {
@@ -655,6 +641,8 @@ downloadResumenEjecutivo() {
             this.tiposPAM = await bdService.getTiposPAM();
         } catch (error) {
             console.error("Error al cargar proyectos y tipos de PAM:", error);
+            this.error = "Error al cargar proyectos y tipos de PAM.";
+            this.clearErrorAfterTimeout();
         }
         },
         async buscarEstimacion() {
@@ -694,8 +682,14 @@ downloadResumenEjecutivo() {
             this.estimaciones = response;
         } catch (error) {
             console.error("Error al buscar estimaciones:", error);
-            alert("Error al buscar estimaciones.");
+            this.error = "Error al buscar estimaciones.";
+            this.clearErrorAfterTimeout();
         }
+        },
+        clearErrorAfterTimeout() {
+            setTimeout(() => {
+                this.error = null;
+            }, 4000); // 4 segundos
         },
         convertirBooleano(valor) {
         if (valor === true || valor === "true") return "Sí";
@@ -734,6 +728,8 @@ downloadResumenEjecutivo() {
             })
             .catch(error => {
                 console.error(`Error al eliminar la estimación con ID: ${id}`, error);
+                this.error = `Error al eliminar la estimación con ID: ${id}`;
+                this.clearErrorAfterTimeout();
             });
         }
         },
@@ -751,7 +747,7 @@ downloadResumenEjecutivo() {
         }
         }
     }
-    };
+    
     </script>
 
     <style scoped>
