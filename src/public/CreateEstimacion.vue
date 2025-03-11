@@ -8,44 +8,41 @@
       </button>
       <div class="estimacion">
         <h1 class="title">Registro de Estimación</h1>
-                  <div class="proyecto-fecha-container">
-            <div class="contenedor-proyecto">
-              <label class="texto">Proyecto</label>
-              <div class="proyecto-input">
-                <div class="custom-dropdown">
-  <button @click="toggleDropdown" class="dropdown-button">
-    {{ selectedProjectName || "Seleccione un Proyecto" }}
-  </button>
-  <div v-if="dropdownOpen" class="dropdown-list">
-    <div v-for="proyecto in proyectos" :key="proyecto.proyectoId"
-      @click="selectProject(proyecto)" class="dropdown-item">
-      {{ proyecto.name }}
-    </div>
-  </div>
-</div>
-
+        <div class="proyecto-fecha-container">
+          <div class="contenedor-proyecto">
+            <label class="texto">Proyecto</label>
+            <div class="proyecto-input">
+              <div class="custom-dropdown">
+                <button @click="toggleDropdown" class="dropdown-button">
+                  {{ selectedProjectName || "Seleccione un Proyecto" }}
+                </button>
+                <div v-if="dropdownOpen" class="dropdown-list">
+                  <div v-for="proyecto in proyectos" :key="proyecto.proyectoId"
+                    @click="selectProject(proyecto)" class="dropdown-item">
+                    {{ proyecto.name }}
+                  </div>
+                </div>
+              </div>
               <div class="botones-proyecto">
                 <button @click="mostrarModalNuevoProyecto" class="btn-nuevoproy"></button>
               </div>
-              </div>
-            </div>
-
-            <div class="fecha-container">
-              <label class="texto">Fecha</label>
-              <input type="date" :value="fecha" class="input-fecha" disabled />
             </div>
           </div>
-    
-          <div v-if="modalNuevoProyecto" class="detalle-overlay show">
-          <div class="detalle-box">
-            <button @click="cerrarModalNuevoProyecto" class="btn-close">&times;</button> <!-- 🔥 Botón X dentro del modal -->
-            <h2 class="texto">Crear Nuevo Proyecto</h2>
 
+          <div class="fecha-container">
+            <label class="texto">Fecha</label>
+            <input type="date" :value="fecha" class="input-fecha" disabled />
+          </div>
+        </div>
+
+        <div v-if="modalNuevoProyecto" class="detalle-overlay show">
+          <div class="detalle-box">
+            <button @click="cerrarModalNuevoProyecto" class="btn-close">&times;</button>
+            <h2 class="texto">Crear Nuevo Proyecto</h2>
             <div class="modal-content">
               <label class="cost-item"><strong>Nombre del Proyecto:</strong></label>
               <input v-model="nuevoProyecto.nombre" type="text" class="modal-input" placeholder="Ingrese el nombre del proyecto" />
             </div>
-
             <div class="modal-footer">
               <button class="btn-secondary" @click="guardarNuevoProyecto">Guardar</button>
               <button class="btn-secondary" @click="cerrarModalNuevoProyecto">Cancelar</button>
@@ -58,30 +55,33 @@
           <div class="flex items-center">
             <input type="text" v-model="estimacion.codPam" :disabled="idPamBloqueado" class="w-full p-2 border rounded input-standard" placeholder="Ingrese el identificador del Pasivo Ambiental Minero" />
             <input type="checkbox" v-model="idPamBloqueado" @change="toggleIdPam" class="ml-2s">
-            <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>                  </div>
+            <span class="checkbox-text"> {{ idPamBloqueado ? 'No requiere' : 'Requiere' }} ID de PAM</span>
+          </div>
         </div>
         <div class="mb-4 flex items-center gap-4">
-        <div class="w-full">
-          <label class="texto">Tipo de PAM</label>
-          <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
-            <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
-            <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
-              {{ tipoPam.name }}
-            </option>
-          </select>
+          <div class="w-full">
+            <label class="texto">Tipo de PAM</label>
+            <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
+              <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
+              <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
+                {{ tipoPam.name }}
+              </option>
+            </select>
+          </div>
         </div>
-        
-       
-      </div>
-      <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
+        <p v-if="costoEstimado" class="flex items-center gap-2 text-lg font-semibold mt-4">
           Costo Estimado:  {{ formatNumero(costoEstimado.totalEstimado) }}
           <Eye @click="toggleDetalle" class="cursor-pointer text-green-600" size="24" />
+          
+          <button @click="descargarPDF" class="btn-action btn-pdf">
+            <i class="fas fa-file-pdf"></i> Descargar PDF
+          </button>
+        
         </p>
         <div class="flex justify-between mt-4">
-         
           <button v-if="atributos.length" @click="abrirModalAtributos" class="btn-primary">
-          {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
-        </button>
+            {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
+          </button>
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
             Calcular
           </button>
@@ -89,10 +89,10 @@
             Nuevo
           </button>
         </div>
-    
+        
       </div>
     </div>
-    
+
     <div v-if="costoEstimado" class="detalle-overlay" :class="{ 'show': mostrarDetalle }">
       <div class="detalle-box">
         <p @click="toggleDetalle" class="X">
@@ -100,26 +100,23 @@
         </p>
         <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
         <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
-      <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
-      <p class="costo-item"><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
-      <p class="costo-item"><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
-      <p class="costo-item"><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
-      <p class="costo-item"><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
-      <p class="costo-item"><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
-      <p class="costo-item"><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
-      <p class="costo-item"><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
-      <p class="costo-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
-      <p class="costo-item"><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
-      <p class="costo-item"><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
-    </div>
-
-    <div class="total-estimado-container">
-      <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
-    </div>
-
+          <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
+          <p class="costo-item"><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
+          <p class="costo-item"><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
+          <p class="costo-item"><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
+          <p class="costo-item"><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
+          <p class="costo-item"><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
+          <p class="costo-item"><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
+          <p class="costo-item"><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
+          <p class="costo-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
+          <p class="costo-item"><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
+          <p class="costo-item"><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
+        </div>
+        <div class="total-estimado-container">
+          <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
+        </div>
       </div>
     </div>
-
 
     <div v-if="mostrarModalCoberturas" class="modal-overlay">
       <div class="modal-box">
@@ -133,62 +130,55 @@
         </div>
       </div>
     </div>
-
   </div>
   <div v-if="modalAtributos" class="detalle-overlay show">
-  <div class="detalle-box">
-    <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
-    <h2 class="texto">Atributos del PAM</h2>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
-        <label class="block text-sm font-medium">
-          {{ obtenerDescripcionAtributo(atributo.nombre) }}
-        </label>
-
-        <template v-if="atributo.nombre === 'TipoCierre'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-            <option value="TRASLADO">TRASLADO</option>
-            <option value="INSITU">INSITU</option>
-          </select>
-        </template>
-
-        <template v-else-if="atributo.nombre === 'TipoCobertura'">
-          <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
-            Seleccionar
-          </button>
-          <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
-        </template>
-
-        <template v-else-if="atributo.tipoDato === 'bool'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-            <option :value="true">Sí</option>
-            <option :value="false">No</option>
-          </select>
-        </template>
-
-        <template v-else-if="atributo.tipoDato === 'decimal'">
-          <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
-        </template>
-
-        <template v-else>
-          <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
-        </template>
+    <div class="detalle-box">
+      <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
+      <h2 class="texto">Atributos del PAM</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
+          <label class="block text-sm font-medium">
+            {{ obtenerDescripcionAtributo(atributo.nombre) }}
+          </label>
+          <template v-if="atributo.nombre === 'TipoCierre'">
+            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+              <option value="TRASLADO">TRASLADO</option>
+              <option value="INSITU">INSITU</option>
+            </select>
+          </template>
+          <template v-else-if="atributo.nombre === 'TipoCobertura'">
+            <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
+              Seleccionar
+            </button>
+            <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
+          </template>
+          <template v-else-if="atributo.tipoDato === 'bool'">
+            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+              <option :value="true">Sí</option>
+              <option :value="false">No</option>
+            </select>
+          </template>
+          <template v-else-if="atributo.tipoDato === 'decimal'">
+            <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+          </template>
+          <template v-else>
+            <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+          </template>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" @click="guardarAtributos">Grabar</button>
+        <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
       </div>
     </div>
-
-    <div class="modal-footer">
-      <button class="btn-secondary" @click="guardarAtributos">Grabar</button>
-      <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
-    </div>
   </div>
-</div>
 </template>
 
 
 
 <script>
 import bdService from "@/main/services/bdservice";
+import jsPDF from "jspdf";
 import { Eye } from 'lucide-vue-next';
 import AlertComponent from "@/components/AlertComponent.vue";
 export default {
@@ -313,9 +303,10 @@ export default {
         this.showAlert("El nombre del proyecto no puede estar vacío.", "error");
         return;
       }
+      const proyectoEnMayusculas = this.nuevoProyecto.nombre.toUpperCase();
 
       try {
-        const nuevoProyecto = await bdService.createProyecto(this.nuevoProyecto.nombre);
+        const nuevoProyecto = await bdService.createProyecto(proyectoEnMayusculas);
 
         await this.cargarProyectos();
 
@@ -392,6 +383,7 @@ export default {
     bloquearProyecto() {
       this.proyectoBloqueado = !this.proyectoBloqueado;
     },
+  
     limpiarFormulario() {
       this.estimacion.codPam = null;
       this.estimacion.tipoPamId = null;
@@ -466,7 +458,124 @@ export default {
     seleccionarCobertura(value) {
       this.valoresAtributos[this.atributoPamIdSeleccionado] = value;
       this.cerrarModalCobertura();
-    }
+    },
+    descargarPDF() {
+    const doc = new jsPDF("p", "mm", "a4");
+
+    // **Título principal**
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(19);
+    doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+
+    // **Encabezado con Proyecto, Tipo de PAM e ID de PAM**
+    doc.setFontSize(12);
+    doc.setFont("helvetica");
+    doc.text(`Proyecto: ${this.selectedProjectName || "No definido"}`, 15, 30);
+    doc.text(`Tipo de PAM: ${this.tiposPAM.find(p => p.id === this.estimacion.tipoPamId)?.name || "No definido"}`, 15, 40);
+
+    // **Primera tabla: Información del usuario**
+    const tableColumnsUsuario = ["Descripción", "Valor"];
+    const tableRowsUsuario = [
+        ["Usuario", localStorage.getItem('idUser') || "Desconocido"],
+        ["Fecha", this.fecha || "N/A"]
+    ];
+
+    doc.autoTable({
+        startY: 50,
+        head: [tableColumnsUsuario],
+        body: tableRowsUsuario,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39, 174, 96] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Segunda tabla: Características**
+    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+    const tableRowsCaracteristicas = this.atributos.map(atributo => [
+        this.obtenerDescripcionAtributo(atributo.nombre),
+        this.valoresAtributos[atributo.atributoPamId] || "N/A"
+    ]);
+
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [tableColumnsCaracteristicas],
+        body: tableRowsCaracteristicas,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [46, 204, 113] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Tercera tabla: Desglose del Total Estimado**
+    const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
+    const tableRowsCostoCierre = [
+        ["Costo Directo", this.formatNumero(this.costoEstimado?.costoDirecto)],
+        ["Gastos Generales", this.formatNumero(this.costoEstimado?.gastosGenerales)],
+        ["Utilidad", this.formatNumero(this.costoEstimado?.utilidades)],
+        ["Subtotal", this.formatNumero(this.costoEstimado?.subTotal)],
+        ["Subtotal Obra", this.formatNumero(this.costoEstimado?.subTotalObras)]
+    ];
+
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [tableColumnsCostoCierre],
+        body: tableRowsCostoCierre,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39, 174, 96] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Cuarta tabla: Otros costos adicionales**
+    const tableColumnsOtros = ["Otros", "Valor"];
+    const tableRowsOtros = [
+        ["IGV 18%", this.formatNumero(this.costoEstimado?.igv)],
+        ["Expediente Técnico 6%", this.formatNumero(this.costoEstimado?.expedienteTecnico)],
+        ["Supervisión 15%", this.formatNumero(this.costoEstimado?.supervision)],
+        ["Gestión de Proyectos 5%", this.formatNumero(this.costoEstimado?.gestionProyecto)],
+        ["Capacitación 1%", this.formatNumero(this.costoEstimado?.capacitacion)],
+        ["Contingencias 6%", this.formatNumero(this.costoEstimado?.contingencias)]
+    ];
+
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [tableColumnsOtros],
+        body: tableRowsOtros,
+        theme: "grid",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [30, 132, 73] },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        margin: { left: 15, right: 15 }
+    });
+
+    // **Total Estimado final**
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(
+        `Total Estimado: ${this.formatNumero(this.costoEstimado?.totalEstimado)}`,
+        doc.internal.pageSize.getWidth() / 2,
+        doc.lastAutoTable.finalY + 10,
+        { align: 'center' }
+    );
+
+    // **Nota de precisión**
+    doc.setFontSize(8);
+    doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", 
+        doc.internal.pageSize.getWidth() / 2, doc.lastAutoTable.finalY + 40, { align: 'center' });
+
+    // **Número de página**
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+
+    // **Generar el PDF**
+ const pdfUrl = doc.output('bloburl');
+    window.open(pdfUrl, '_blank');},
+
   }
 };
 </script>
@@ -512,6 +621,18 @@ export default {
 .fade-enter, .fade-leave-to  {
   opacity: 0;
 }
+
+.btn-action {
+    padding: 15px;
+    margin: 0 2px;
+    margin-left: 100px;
+    color: white;
+    background-color: #548f4e;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
 
 .custom-dropdown {
   position: relative;

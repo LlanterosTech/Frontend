@@ -7,10 +7,10 @@
     </div>
 
     <div class="glass-box">
-      <h1 class="title">Bienvenidos</h1>
+      <h1 class="title">Bienvenido, {{ userName }}</h1>
       <div class="options">
         <div class="option" @click="irCalculadora">
-          <i  class="fas fa-calculator icono-opcion"></i>
+          <i class="fas fa-calculator icono-opcion"></i>
           <p>Calculador</p>
         </div>
         <div class="option" @click="irHistorial">
@@ -31,7 +31,26 @@
 </template>
 
 <script>
+import userService from "@/main/services/userservice";
+
 export default {
+  data() {
+    return {
+      userId: "",
+      userName: "",
+    };
+  },
+  async created() {
+    try {
+       const userId=localStorage.getItem('idUser');
+      const user = await userService.getAuthUser(userId);
+      console.log(user);
+      this.userName = user.name;
+    } catch (error) {
+      console.error("Error al obtener el usuario:", error);
+      this.userName = "Usuario";
+    }
+  },
   methods: {
     irCalculadora() {
       this.$router.push("/nuevaestimacion");
@@ -96,13 +115,24 @@ body, html {
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+ max-width: 700px; /* Ajusta según sea necesario */
+  width: 90%;
+  text-align: center;
 }
 
 .title {
   font-size: 2.5rem;
   font-weight: 600;
   color: white;
+  max-width: 90%; /* Permite que el título ocupe más espacio */
+  text-align: center; /* Centra el texto */
+  word-wrap: break-word; /* Permite dividir el texto en varias líneas */
+  overflow-wrap: break-word; /* Alternativa para compatibilidad */
+  white-space: normal; /* Permite que el texto salte de línea */
+  margin: 0 auto; /* Centra el elemento dentro de su contenedor */
 }
+
+
 
 .options {
   display: flex;
@@ -195,6 +225,15 @@ body, html {
 }
 
 
+.options {
+  display: flex;
+  justify-content: center; /* Centra los botones */
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+  flex-wrap: wrap; /* Permite que los botones se acomoden en varias filas si es necesario */
+}
+
 .option {
   background: white;
   padding: 20px;
@@ -204,7 +243,28 @@ body, html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 120px;
+  justify-content: center; /* Asegura alineación vertical */
+  width: 140px; /* Aumentar si es necesario */
+  height: 140px; /* Mantiene proporción */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.icono-opcion {
+  font-size: 3rem; /* Asegurar tamaño de los iconos */
+  color: #3ea845;
+}
+
+.option p {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #3ea845;
+  margin-top: 10px; /* Espacio entre icono y texto */
+  text-align: center;
+}
+
+.option:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .icono-opcion {

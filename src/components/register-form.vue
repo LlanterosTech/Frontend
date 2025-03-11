@@ -10,6 +10,10 @@
             <input id="email" v-model="formData.email" type="text" placeholder="usuario@dominio" required>
           </div>
           <div class="text-input">
+            <i class="ri-user-fill"></i>
+            <input id="name" v-model="formData.name" type="text" placeholder="Nombre" required>
+          </div>
+          <div class="text-input">
             <i class="ri-lock-fill"></i>
             <input class="icx" id="password" v-model="formData.password" type="password" placeholder="Contraseña" required>
           </div>
@@ -45,6 +49,7 @@ export default {
       formData: {
         email: "",
         password: "",
+        name: "",
         registerArea: "", 
       },
       error: null,

@@ -177,25 +177,25 @@
         paginatedEstimaciones() {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
-    return this.filteredEstimaciones.slice(start, end);
+    return this.filteredEstimaciones.slice(start, end); 
   },
   filteredEstimaciones() {
     return this.estimaciones.filter((estimacion) => {
-      // Verifica que el proyecto coincida con la selección
+      // Asegurar que 'codPam' y 'idPam' no sean undefined antes de comparar
+      const codPam = estimacion.codPam ? estimacion.codPam.toLowerCase().trim() : "";
+      const idPamFilter = this.idPam ? this.idPam.toLowerCase().trim() : "";
+
       const coincideProyecto =
         this.selectedProyectos.length === 0 ||
-        this.selectedProyectos.some((p) => p.name === estimacion.proyecto.name);
+        this.selectedProyectos.some((p) => p.name.toLowerCase() === estimacion.proyecto.name.toLowerCase());
 
-      // Verifica que el Tipo de PAM coincida con la selección
       const coincideTipoPam =
         this.selectedTiposPAM.length === 0 ||
-        this.selectedTiposPAM.some((tp) => tp.name === estimacion.tipoPam.name);
+        this.selectedTiposPAM.some((tp) => tp.name.toLowerCase() === estimacion.tipoPam.name.toLowerCase());
 
-      // Verifica que el ID de PAM coincida si hay un valor ingresado
-      const coincideIdPam =
-        !this.idPam || estimacion.codPam.includes(this.idPam);
+      // Usar includes() para permitir coincidencias parciales
+      const coincideIdPam = !idPamFilter || codPam.includes(idPamFilter);
 
-      // Solo muestra las estimaciones que cumplan con TODAS las condiciones
       return coincideProyecto && coincideTipoPam && coincideIdPam;
     });
   }
@@ -211,6 +211,27 @@
         await this.getProyectosYTipos();
     },
     methods: {
+    async getEstimaciones() {
+        try {
+            const estimaciones = await bdService.getEstimaciones();
+            console.log("Datos obtenidos:", estimaciones); 
+
+            for (let estimacion of estimaciones) {
+            try {
+                const usuario = await userService.getAuthUser(estimacion.usuarioId);
+                estimacion.usuario = usuario; 
+            } catch (error) {
+                console.error(`Error obteniendo el usuario para ID ${estimacion.usuarioId}:`, error);
+                estimacion.usuario = { email: "Desconocido", area: "No definido" }; 
+            }
+            }
+            this.estimaciones = estimaciones;
+        } catch (error) {
+            console.error("Error al cargar las estimaciones:", error);
+            this.error = "Error al cargar las estimaciones.";
+            this.clearErrorAfterTimeout();
+        }
+        },
         descargarEstimacionPDF(estimacion) {
     const doc = new jsPDF("p", "mm", "a4");
 
@@ -509,7 +530,7 @@ for (let i = 1; i <= pageCount; i++) {
     const pdfUrl = doc.output('bloburl');
     window.open(pdfUrl, '_blank');
 },
-},
+
 
 downloadResumenEjecutivo() {
     const doc = new jsPDF("p", "mm", "a4");
@@ -607,27 +628,7 @@ downloadResumenEjecutivo() {
     window.open(pdfUrl, '_blank');
 },
 
-    async getEstimaciones() {
-        try {
-            const estimaciones = await bdService.getEstimaciones();
-            console.log("Datos obtenidos:", estimaciones); 
-
-            for (let estimacion of estimaciones) {
-            try {
-                const usuario = await userService.getAuthUser(estimacion.usuarioId);
-                estimacion.usuario = usuario; 
-            } catch (error) {
-                console.error(`Error obteniendo el usuario para ID ${estimacion.usuarioId}:`, error);
-                estimacion.usuario = { email: "Desconocido", area: "No definido" }; 
-            }
-            }
-            this.estimaciones = estimaciones;
-        } catch (error) {
-            console.error("Error al cargar las estimaciones:", error);
-            this.error = "Error al cargar las estimaciones.";
-            this.clearErrorAfterTimeout();
-        }
-        },
+    
         formatFecha(fecha) {
         const date = new Date(fecha);
         const dia = date.getDate().toString().padStart(2, '0');
@@ -746,6 +747,7 @@ downloadResumenEjecutivo() {
             this.currentPage++;
         }
         }
+    },
     }
     
     </script>
