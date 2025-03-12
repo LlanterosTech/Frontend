@@ -5,21 +5,39 @@
         <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
         <h3 class="title">ACTIVOS MINEROS</h3>
 
+        <!-- Campo de usuario -->
         <div class="text-input">
-          <i class="ri-user-fill"></i>
-          <input v-model="email" type="text" placeholder="Usuario">
+            <i class="ri-user-fill"></i>
+            <input v-model="email" type="text" placeholder="Usuario">
         </div>
+
+        <!-- Campo de contraseña -->
         <div class="text-input">
-          <i class="ri-lock-fill"></i>
-          <input v-model="password" type="password" placeholder="Contraseña">
+            <i class="ri-lock-fill"></i>
+            <input v-model="password" type="password" placeholder="Contraseña">
         </div>
+      <!-- Recuperación de contraseña -->
+        <div class="forgot-password">
+            <a @click.prevent="goToForgotPassword" href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+        <!-- reCAPTCHA -->
         <div ref="recaptcha" class="g-recaptcha"></div>
+
+        <!-- Mensaje de cuenta no verificada -->
+        <p v-if="showVerificationMessage" class="verification-message">
+            Tu cuenta no está verificada. <a @click="resendVerificationEmail" href="#">Reenviar correo de verificación</a>.
+        </p>
+
+        <!-- Botón de inicio de sesión -->
         <button @click="handleLogin" class="login-btn">Iniciar Sesión</button>
+
+        <!-- Registro de nuevo usuario -->
         <div class="create">
-          <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
-          <i class="ri-arrow-right-fill"></i>
+            <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
+            <i class="ri-arrow-right-fill"></i>
         </div>
-      </div>
+    </div>
+
     </div>
     <transition name="fade">
   <div v-if="error" class="alert-container show">
@@ -108,6 +126,9 @@ export default {
     },
     goToRegister() {
       this.$router.push("/register");
+    },
+    goToForgotPassword() {
+        this.$router.push("/forgot-password"); 
     }
   },
 };
@@ -237,6 +258,17 @@ body {
 
 .create {
   margin-top: 15px;
+}
+.forgot-password a {
+  font-size: 11px;
+  color: #555;
+  cursor: pointer;
+  text-decoration: none;
+}
+.forgot-password {
+  text-align: left !important;
+  margin-left: 10px; /* Ajusta el valor según lo necesites */
+
 }
 
 .create a {

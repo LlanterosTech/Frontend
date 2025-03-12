@@ -6,6 +6,7 @@ import InitPage from "@/public/InitPage.vue";
 import MainContainer from '@/components/main-container.vue';
 import BuscarEstimacion from "@/public/BuscarEstimacion.vue";
 import HistoralEstimacion from '@/public/HistoralEstimacion.vue';
+import ForgotPassword from "@/components/ForgotPassword.vue";
 
 const routes = [
     {
@@ -50,6 +51,11 @@ const routes = [
         component: HistoralEstimacion,
         meta: { title: 'Historial Estimaciones', requiresAuth: true }
     },
+    {
+        path: "/forgot-password",
+        name: "ForgotPassword",
+        component: ForgotPassword,
+      },
     {
         path: '/:catchAll(.*)',
         name: 'not-found',
