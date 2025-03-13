@@ -129,7 +129,22 @@ const bdService = {
             console.error("Error al enviar el correo de recuperación:", error.response?.data || error);
             throw error;
         });
+        
+    },
+
+    async resetPassword(token, newPassword) {
+        return api.post("authentication/reset-password", {
+            token: token,
+            newPassword: newPassword
+        })
+        .then(response => response.data)
+        .catch(error => {
+            console.error("Error al restablecer la contraseña:", error.response?.data || error.message);
+            throw error;
+        });
     }
+    
+
     
     
 

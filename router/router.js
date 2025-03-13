@@ -7,6 +7,8 @@ import MainContainer from '@/components/main-container.vue';
 import BuscarEstimacion from "@/public/BuscarEstimacion.vue";
 import HistoralEstimacion from '@/public/HistoralEstimacion.vue';
 import ForgotPassword from "@/components/ForgotPassword.vue";
+import ResetPassword from "@/components/ResetPassword.vue"; 
+import HelloWorld from '@/components/HelloWorld.vue'; // Import correcto
 
 const routes = [
     {
@@ -55,7 +57,19 @@ const routes = [
         path: "/forgot-password",
         name: "ForgotPassword",
         component: ForgotPassword,
-      },
+    },
+    {
+        path: '/hello',
+        name: 'HelloWorld',
+        component: HelloWorld,
+        meta: { title: 'Hola Mundo' , requiresAuth: false }
+    },
+    {
+        path: "/reset-password",
+        name: "ResetPassword",
+        component: ResetPassword,
+        meta: { title: "Restablecer Contraseña" }
+    },
     {
         path: '/:catchAll(.*)',
         name: 'not-found',
@@ -67,7 +81,8 @@ const routes = [
                 next('/login');
             }
         }
-    }
+    },
+   
 ];
 
 const router = createRouter({
@@ -102,14 +117,14 @@ router.beforeEach((to, from, next) => {
     }
 });
 
-window.addEventListener('load', () => {
-    const lastRoute = localStorage.getItem('lastRoute');
-    const token = localStorage.getItem('token');
-    if (lastRoute && token && isTokenValid(token)) {
-        router.push(lastRoute);
-    } else {
-        router.push('/login');
-    }
-});
+// window.addEventListener('load', () => {
+//     const lastRoute = localStorage.getItem('lastRoute');
+//     const token = localStorage.getItem('token');
+//     if (lastRoute && token && isTokenValid(token)) {
+//         router.push(lastRoute);
+//     } else {
+//         router.push('/login');
+//     }
+// });
 
 export default router;
