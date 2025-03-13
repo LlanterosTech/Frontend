@@ -117,7 +117,24 @@ const bdService = {
                 console.error("Error al eliminar la estimación:", error);
                 throw error;
         });
+    },
+    async forgotPassword(email, subject, message) {
+        return api.post("authentication/forgot-password", { 
+            email: email, 
+            subject: subject, 
+            message: message 
+        })
+        .then(response => response.data)
+        .catch(error => {
+            console.error("Error al enviar el correo de recuperación:", error.response?.data || error);
+            throw error;
+        });
     }
+    
+    
+
+
+
 };
 
 export default bdService;

@@ -7,17 +7,20 @@
             <p class="description">
                 Por favor ingresa tu dirección de correo electrónico y reinicia tu contraseña.
             </p>
-            
+    
             <form @submit.prevent="handleForgotPassword">
                 <div class="text-input">
                 <i class="ri-mail-fill"></i>
                 <input id="email" v-model="email" type="email" placeholder="Correo Electrónico *" required>
                 </div>
-                
+    
                 <div class="forgot-password-container">
                 <button type="submit" class="forgot-password-btn">Reiniciar contraseña</button>
                 </div>
             </form>
+    
+            <div v-if="message" class="success-message">{{ message }}</div>
+            <div v-if="error" class="error-message">{{ error }}</div>
     
             <div class="go-back">
                 <a @click.prevent="goToLogin" href="#">Volver al inicio</a>
@@ -28,20 +31,29 @@
     </template>
     
     <script>
+    import bdService from "@/main/services/bdservice"; // Importamos el servicio
+    
     export default {
         name: "ForgotPasswordComponent",
         data() {
         return {
-            email: ""
+            email: "",
+            message: "",
+            error: ""
         };
         },
         methods: {
         async handleForgotPassword() {
             try {
-            console.log("Solicitud para recuperar contraseña enviada a:", this.email);
-            alert("Si el correo existe en nuestra base de datos, recibirás un enlace para restablecer tu contraseña.");
+            this.message = "";
+            this.error = "";
+    
+            await bdService.forgotPassword(this.email, "Recuperación de contraseña", 
+                "Haz clic en el enlace para restablecer tu contraseña.");
+    
+            this.message = "Correo de recuperación enviado. Revisa tu bandeja de entrada.";
             } catch (error) {
-            console.error("Error al solicitar la recuperación de contraseña:", error);
+            this.error = "Hubo un error al enviar el correo. Inténtalo nuevamente.";
             }
         },
         goToLogin() {
@@ -147,6 +159,18 @@
         transform: scale(1.05);
     }
     
+    .success-message {
+        margin-top: 15px;
+        color: green;
+        font-weight: bold;
+    }
+    
+    .error-message {
+        margin-top: 15px;
+        color: red;
+        font-weight: bold;
+    }
+    
     .go-back {
         margin-top: 15px;
     }
@@ -158,3 +182,4 @@
         text-decoration: none;
     }
     </style>
+    
