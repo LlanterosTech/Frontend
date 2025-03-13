@@ -3,7 +3,6 @@
         <div class="reset-box">
             <div class="reset">
             <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
-            <h3 class="title">ACTIVOS MINEROS</h3>
             <p class="description">
                 Ingresa tu nueva contraseña para restablecer tu cuenta.
             </p>
@@ -111,7 +110,7 @@
     }
     
     .fondo {
-        background: url("https://www.amsac.pe/wp-content/uploads/2025/01/NP-Catalogo-de-especies-02-scaled.jpg") no-repeat center center fixed;
+        background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
         background-size: cover;
         background-position: center;
         background-attachment: fixed;

@@ -1,62 +1,66 @@
 <template>
+  <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
+
   <div class="container fondo">
+    <div class = "content">
+      <div class="text-box">
+        <h1>PAM Calculator</h1>
+        <p>Herramienta para calcular el costo estimado de los pasivos ambientales mineros en AMSAC.</p>
+      </div>
+    </div>
     <div class="login-box">
       <div class="login">        
         <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
-        <h3 class="title">ACTIVOS MINEROS</h3>
 
-        <!-- Campo de usuario -->
-        <div class="text-input">
+        <!-- 🔥 FORMULARIO con @submit.prevent -->
+        <form @submit.prevent="handleLogin">
+          <div :class="['text-input', { 'input-error': inputError }]">
             <i class="ri-user-fill"></i>
             <input v-model="email" type="text" placeholder="Usuario">
-        </div>
+          </div>
 
-        <!-- Campo de contraseña -->
-        <div class="text-input">
+          <div :class="['text-input', { 'input-error': inputError }]">
             <i class="ri-lock-fill"></i>
             <input v-model="password" type="password" placeholder="Contraseña">
-        </div>
-      <!-- Recuperación de contraseña -->
-        <div class="forgot-password">
+          </div>
+
+          <div class="forgot-password">
             <a @click.prevent="goToForgotPassword" href="#">¿Olvidaste tu contraseña?</a>
-        </div>
-        <!-- reCAPTCHA -->
-        <div ref="recaptcha" class="g-recaptcha"></div>
+          </div>
 
-        <!-- Mensaje de cuenta no verificada -->
-        <p v-if="showVerificationMessage" class="verification-message">
-            Tu cuenta no está verificada. <a @click="resendVerificationEmail" href="#">Reenviar correo de verificación</a>.
-        </p>
+          <div ref="recaptcha" class="g-recaptcha"></div>
 
-        <!-- Botón de inicio de sesión -->
-        <button @click="handleLogin" class="login-btn">Iniciar Sesión</button>
+          <!-- 🔥 Botón corregido para evitar el refresco -->
+          <button type="submit" class="login-btn">Iniciar Sesión</button>
+        </form>
 
-        <!-- Registro de nuevo usuario -->
         <div class="create">
-            <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
-            <i class="ri-arrow-right-fill"></i>
+          <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
+          <i class="ri-arrow-right-fill"></i>
         </div>
+      </div>
     </div>
 
-    </div>
-    <transition name="fade">
-  <div v-if="error" class="alert-container show">
-    <p class="error-message">{{ error }}</p>
-  </div>
-</transition>
   </div>
 </template>
 <script>
 import userService from "@/main/services/userservice";
 import { loadRecaptcha } from "@/utils/recaptcha";
+import AlertComponent from "@/components/AlertComponent.vue";
 
 export default {
+  components: {
+    AlertComponent
+  },
   data() {
     return {
       email: "",
       password: "",
       error: null,
-      recaptchaSiteKey: "6Lc7S94qAAAAAE2ohl9u4JgSRLkqFCBd-ypbg9Wd" 
+      recaptchaSiteKey: "6Lc7S94qAAAAAE2ohl9u4JgSRLkqFCBd-ypbg9Wd",
+      alertMessage: null,
+      alertType: "error",
+      inputError: false, // Estado para manejar el error en los inputs
     };
   },
   async mounted() {
@@ -82,20 +86,33 @@ export default {
     }
   },
   methods: {
-    async handleLogin() {
+    showAlert(message, type = "error") {
+      this.alertMessage = message;
+      this.alertType = type;
+    },
+    clearAlert() {
+      setTimeout(() => {
+        this.alertMessage = null;
+      }, 200);
+    },
+    async handleLogin(event) {
+      if (event) event.preventDefault(); // 🔥 Bloquea cualquier intento de recarga accidental
+
+      console.log("🔥 handleLogin ejecutado"); // 🟢 Debug
+
       try {
         this.error = null;
-        
+
         if (!window.grecaptcha || !window.grecaptcha.getResponse) {
-          this.error = "Error: reCAPTCHA no está cargado.";
-          this.clearErrorAfterTimeout();
+          console.log("⚠️ reCAPTCHA no está cargado.");
+          this.showAlert("Error: reCAPTCHA no está cargado.", "error");
           return;
         }
 
         const recaptchaResponse = window.grecaptcha.getResponse();
         if (!recaptchaResponse) {
-          this.error = "Por favor, completa el CAPTCHA.";
-          this.clearErrorAfterTimeout();
+          console.log("⚠️ CAPTCHA no completado.");
+          this.showAlert("Por favor, completa el CAPTCHA.", "error");
           return;
         }
 
@@ -105,34 +122,49 @@ export default {
           recaptchaResponse
         };
 
+        console.log("🔹 Enviando credenciales:", credentials);
+
         const response = await userService.loginUser(credentials);
 
+        console.log("✅ Respuesta del servidor:", response);
+
         if (response && response.resource.token) {
-          this.$router.push("/init");
+          console.log("🔹 Redirigiendo a /init");
+          this.$router.push("/init"); 
         } else {
-          this.error = "Error: No se recibió un token válido.";
-          this.clearErrorAfterTimeout();
+          console.log("❌ No se recibió un token válido.");
+          throw new Error("Error: No se recibió un token válido.");
         }
       } catch (error) {
-        console.error("Error al Iniciar Sesión:", error);
-        this.error = "Error al Iniciar Sesión: " + (error.message || "Error inesperado");
-        this.clearErrorAfterTimeout();
+        console.error("❌ Error en login:", error);
+
+        if (error.response && error.response.status === 401) {
+          this.showAlert(error.message || "Error inesperado.", "error");
+
+        } else {
+          this.showAlert("Usuario o contraseña incorrectos.", "error");
+          this.inputError = true; // Activa el estado de error en los inputs
+          setTimeout(() => {
+            this.inputError = false; // Desactiva el estado de error después de 2 segundos
+          }, 2000);
+        }
+
+        return;
       }
     },
-    clearErrorAfterTimeout() {
-      setTimeout(() => {
-        this.error = null;
-      }, 4000); 
-    },
     goToRegister() {
+      console.log("🔹 Navegando a registro");
       this.$router.push("/register");
     },
     goToForgotPassword() {
-        this.$router.push("/forgot-password"); 
+      console.log("🔹 Navegando a recuperación de contraseña");
+      this.$router.push("/forgot-password");
     }
-  },
+  }
 };
 </script>
+
+
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -144,7 +176,6 @@ html, body {
   height: 100%;
   background-size: cover;
 }
-
 
 body {
   font-family: 'Poppins', sans-serif;
@@ -164,17 +195,14 @@ body {
   filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.2)); /* Sombra sutil */
 }
 
-
 .login h3.title {
   margin: 20px 0;
   font-size: 2.4rem; /* Ajusta según necesites */
   font-weight: 10; /* Negrita */
   letter-spacing: 1px; /* Para mejorar legibilidad */
   text-transform: uppercase; /* Para mantener mayúsculas */
-
   font-family: 'Nunito', sans-serif; /* Asegura la fuente */
 }
-
 
 .g-recaptcha {
   display: flex;
@@ -186,30 +214,55 @@ body {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center; /* Centrará el modal horizontalmente */
-  align-items: center; /* Centrará el modal verticalmente */
+  align-items: center;
+  justify-content: center;
   position: relative;
+
+}
+
+.text-box {
+  position: absolute;
+  left: 5%;
+  top: 30%;
+  color: white;
+  max-width: 1200px; /* Aumenta el ancho permitido */
+  width: auto; /* Permite que el contenedor se expanda si es necesario */
+}
+
+.text-box h1 {
+  font-size: 4.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap; /* Evita que "Calculator" baje de línea */
+}
+
+.text-box p {
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1.5;
+  max-width: 600px; /* Ajusta el ancho del texto para evitar que se vea angosto */
 }
 
 .fondo {
-  background: url("https://www.amsac.pe/wp-content/uploads/2025/01/NP-Catalogo-de-especies-02-scaled.jpg") no-repeat center center fixed;
+  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
 }
 
 .login-box {
-  background: rgba(255, 255, 255);
+  position: absolute;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0 0 25px 5px rgb(0 0 0 / 20%);
-  z-index: 10;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   width: 350px;
   text-align: center;
 }
-
-
-
 .text-input {
   background: #e6e6e6;
   height: 45px;
@@ -236,7 +289,7 @@ body {
 }
 
 ::placeholder {
-  color: #9a9a9a;
+  color: #9a9aa9;
   font-size: 1rem;
 }
 
@@ -259,16 +312,17 @@ body {
 .create {
   margin-top: 15px;
 }
+
 .forgot-password a {
   font-size: 11px;
   color: #555;
   cursor: pointer;
   text-decoration: none;
 }
+
 .forgot-password {
   text-align: left !important;
   margin-left: 10px; /* Ajusta el valor según lo necesites */
-
 }
 
 .create a {
@@ -308,5 +362,9 @@ body {
 .error-message {
   color: white;
   font-size: 0.9rem;
+}
+
+.input-error {
+  border: 2px solid red;
 }
 </style>

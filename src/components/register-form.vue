@@ -1,9 +1,10 @@
 <template>
+    <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
+
   <div class="container fondo">
     <div class="register-box">
       <div class="register">
         <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
-        <h3 class="title">ACTIVOS MINEROS</h3>
           <form @submit.prevent="handleRegister">
           <div class="text-input">
             <i class="ri-user-fill"></i>
@@ -28,12 +29,7 @@
           <i class="ri-arrow-right-fill"></i>
         </div>
         </form>
-
-        <transition name="fade">
-  <div v-if="error" class="alert-container show">
-    <p class="error-message">{{ error }}</p>
-  </div>
-</transition>       
+    
       </div>
     </div>
   </div>
@@ -41,9 +37,12 @@
 
 <script>
 import userService from "@/main/services/userservice";
-
+import AlertComponent from "./AlertComponent.vue";
 export default {
   name: "RegisterFormComponent",
+  components: {
+    AlertComponent,
+  },
   data() {
     return {
       formData: {
@@ -51,20 +50,46 @@ export default {
         password: "",
         name: "",
         registerArea: "", 
+       
       },
       error: null,
+      alertMessage: null,
+      alertType: "error",
+      inputError: false,
     };
   },
   methods: {
+    showAlert(message, type = "error") {
+      this.alertMessage = message;
+      this.alertType = type;
+    },
+    clearAlert() {
+      setTimeout(() => {
+        this.alertMessage = null;
+      }, 200);
+    },
+    validateEmail(email){
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(String(email).toLowerCase());
+    },
     async handleRegister() {
+      if (!this.validateEmail(this.formData.email)) {
+        this.showAlert("Por favor, ingrese un correo electrónico válido.", "error");
+        this.inputError = true;
+        setTimeout(() => {
+          this.inputError = false;
+        }, 2000);
+        return;
+      }
+
       try {
         this.error = null; 
         await userService.registerUser(this.formData);
-        console.log("Registration successful");
+        console.log("Registro exitoso");
         this.$router.push("/login"); 
       } catch (err) {
-        this.error =  "Error al registrase, intente nuevamente";
-        this.clearErrorAfterTimeout();
+        this.showAlert("Error al registrarse, La cuenta ya existe.", "error");
+        return;
       }
     },
     async goToLogin() {
@@ -121,7 +146,7 @@ body {
 }
 
 .fondo {
-  background: url("https://www.amsac.pe/wp-content/uploads/2025/01/NP-Catalogo-de-especies-02-scaled.jpg") no-repeat center center fixed;
+  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

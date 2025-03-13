@@ -2,7 +2,7 @@
     <transition name="fade">
         <div v-if="visible" class="alert-box" :class="typeClass">
             <p>{{ message }}</p>
-            <button class="close-btn" @click="closeAlert">&times;</button>
+            <button class="close-btn" @click="fadeOutAlert">&times;</button>
         </div>
     </transition>
 </template>
@@ -12,7 +12,7 @@ export default {
     props: {
         message: String,
         type: { type: String, default: "error" }, 
-        duration: { type: Number, default: 4000 } 
+        duration: { type: Number, default: 2000 } 
     },
     data() {
         return { visible: false };
@@ -31,11 +31,14 @@ export default {
         showAlert() {
             this.visible = true;
             setTimeout(() => {
-                this.closeAlert();
+                this.fadeOutAlert();
             }, this.duration);
         },
-        closeAlert() {
-            this.visible = false;
+        fadeOutAlert() {
+            this.visible = false; // Activa la transición de desvanecido
+            setTimeout(() => {
+                this.$emit("close"); // Emite el evento después de la animación
+            }, 200); // Coincide con la duración de la transición CSS
         }
     },
     mounted() {
@@ -47,7 +50,7 @@ export default {
 <style scoped>
 .alert-box {
     position: fixed;
-    top: 20px; /* 📌 Se mostrará en la parte superior */
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     padding: 14px 24px;
@@ -58,7 +61,7 @@ export default {
     min-width: 200px;
     max-width: 400px;
     text-align: center;
-    z-index: 1050; /* 🔥 Se asegurará de estar por encima de otros elementos */
+    z-index: 1050;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -92,11 +95,7 @@ export default {
     transition: opacity 0.5s ease-in-out;
 }
 
-.fade-enter {
-    opacity: 0;
-}
-
-.fade-leave-active {
+.fade-enter, .fade-leave-to {
     opacity: 0;
 }
 </style>
