@@ -60,8 +60,10 @@
         </div>
         <div class="mb-4 flex items-center gap-4">
           <div class="w-full">
-            <label class="texto">Tipo de PAM</label>
-            <select v-model="estimacion.tipoPamId" @change="cargarAtributos" class="w-full p-2 border rounded input-standard">
+            <select v-model="estimacion.tipoPamId" 
+              @focus="validarProyectoAntesDeSeleccionarPam"
+              @change="cargarAtributos"
+              class="w-full p-2 border rounded input-standard">
               <option disabled value="">Ingrese el Pasivo Ambiental Minero</option>
               <option v-for="tipoPam in tiposPAM" :key="tipoPam.id" :value="tipoPam.id">
                 {{ tipoPam.name }}
@@ -79,8 +81,8 @@
         
         </p>
         <div class="flex justify-between mt-4">
-          <button v-if="atributos.length" @click="abrirModalAtributos" class="btn-primary">
-            {{ atributosIngresados ? "Ver Atributos" : "Ingresar Atributos" }}
+          <button v-if="atributos.length && atributosIngresados" @click="abrirModalAtributos" class="btn-primary">
+            Ver Atributos
           </button>
           <button v-if="!estimacionGuardada" @click="guardarEstimacion" class="btn-primary">
             Calcular
@@ -100,17 +102,17 @@
         </p>
         <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
         <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
-          <p class="costo-item"><strong>Costo Directo:</strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
-          <p class="costo-item"><strong>Gastos Generales:</strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
-          <p class="costo-item"><strong>Utilidad:</strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
-          <p class="costo-item"><strong>Subtotal:</strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
-          <p class="costo-item"><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
-          <p class="costo-item"><strong>Subtotal Obra:</strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
-          <p class="costo-item"><strong>Expediente Técnico:</strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
-          <p class="costo-item"><strong>Supervisión:</strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
-          <p class="costo-item"><strong>Gestión de Proyectos:</strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
-          <p class="costo-item"><strong>Capacitación:</strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
-          <p class="costo-item"><strong>Contingencias:</strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
+          <p class="costo-item"><strong>Costo Directo:‎ </strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
+          <p class="costo-item"><strong>Gastos Generales:‎ </strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
+          <p class="costo-item"><strong>Utilidad:‎ </strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
+          <p class="costo-item"><strong>Subtotal:‎ </strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
+          <p class="costo-item"><strong>IGV:‎ </strong>  {{ formatNumero(costoEstimado.igv)}}</p>
+          <p class="costo-item"><strong>Subtotal Obra:‎ </strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
+          <p class="costo-item"><strong>Expediente Técnico:‎ </strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
+          <p class="costo-item"><strong>Supervisión:‎ </strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
+          <p class="costo-item"><strong>Gestión de Proyectos:‎ </strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
+          <p class="costo-item"><strong>Capacitación:‎ </strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
+          <p class="costo-item"><strong>Contingencias:‎ </strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
         </div>
         <div class="total-estimado-container">
           <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
@@ -181,6 +183,7 @@ import bdService from "@/main/services/bdservice";
 import jsPDF from "jspdf";
 import { Eye } from 'lucide-vue-next';
 import AlertComponent from "@/components/AlertComponent.vue";
+
 export default {
   components: {
     Eye,
@@ -235,6 +238,7 @@ export default {
       atributosIngresados: false, 
       dropdownOpen: false,
       selectedProjectName: null,
+      tipoPamPrevio: null, // Para almacenar el valor anterior de tipoPamId
     };
   },
   async created() {
@@ -245,18 +249,18 @@ export default {
       this.$router.go(-1);
     },
     toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
-  },
-  selectProject(proyecto) {
-    this.estimacion.proyectoId = proyecto.proyectoId;
-    this.selectedProjectName = proyecto.name;
-    this.cargarTiposPAM();
-    this.dropdownOpen = false; // Cerrar el dropdown
-  },
+      this.dropdownOpen = !this.dropdownOpen;
+    },
+    selectProject(proyecto) {
+      this.estimacion.proyectoId = proyecto.proyectoId;
+      this.selectedProjectName = proyecto.name;
+      this.cargarTiposPAM();
+      this.dropdownOpen = false; // Cerrar el dropdown
+    },
     formatNumero(valor) {
       if (valor == null || isNaN(valor)) return 'S/ 0';
       const roundedValue = Math.round(valor);
-      return `S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
+      return ` S/ ${Number(roundedValue).toLocaleString('es-PE')}`;
     },
     async cargarProyectos() {
       this.proyectos = await bdService.getProyectos();
@@ -264,12 +268,11 @@ export default {
     showAlert(message, type = "error") {
       this.alertMessage = message;
       this.alertType = type;
-      setTimeout(() => {
-        this.alertMessage = null;
-      }, 4000);
     },
     clearAlert() {
-      this.alertMessage = null;
+      setTimeout(() => {
+        this.alertMessage = null;
+      }, 200);
     },
     async cargarTiposPAM() {
       this.tiposPAM = await bdService.getTiposPAM();
@@ -279,74 +282,86 @@ export default {
         this.estimacion.codPam = null;
       }
     },
-    async cargarCostosByProyectoId() {
+    validarProyectoAntesDeSeleccionarPam(event) {
+      console.log("🔹 Ejecutando validación antes de seleccionar Tipo PAM");
+
+      // 💾 Guardar la opción actual antes de cambiarla
+      if (!this.tipoPamPrevio) {
+        this.tipoPamPrevio = this.estimacion.tipoPamId;
+      }
+
+      // 🔍 Validar si se ha seleccionado un proyecto
       if (!this.estimacion.proyectoId) {
-        console.warn("⚠️ No hay proyectoId definido");
+        console.log("⚠️ No se ha seleccionado un proyecto. Mostrando alerta...");
+        this.showAlert("Seleccione un proyecto antes de elegir un Tipo de PAM.", "warning");
+
+        // 🔥 Restaurar la opción anterior sin activar otro evento
+        this.$nextTick(() => {
+          this.estimacion.tipoPamId = this.tipoPamPrevio;
+        });
+
+        event.target.blur(); // Cerrar el menú desplegable
         return;
       }
-      try {
-        const response = await bdService.getCostoTotalByProyectoId(this.estimacion.proyectoId);
-        console.log("🔹 Respuesta de la API para totalCost:", response);
-        if (response && response.totalCost !== undefined) {
-          this.totalProyecto = response.totalCost;
+
+      // 🔍 Verificar si hay datos en los atributos guardados
+      if (Object.keys(this.valoresAtributos).length > 0 && Object.values(this.valoresAtributos).some(value => value)) {
+        const continuar = confirm("Si continúa, se perderán los datos guardados. ¿Desea continuar?");
+
+        if (!continuar) {
+          console.log("❌ Cancelado por el usuario. Restaurando selección previa...");
+
+          // 🔥 Restaurar la opción previa sin activar otro cambio
+          this.$nextTick(() => {
+        this.estimacion.tipoPamId = this.tipoPamPrevio;
+          });
+
+          event.target.blur(); // Cerrar el menú desplegable
+          return;
         } else {
-          console.warn("⚠️ La respuesta de la API no contiene totalCost");
-          this.totalProyecto = 0;
+          // Si el usuario decide continuar, limpiar los atributos
+          this.valoresAtributos = {};
+          this.atributosIngresados = false;
+          this.tipoPamPrevio = null; // 🔄 Actualizar la opción previa con la nueva selección
+          this.estimacion.tipoPamId = null; // 🔄 Limpiar la selección actual
+          this.$nextTick(() => {
+        event.target.focus(); // Abrir automáticamente la lista de tipo de PAM
+          });
+        }
+      }
+
+      // ✅ Si el usuario aceptó, continuar con la carga de atributos
+      this.cargarAtributos(false); // Abrir el modal de atributos automáticamente
+    },
+    async cargarAtributos(abrirModal = true) {
+      if (!this.estimacion.tipoPamId) return;
+      try {
+        const response = await bdService.getAtributosByTipoPamId(this.estimacion.tipoPamId);
+        this.atributos = response || [];
+        this.valoresAtributos = {};
+
+        // Inicializa valores por defecto
+        this.atributos.forEach(atributo => {
+          if (atributo.tipoDato === "decimal") {
+            this.valoresAtributos[atributo.atributoPamId] = 0.0;
+          } else if (atributo.tipoDato === "bool") {
+            this.valoresAtributos[atributo.atributoPamId] = false;
+          } else {
+            this.valoresAtributos[atributo.atributoPamId] = "";
+          }
+        });
+
+        console.log("Atributos cargados:", this.atributos);
+        console.log("Valores asignados:", this.valoresAtributos);
+
+        // Abrir automáticamente el modal de atributos solo si no ha ingresado valores antes y abrirModal es true
+        if (this.atributos.length > 0 && abrirModal) {
+          this.modalAtributos = true;
         }
       } catch (error) {
-        console.error("❌ Error al obtener el costo total del proyecto:", error);
-        this.totalProyecto = 0;
+        console.error("Error al cargar los atributos:", error);
       }
     },
-    async guardarNuevoProyecto() {
-      if (!this.nuevoProyecto.nombre.trim()) {
-        this.showAlert("El nombre del proyecto no puede estar vacío.", "error");
-        return;
-      }
-      const proyectoEnMayusculas = this.nuevoProyecto.nombre.toUpperCase();
-
-      try {
-        const nuevoProyecto = await bdService.createProyecto(proyectoEnMayusculas);
-
-        await this.cargarProyectos();
-
-        this.estimacion.proyectoId = nuevoProyecto.proyectoId;
-
-        this.cargarTiposPAM();
-        this.cerrarModalNuevoProyecto();
-      } catch (error) {
-        this.showAlert("Error al crear proyecto. Puede que el proyecto ya exista.", "error");
-      }
-    },
-    async cargarAtributos() {
-  if (!this.estimacion.tipoPamId) return;
-  try {
-    const response = await bdService.getAtributosByTipoPamId(this.estimacion.tipoPamId);
-    this.atributos = response || [];
-    this.valoresAtributos = {};
-
-    // Inicializa valores por defecto
-    this.atributos.forEach(atributo => {
-      if (atributo.tipoDato === "decimal") {
-        this.valoresAtributos[atributo.atributoPamId] = 0.0;
-      } else if (atributo.tipoDato === "bool") {
-        this.valoresAtributos[atributo.atributoPamId] = false;
-      } else {
-        this.valoresAtributos[atributo.atributoPamId] = "";
-      }
-    });
-
-    console.log("Atributos cargados:", this.atributos);
-    console.log("Valores asignados:", this.valoresAtributos);
-
-    // Abrir automáticamente el modal de atributos solo si no ha ingresado valores antes
-    if (this.atributos.length > 0 && !this.atributosIngresados) {
-      this.modalAtributos = true;
-    }
-  } catch (error) {
-    console.error("Error al cargar los atributos:", error);
-  }
-},
     abrirModalAtributos() {
       this.modalAtributos = true;
     },
@@ -354,25 +369,25 @@ export default {
       this.modalAtributos = false;
     },
     guardarAtributos() {
-    this.atributosIngresados = true;
-    let valid = true;
+      this.atributosIngresados = true;
+      let valid = true;
 
-    this.atributos.forEach(atributo => {
+      this.atributos.forEach(atributo => {
         const valor = this.valoresAtributos[atributo.atributoPamId];
         if (atributo.tipoDato !== 'bool' && !valor) {
-            valid = false;
+          valid = false;
         }
         this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
-    });
+      });
 
-    if (!valid) {
+      if (!valid) {
         this.showAlert("Todos los atributos son obligatorios.", "error");
         return;
-    }
+      }
 
-    this.showAlert("Atributos guardados correctamente.", "success");
-    this.cerrarModalAtributos();
-},
+      this.showAlert("Atributos guardados correctamente.", "success");
+      this.cerrarModalAtributos();
+    },
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
     },
@@ -383,14 +398,15 @@ export default {
     bloquearProyecto() {
       this.proyectoBloqueado = !this.proyectoBloqueado;
     },
-  
     limpiarFormulario() {
       this.estimacion.codPam = null;
       this.estimacion.tipoPamId = null;
       this.atributos = [];
       this.valoresAtributos = {};
       this.costoEstimado = null;
-      this.estimacionGuardada = false; 
+      this.estimacionGuardada = false;
+      this.atributosIngresados = false;
+      this.modalAtributos = false; 
     },
     toggleDetalle() {
       this.mostrarDetalle = !this.mostrarDetalle;
@@ -431,12 +447,9 @@ export default {
         }
         await this.cargarCostosByProyectoId();
       } catch (error) {
-        console.error("Error al crear la estimación:", error.response ? error.response.data : error);
-        this.error = "Error al crear estimación";
-        this.clearErrorAfterTimeout();
+        this.showAlert("Error al guardar la estimación.", "error");
       }
     },
-
     clearErrorAfterTimeout() {
       setTimeout(() => {
         this.error = null;
@@ -447,135 +460,134 @@ export default {
     },
     mostrarModalCobertura(atributoPamId) {
       this.cerrarModalAtributos(); 
-    this.atributoPamIdSeleccionado = atributoPamId;
-    this.mostrarModalCoberturas = true;
+      this.atributoPamIdSeleccionado = atributoPamId;
+      this.mostrarModalCoberturas = true;
     },
     cerrarModalCobertura() {
       this.mostrarModalCoberturas = false;
       this.abrirModalAtributos(); 
-
     },
     seleccionarCobertura(value) {
       this.valoresAtributos[this.atributoPamIdSeleccionado] = value;
       this.cerrarModalCobertura();
     },
     descargarPDF() {
-    const doc = new jsPDF("p", "mm", "a4");
+      const doc = new jsPDF("p", "mm", "a4");
 
-    // **Título principal**
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(19);
-    doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+      // **Título principal**
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(19);
+      doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
-    // **Encabezado con Proyecto, Tipo de PAM e ID de PAM**
-    doc.setFontSize(12);
-    doc.setFont("helvetica");
-    doc.text(`Proyecto: ${this.selectedProjectName || "No definido"}`, 15, 30);
-    doc.text(`Tipo de PAM: ${this.tiposPAM.find(p => p.id === this.estimacion.tipoPamId)?.name || "No definido"}`, 15, 40);
+      // **Encabezado con Proyecto, Tipo de PAM e ID de PAM**
+      doc.setFontSize(12);
+      doc.setFont("helvetica");
+      doc.text(`Proyecto: ${this.selectedProjectName || "No definido"}`, 15, 30);
+      doc.text(`Tipo de PAM: ${this.tiposPAM.find(p => p.id === this.estimacion.tipoPamId)?.name || "No definido"}`, 15, 40);
 
-    // **Primera tabla: Información del usuario**
-    const tableColumnsUsuario = ["Descripción", "Valor"];
-    const tableRowsUsuario = [
-        ["Usuario", localStorage.getItem('idUser') || "Desconocido"],
-        ["Fecha", this.fecha || "N/A"]
-    ];
+      // **Primera tabla: Información del usuario**
+      const tableColumnsUsuario = ["Descripción", "Valor"];
+      const tableRowsUsuario = [
+          ["Usuario", localStorage.getItem('idUser') || "Desconocido"],
+          ["Fecha", this.fecha || "N/A"]
+      ];
 
-    doc.autoTable({
-        startY: 50,
-        head: [tableColumnsUsuario],
-        body: tableRowsUsuario,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [39, 174, 96] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+      doc.autoTable({
+          startY: 50,
+          head: [tableColumnsUsuario],
+          body: tableRowsUsuario,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [39, 174, 96] },
+          alternateRowStyles: { fillColor: [240, 240, 240] },
+          margin: { left: 15, right: 15 }
+      });
 
-    // **Segunda tabla: Características**
-    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
-    const tableRowsCaracteristicas = this.atributos.map(atributo => [
-        this.obtenerDescripcionAtributo(atributo.nombre),
-        this.valoresAtributos[atributo.atributoPamId] || "N/A"
-    ]);
+      // **Segunda tabla: Características**
+      const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+      const tableRowsCaracteristicas = this.atributos.map(atributo => [
+          this.obtenerDescripcionAtributo(atributo.nombre),
+          this.valoresAtributos[atributo.atributoPamId] || "N/A"
+      ]);
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [tableColumnsCaracteristicas],
-        body: tableRowsCaracteristicas,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [46, 204, 113] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+      doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 10,
+          head: [tableColumnsCaracteristicas],
+          body: tableRowsCaracteristicas,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [46, 204, 113] },
+          alternateRowStyles: { fillColor: [240, 240, 240] },
+          margin: { left: 15, right: 15 }
+      });
 
-    // **Tercera tabla: Desglose del Total Estimado**
-    const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
-    const tableRowsCostoCierre = [
-        ["Costo Directo", this.formatNumero(this.costoEstimado?.costoDirecto)],
-        ["Gastos Generales", this.formatNumero(this.costoEstimado?.gastosGenerales)],
-        ["Utilidad", this.formatNumero(this.costoEstimado?.utilidades)],
-        ["Subtotal", this.formatNumero(this.costoEstimado?.subTotal)],
-        ["Subtotal Obra", this.formatNumero(this.costoEstimado?.subTotalObras)]
-    ];
+      // **Tercera tabla: Desglose del Total Estimado**
+      const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
+      const tableRowsCostoCierre = [
+          ["Costo Directo", this.formatNumero(this.costoEstimado?.costoDirecto)],
+          ["Gastos Generales", this.formatNumero(this.costoEstimado?.gastosGenerales)],
+          ["Utilidad", this.formatNumero(this.costoEstimado?.utilidades)],
+          ["Subtotal", this.formatNumero(this.costoEstimado?.subTotal)],
+          ["Subtotal Obra", this.formatNumero(this.costoEstimado?.subTotalObras)]
+      ];
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [tableColumnsCostoCierre],
-        body: tableRowsCostoCierre,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [39, 174, 96] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+      doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 10,
+          head: [tableColumnsCostoCierre],
+          body: tableRowsCostoCierre,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [39, 174, 96] },
+          alternateRowStyles: { fillColor: [240, 240, 240] },
+          margin: { left: 15, right: 15 }
+      });
 
-    // **Cuarta tabla: Otros costos adicionales**
-    const tableColumnsOtros = ["Otros", "Valor"];
-    const tableRowsOtros = [
-        ["IGV 18%", this.formatNumero(this.costoEstimado?.igv)],
-        ["Expediente Técnico 6%", this.formatNumero(this.costoEstimado?.expedienteTecnico)],
-        ["Supervisión 15%", this.formatNumero(this.costoEstimado?.supervision)],
-        ["Gestión de Proyectos 5%", this.formatNumero(this.costoEstimado?.gestionProyecto)],
-        ["Capacitación 1%", this.formatNumero(this.costoEstimado?.capacitacion)],
-        ["Contingencias 6%", this.formatNumero(this.costoEstimado?.contingencias)]
-    ];
+      // **Cuarta tabla: Otros costos adicionales**
+      const tableColumnsOtros = ["Otros", "Valor"];
+      const tableRowsOtros = [
+          ["IGV 18%", this.formatNumero(this.costoEstimado?.igv)],
+          ["Expediente Técnico 6%", this.formatNumero(this.costoEstimado?.expedienteTecnico)],
+          ["Supervisión 15%", this.formatNumero(this.costoEstimado?.supervision)],
+          ["Gestión de Proyectos 5%", this.formatNumero(this.costoEstimado?.gestionProyecto)],
+          ["Capacitación 1%", this.formatNumero(this.costoEstimado?.capacitacion)],
+          ["Contingencias 6%", this.formatNumero(this.costoEstimado?.contingencias)]
+      ];
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [tableColumnsOtros],
-        body: tableRowsOtros,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [30, 132, 73] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+      doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 10,
+          head: [tableColumnsOtros],
+          body: tableRowsOtros,
+          theme: "grid",
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [30, 132, 73] },
+          alternateRowStyles: { fillColor: [240, 240, 240] },
+          margin: { left: 15, right: 15 }
+      });
 
-    // **Total Estimado final**
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(
-        `Total Estimado: ${this.formatNumero(this.costoEstimado?.totalEstimado)}`,
-        doc.internal.pageSize.getWidth() / 2,
-        doc.lastAutoTable.finalY + 10,
-        { align: 'center' }
-    );
+      // **Total Estimado final**
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(
+          `Total Estimado: ${this.formatNumero(this.costoEstimado?.totalEstimado)}`,
+          doc.internal.pageSize.getWidth() / 2,
+          doc.lastAutoTable.finalY + 10,
+          { align: 'center' }
+      );
 
-    // **Nota de precisión**
-    doc.setFontSize(8);
-    doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", 
-        doc.internal.pageSize.getWidth() / 2, doc.lastAutoTable.finalY + 40, { align: 'center' });
+      // **Nota de precisión**
+      doc.setFontSize(8);
+      doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", 
+          doc.internal.pageSize.getWidth() / 2, doc.lastAutoTable.finalY + 40, { align: 'center' });
 
-    // **Número de página**
-    const pageCount = doc.internal.getNumberOfPages();
-    doc.setFontSize(8);
-    doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+      // **Número de página**
+      const pageCount = doc.internal.getNumberOfPages();
+      doc.setFontSize(8);
+      doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
 
-    // **Generar el PDF**
- const pdfUrl = doc.output('bloburl');
-    window.open(pdfUrl, '_blank');},
-
+      // **Generar el PDF**
+      const pdfUrl = doc.output('bloburl');
+      window.open(pdfUrl, '_blank');
+    },
   }
 };
 </script>
@@ -1004,13 +1016,14 @@ body {
   grid-template-columns: repeat(2, 1fr);  
   gap: 16px;
   padding: 16px;
+  justify-content: flex-start; /* Asegura que los elementos inicien alineados */
 }
-
 .costo-item {
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 8px;
   color: #333;
+  display: flex; /* Mantiene la estructura horizontal */
 }
 
 .total-estimado-container {
@@ -1252,7 +1265,6 @@ body {
   display: flex;
   flex-direction: column;
   width: 50%;
-  font-family: sans-serif;
 }
 .fecha-container {
   display: flex;

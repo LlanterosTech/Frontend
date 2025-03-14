@@ -4,7 +4,7 @@
             <div class="forgot">
             <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
             <p class="description">
-                Por favor ingresa tu dirección de correo electrónico y reinicia tu contraseña.
+                Ingrese su dirección de correo electrónico para restablecer su contraseña.
             </p>
     
             <form @submit.prevent="handleForgotPassword">
