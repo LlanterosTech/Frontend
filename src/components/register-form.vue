@@ -50,7 +50,8 @@ export default {
         password: "",
         name: "",
         registerArea: "", 
-       
+        role: "User", 
+
       },
       error: null,
       alertMessage: null,

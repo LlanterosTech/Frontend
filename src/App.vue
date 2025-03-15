@@ -18,15 +18,29 @@ export default {
   components: {
     LogoutButton
   },
+  data() {
+    return {
+      isAuthenticated: false
+    }
+  },
   computed: {
     showLogoutButton() {
       const noLogoutRoutes = ["/login", "/register"];
-      return !noLogoutRoutes.includes(this.$route.path);
+      return this.isAuthenticated && !noLogoutRoutes.includes(this.$route.path);
     }
   },
-  created() {
-    if (localStorage.getItem('token')) {
-      startInactivityTimer(userService.logoutUser);
+  async created() {
+    try {
+      const user = await userService.getInfoUser(); // 🔥 Obtiene usuario desde la API
+      if (user) {
+        this.isAuthenticated = true;
+        startInactivityTimer(userService.logoutUser); // Iniciar temporizador de inactividad
+      } else {
+        this.isAuthenticated = false;
+      }
+    } catch (error) {
+      console.error("Error verificando autenticación:", error);
+      this.isAuthenticated = false;
     }
   }
 };

@@ -183,6 +183,7 @@ import bdService from "@/main/services/bdservice";
 import jsPDF from "jspdf";
 import { Eye } from 'lucide-vue-next';
 import AlertComponent from "@/components/AlertComponent.vue";
+import userService from "@/main/services/userservice";
 
 export default {
   components: {
@@ -218,7 +219,7 @@ export default {
         { value: 'IV', label: 'Cobertura IV', img: require('@/assets/tipo4.jpg') }
       ],
       estimacion: {
-        usuarioId: localStorage.getItem('idUser'),
+        usuarioId: null,
         proyectoId: null,
         codPam: null,
         tipoPamId: null,
@@ -242,9 +243,25 @@ export default {
     };
   },
   async created() {
+    await this.obtenerUsuario();
     await this.cargarProyectos();
   },
   methods: {
+    async obtenerUsuario() {
+    try {
+        const response = await userService.getInfoUser(); // Llama a la API para obtener el usuario
+        if (response) {
+            this.usuarioId = response.id; // Asigna el ID del usuario al componente
+        } else {
+            console.warn("⚠️ No se encontró un usuario autenticado.");
+            this.$router.push('/login'); // Redirigir si no está autenticado
+        }
+    } catch (error) {
+        console.error("❌ Error obteniendo usuario:", error);
+        this.$router.push('/login'); // Redirigir si hay un error
+    }
+},
+
     async goBack() {
       this.$router.go(-1);
     },
@@ -280,6 +297,44 @@ export default {
     toggleIdPam() {
       if (this.idPamBloqueado) {
         this.estimacion.codPam = null;
+      }
+    },
+    async cargarCostosByProyectoId() {
+      if (!this.estimacion.proyectoId) {
+        console.warn("⚠️ No hay proyectoId definido");
+        return;
+      }
+      try {
+        const response = await bdService.getCostoTotalByProyectoId(this.estimacion.proyectoId);
+        console.log("🔹 Respuesta de la API para totalCost:", response);
+        if (response && response.totalCost !== undefined) {
+          this.totalProyecto = response.totalCost;
+        } else {
+          console.warn("⚠️ La respuesta de la API no contiene totalCost");
+          this.totalProyecto = 0;
+        }
+      } catch (error) {
+        console.error("❌ Error al obtener el costo total del proyecto:", error);
+        this.totalProyecto = 0;
+      }
+    },
+    async guardarNuevoProyecto() {
+      if (!this.nuevoProyecto.nombre.trim()) {
+        alert("El nombre del proyecto no puede estar vacío.");
+        return;
+      }
+
+      try {
+        const nuevoProyecto = await bdService.createProyecto(this.nuevoProyecto.nombre);
+
+        await this.cargarProyectos();
+
+        this.estimacion.proyectoId = nuevoProyecto.proyectoId;
+
+        this.cargarTiposPAM();
+        this.cerrarModalNuevoProyecto();
+      } catch (error) {
+        alert("Error al crear el proyecto.");
       }
     },
     validarProyectoAntesDeSeleccionarPam(event) {
@@ -412,7 +467,7 @@ export default {
       this.mostrarDetalle = !this.mostrarDetalle;
     },
     async guardarEstimacion() {
-      const storedUserId = localStorage.getItem("idUser");
+      const storedUserId = this.usuarioId;
       if (!storedUserId) {
         this.error = "No se encontró un usuario autenticado.";
         this.clearErrorAfterTimeout();
@@ -488,7 +543,7 @@ export default {
       // **Primera tabla: Información del usuario**
       const tableColumnsUsuario = ["Descripción", "Valor"];
       const tableRowsUsuario = [
-          ["Usuario", localStorage.getItem('idUser') || "Desconocido"],
+          ["Usuario", this.usuarioId || "Desconocido"],
           ["Fecha", this.fecha || "N/A"]
       ];
 

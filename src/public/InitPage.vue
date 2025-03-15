@@ -36,22 +36,28 @@ import userService from "@/main/services/userservice";
 export default {
   data() {
     return {
-      userId: "",
       userName: "",
     };
   },
   async created() {
-    try {
-       const userId=localStorage.getItem('idUser');
-      const user = await userService.getAuthUser(userId);
-      console.log(user);
-      this.userName = user.name;
-    } catch (error) {
-      console.error("Error al obtener el usuario:", error);
-      this.userName = "Usuario";
-    }
+    await this.loadUserData(); // Llama a la función al crear el componente
   },
   methods: {
+    async loadUserData() {
+      try {
+        const user = await userService.getInfoUser(); // Llama al servicio de usuario
+        if (user) {
+          this.userName = user.name; // Asigna el nombre del usuario
+        } else {
+          console.warn("⚠️ No se encontró un usuario autenticado.");
+          this.$router.push('/login'); // Redirige si no hay usuario autenticado
+        }
+      } catch (error) {
+        console.error("❌ Error obteniendo usuario:", error);
+        this.userName = "Usuario";
+        this.$router.push('/login'); // Redirige en caso de error
+      }
+    },
     irCalculadora() {
       this.$router.push("/nuevaestimacion");
     },

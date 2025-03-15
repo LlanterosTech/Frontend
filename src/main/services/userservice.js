@@ -1,6 +1,7 @@
 import api from "@/../api/api";
 
 const userService = {
+    // 🔹 REGISTRO DE USUARIO
     async registerUser(userData) {
         try {
             const response = await api.post("/authentication/sign-up", userData);
@@ -10,90 +11,73 @@ const userService = {
             throw error.response ? error.response.data : "Error de red o del servidor";
         }
     },
+
+    // 🔹 LOGIN DE USUARIO (SE USA HttpOnly COOKIE)
     async loginUser(credentials) {
         try {
-            console.log("🔹 Enviando solicitud de login con:", credentials);
-    
             const response = await api.post("/authentication/sign-in", credentials);
-            console.log(" Respuesta completa de loginUser:", response);
-    
-            if (!response || !response.data || !response.data.resource || !response.data.resource.token) {
-                throw new Error(" No se recibió un token válido.");
-            }
-    
-            localStorage.setItem("token", response.data.resource.token);
-            localStorage.setItem("refreshToken", response.data.refreshToken || "");
-            localStorage.setItem("idUser", response.data.resource.id);
-    
-            console.log(" Tokens guardados correctamente en localStorage.");
-            return response.data;
+            return response;  // 🔥 RETORNAR la respuesta completa
         } catch (error) {
-            console.error(" Error en loginUser:", error);
-    
-            if (error.response) {
-                console.error(" Respuesta del servidor:", error.response.data);
-                console.error(" Código de estado:", error.response.status);
-            } else if (error.request) {
-                console.error(" No se recibió respuesta. Request:", error.request);
-            } else {
-                console.error(" Error inesperado:", error.message);
-            }
-    
-            throw error.response ? error.response.data : "Error de red o del servidor";
+            console.error("❌ Error en loginUser:", error);
+            throw error;  // 🔥 Re-lanzar el error para que lo capture `handleLogin`
         }
     },
     
-    
-    
+    // 🔹 REFRESCAR TOKEN (SE USA HttpOnly COOKIE)
     async refreshToken() {
         try {
-            const refreshToken = localStorage.getItem("token");
-    
-            if (!refreshToken) {
-                console.warn(" No hay refreshToken disponible en localStorage.");
-                throw new Error("No refresh token available");
-            }
-    
-            console.log(" Enviando solicitud para refrescar token...");
-            const response = await api.post("/authentication/refresh-token", { refreshToken });
-    
-            console.log("Token refrescado correctamente:", response.data);
-    
-            localStorage.setItem("token", response.data.accessToken);
-            localStorage.setItem("refreshToken", response.data.refreshToken);
-    
+            console.log("🔄 Enviando solicitud para refrescar token...");
+            const response = await api.post("/authentication/refresh-token", {}, { withCredentials: true });
+
+            console.log("✅ Token refrescado correctamente.");
             return response.data.accessToken;
         } catch (error) {
-            console.error(" Error al refrescar el token:", error);
-            throw error.response ? error.response.data : "Error de red o del servidor";
-        }
-    }
-    ,
-    async logoutUser() {
-        try {
-            const refreshToken = localStorage.getItem("refreshToken");
-
-            if (refreshToken) {
-                await api.post("/authentication/sign-out", { refreshToken });
-            }
-
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("idUser");
-        } catch (error) {
-            console.error("Error logging out:", error);
+            console.error("❌ Error al refrescar el token:", error);
             throw error.response ? error.response.data : "Error de red o del servidor";
         }
     },
+
     async getAuthUser(userId) {
         try {
             const response = await api.get(`/auth-user/${userId}`);
             return response.data;
         } catch (error) {
-            console.error("Error logging in:", error);
+            console.error("❌ Error obteniendo usuario por ID:", error);
             throw error.response ? error.response.data : "Error de red o del servidor";
         }
     },
+
+    // 🔹 LOGOUT DEL USUARIO (ELIMINA COOKIES)
+    async logoutUser() {
+        try {
+            await api.post("/authentication/sign-out", {}, { withCredentials: true });
+            console.log("✅ Sesión cerrada correctamente.");
+        } catch (error) {
+            console.error("❌ Error en logoutUser:", error);
+            throw error.response ? error.response.data : "Error de red o del servidor";
+        }
+    },
+
+    // 🔹 OBTENER INFORMACIÓN DEL USUARIO (USA HttpOnly COOKIES)
+    async getInfoUser() {
+        try {
+            console.log("🔍 Haciendo petición a /auth-user/me...");
+    
+            const response = await api.get("/auth-user/me", {
+                withCredentials: true, // 🔥 Asegura que las cookies sean enviadas
+                headers: {
+                    Authorization: `Bearer ${document.cookie.split('; ').find(row => row.startsWith('AuthToken='))
+                        ?.split('=')[1] || ""}` // 🔥 Asegura que el token se envíe en la cabecera
+                }
+            });
+    
+            console.log("✅ Usuario obtenido correctamente:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("❌ Error obteniendo usuario:", error);
+            return null;
+        }
+    }
 };
 
 export default userService;

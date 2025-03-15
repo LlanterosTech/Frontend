@@ -9,7 +9,7 @@ import HistoralEstimacion from '@/public/HistoralEstimacion.vue';
 import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue"; 
 import HelloWorld from '@/components/HelloWorld.vue'; // Import correcto
-
+import userService from '@/main/services/userservice';
 const routes = [
     {
         path: '/',
@@ -62,7 +62,7 @@ const routes = [
         path: '/hello',
         name: 'HelloWorld',
         component: HelloWorld,
-        meta: { title: 'Hola Mundo' , requiresAuth: false }
+        meta: { title: 'Hola Mundo' , requiresAuth: true,role: "Admin" }
     },
     {
         path: "/reset-password",
@@ -73,12 +73,17 @@ const routes = [
     {
         path: '/:catchAll(.*)',
         name: 'not-found',
-        beforeEnter: (to, from, next) => {
-            const isAuthenticated = localStorage.getItem('token');
-            if (isAuthenticated) {
-                next('/init');
-            } else {
-                next('/login');
+        beforeEnter: async (to, from, next) => {
+            try {
+                const user = await userService.getInfoUser();
+                if (user) {
+                    next('/init'); // ✅ Usuario autenticado, redirigir a /init
+                } else {
+                    next('/login'); // ❌ No autenticado, redirigir a /login
+                }
+            } catch (error) {
+                console.error("Error obteniendo usuario:", error);
+                next('/login'); // ❌ Manejo seguro de error
             }
         }
     },
@@ -90,33 +95,32 @@ const router = createRouter({
     routes
 });
 
-function isTokenValid(token) {
 
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const expiration = payload.exp * 1000;
-        return Date.now() < expiration;
-    } catch (e) {
-        return false;
-    }
-}
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title || 'App';
 
-    const token = localStorage.getItem('token');
-    const isAuthenticated = token && isTokenValid(token);
+    try {
+        const user = await userService.getInfoUser(); // 🔍 Obtener usuario desde la API
+        const isAuthenticated = !!user; // Si hay un usuario, está autenticado
+        const userRole = user?.role || "User"; // Si no tiene rol, por defecto es "User"
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/login');
-    } else {
-        if (!['/', '/register'].includes(to.path)) {
-            localStorage.setItem('lastRoute', to.path);
+        // 🔐 Verificar si la ruta requiere autenticación
+        if (to.meta.requiresAuth && !isAuthenticated) {
+            next('/login');
         }
-        next();
+        // 🔐 Verificar si la ruta tiene restricciones por rol
+        else if (to.meta.role && userRole !== to.meta.role) {
+            next('/'); // Redirigir al home si no tiene permisos
+        } 
+        else {
+            next();
+        }
+    } catch (error) {
+        console.error("Error verificando autenticación:", error);
+        next('/login'); // ❌ Si hay un error, redirigir al login
     }
 });
-
 // window.addEventListener('load', () => {
 //     const lastRoute = localStorage.getItem('lastRoute');
 //     const token = localStorage.getItem('token');

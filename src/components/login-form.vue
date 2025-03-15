@@ -2,6 +2,7 @@
   <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
 
   <div class="container fondo">
+
     <div class = "content">
       <div class="text-box">
         <h1>PAM Calculator</h1>
@@ -96,62 +97,64 @@ export default {
       }, 200);
     },
     async handleLogin(event) {
-      if (event) event.preventDefault(); // 🔥 Bloquea cualquier intento de recarga accidental
+    if (event) event.preventDefault(); 
+    console.log("🔥 handleLogin ejecutado");
 
-      console.log("🔥 handleLogin ejecutado"); // 🟢 Debug
-
-      try {
+    try {
         this.error = null;
 
         if (!window.grecaptcha || !window.grecaptcha.getResponse) {
-          console.log("⚠️ reCAPTCHA no está cargado.");
-          this.showAlert("Error: reCAPTCHA no está cargado.", "error");
-          return;
+            console.log("⚠️ reCAPTCHA no está cargado.");
+            this.showAlert("Error: reCAPTCHA no está cargado.", "error");
+            return;
         }
 
         const recaptchaResponse = window.grecaptcha.getResponse();
         if (!recaptchaResponse) {
-          console.log("⚠️ CAPTCHA no completado.");
-          this.showAlert("Por favor, completa el CAPTCHA.", "error");
-          return;
+            console.log("⚠️ CAPTCHA no completado.");
+            this.showAlert("Por favor, completa el CAPTCHA.", "error");
+            return;
         }
 
         const credentials = {
-          email: this.email,
-          password: this.password,
-          recaptchaResponse
+            email: this.email,
+            password: this.password,
+            recaptchaResponse
         };
 
         console.log("🔹 Enviando credenciales:", credentials);
 
         const response = await userService.loginUser(credentials);
+        
+        console.log("✅ Respuesta completa del backend:", response);
 
-        console.log("✅ Respuesta del servidor:", response);
-
-        if (response && response.resource.token) {
-          console.log("🔹 Redirigiendo a /init");
-          this.$router.push("/init"); 
-        } else {
-          console.log("❌ No se recibió un token válido.");
-          throw new Error("Error: No se recibió un token válido.");
+        if (!response) {
+            throw new Error("Error: La respuesta del backend es undefined.");
         }
-      } catch (error) {
+
+        if (response?.status === 200) {
+            console.log("✅ Login exitoso. Redirigiendo...");
+            this.$router.push("/init");
+        } else {
+            console.log("❌ Error en login: Respuesta inesperada.");
+            throw new Error("Error: Respuesta inesperada.");
+        }
+    } catch (error) {
         console.error("❌ Error en login:", error);
 
-        if (error.response && error.response.status === 401) {
-          this.showAlert(error.message || "Error inesperado.", "error");
-
+        if (error.response?.status === 401) {
+            this.showAlert(error.message || "Error inesperado.", "error");
         } else {
-          this.showAlert("Usuario o contraseña incorrectos.", "error");
-          this.inputError = true; // Activa el estado de error en los inputs
-          setTimeout(() => {
-            this.inputError = false; // Desactiva el estado de error después de 2 segundos
-          }, 2000);
+            this.showAlert("Usuario o contraseña incorrectos.", "error");
+            this.inputError = true;
+            setTimeout(() => {
+                this.inputError = false;
+            }, 2000);
         }
 
         return;
-      }
-    },
+    }
+},
     goToRegister() {
       console.log("🔹 Navegando a registro");
       this.$router.push("/register");
