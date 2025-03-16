@@ -429,7 +429,7 @@ export default {
 
       this.atributos.forEach(atributo => {
         const valor = this.valoresAtributos[atributo.atributoPamId];
-        if (atributo.tipoDato !== 'bool' && !valor) {
+        if (atributo.tipoDato !== 'bool' && !valor && valor !== 0) {
           valid = false;
         }
         this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
@@ -480,7 +480,7 @@ export default {
       let valid = true;
       this.atributos.forEach(atributo => {
         const valor = this.valoresAtributos[atributo.atributoPamId];
-        if (atributo.tipoDato !== 'bool' && !valor) {
+        if (atributo.tipoDato !== 'bool'&& !valor && valor !== 0) {
           valid = false;
         }
         this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
