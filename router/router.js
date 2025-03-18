@@ -8,6 +8,7 @@ import BuscarEstimacion from "@/public/BuscarEstimacion.vue";
 import HistoralEstimacion from '@/public/HistoralEstimacion.vue';
 import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue"; 
+import VerifyAccount from "@/components/VerifyAccount.vue";
 import HelloWorld from '@/components/HelloWorld.vue'; // Import correcto
 import userService from '@/main/services/userservice';
 const routes = [
@@ -69,6 +70,12 @@ const routes = [
         name: "ResetPassword",
         component: ResetPassword,
         meta: { title: "Restablecer Contraseña" }
+    },
+    {
+        path: "/verify-account",
+        name: "VerifyAccount",
+        component: VerifyAccount,
+        meta: { title: "Verificación de Cuenta" }
     },
     {
         path: '/:catchAll(.*)',
