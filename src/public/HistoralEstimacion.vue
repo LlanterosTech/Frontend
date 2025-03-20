@@ -120,127 +120,166 @@
     descargarPDF(estimacion) {
     const doc = new jsPDF("p", "mm", "a4");
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(19);
-    doc.text("Detalle de Estimación", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-   
+    // **Cargar el logo de AMSAC con proporciones correctas**
+    const logo = new Image();
+    logo.src = require("@/assets/cropped-logo-amsac.png"); 
 
-    // **Encabezado con Proyecto, Tipo de PAM e ID de PAM**
-    doc.setFontSize(12);
-    doc.setFont("helvetica");
-    doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, 30);
-    doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, 40);
-    doc.text(`ID de PAM: ${estimacion.codPam}`, 15, 50);
+    logo.onload = () => {
+        // **Agregar el logo a la izquierda**
+        const logoWidth = 25;
+        const logoHeight = 18;
+        const logoX = 15; 
+        const logoY = 10; 
 
-    // **Primera tabla: Información del usuario**
-    const tableColumnsUsuario = ["Descripción", "Valor"];
-    const tableRowsUsuario = [
-        ["Usuario", estimacion.usuario.email || "Desconocido"],
-        ["Departamento", estimacion.usuario.registerArea || "No definido"],
-        ["Fecha", this.formatFecha(estimacion.fechaPam) || "N/A"]
-    ];
+        doc.addImage(logo, "PNG", logoX, logoY, logoWidth, logoHeight);
 
-    doc.autoTable({
-        startY: 60,
-        head: [tableColumnsUsuario],
-        body: tableRowsUsuario,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [39, 174, 96] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+        // **Ajustar título (centrado y alineado con el logo)**
+        const titleX = doc.internal.pageSize.getWidth() / 2;
+        const titleY = 20;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(18);
+        doc.text("Detalle de Estimación", titleX, titleY, { align: 'center' });
 
-    // **Segunda tabla: Características**
-    const tableColumnsCaracteristicas = ["Descripción", "Valor"];
-    const tableRowsCaracteristicas = [
-        ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
-        ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
-        ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
-        ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
-        ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
-        ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
-        ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
-    ];
+        // **Encabezado con Proyecto, Tipo de PAM e ID**
+        doc.setFontSize(12);
+        doc.setFont("helvetica");
+        const headerY = 40;
+        doc.text(`Proyecto: ${estimacion.proyecto.name}`, 15, headerY);
+        doc.text(`Tipo de PAM: ${estimacion.tipoPam.name}`, 15, headerY + 8);
+        doc.text(`ID de PAM: ${estimacion.codPam}`, 15, headerY + 16);
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [tableColumnsCaracteristicas],
-        body: tableRowsCaracteristicas,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [46, 204, 113] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+        let startY = headerY + 20;
 
-    // **Tercera tabla: Desglose del Total Estimado**
-    const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
-    const tableRowsCostoCierre = [
-        ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
-        ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
-        ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
-        ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
-        ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)]
-    ];
+        // **Tabla 1: Información del usuario**
+        const tableColumnsUsuario = ["Descripción", "Valor"];
+        const tableRowsUsuario = [
+            ["Usuario", estimacion.usuario.email || "Desconocido"],
+            ["Departamento", estimacion.usuario.registerArea || "No definido"],
+            ["Fecha", this.formatFecha(estimacion.fechaPam) || "N/A"]
+        ];
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [tableColumnsCostoCierre],
-        body: tableRowsCostoCierre,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [39, 174, 96] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+        doc.autoTable({
+            startY,
+            head: [tableColumnsUsuario],
+            body: tableRowsUsuario,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [39, 174, 96] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 }
+        });
 
-    // **Cuarta tabla: Otros costos adicionales**
-    const tableColumnsOtros = ["Otros", "Valor"];
-    const tableRowsOtros = [
-        ["IGV 18%", this.formatNumero(estimacion.costoEstimado?.igv)],
-        ["Expediente Técnico 6%", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
-        ["Supervisión 15%", this.formatNumero(estimacion.costoEstimado?.supervision)],
-        ["Gestión de Proyectos 5%", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
-        ["Capacitación 1%", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
-        ["Contingencias 6%", this.formatNumero(estimacion.costoEstimado?.contingencias)]
-    ];
+        startY = doc.lastAutoTable.finalY + 10;
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 10,
-        head: [tableColumnsOtros],
-        body: tableRowsOtros,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [30, 132, 73] },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        margin: { left: 15, right: 15 }
-    });
+        // **Tabla 2: Características**
+        const tableColumnsCaracteristicas = ["Descripción", "Valor"];
+        const tableRowsCaracteristicas = [
+            ["Volumen (m³)", estimacion.valores?.find(v => v.atributoPamId === 1)?.valor || "N/A"],
+            ["Área (m²)", estimacion.valores?.find(v => v.atributoPamId === 2)?.valor || "N/A"],
+            ["Generación DAR", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 3)?.valor)],
+            ["Cobertura", this.convertirBooleano(estimacion.valores?.find(v => v.atributoPamId === 4)?.valor)],
+            ["Tipo de cierre", estimacion.valores?.find(v => v.atributoPamId === 5)?.valor || "N/A"],
+            ["Tipo de cobertura", estimacion.valores?.find(v => v.atributoPamId === 6)?.valor || "N/A"],
+            ["Distancia (Km)", estimacion.valores?.find(v => v.atributoPamId === 7)?.valor || "N/A"]
+        ];
 
-    // **Total Estimado final**
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(
-        `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
-        doc.internal.pageSize.getWidth() / 2,
-        doc.lastAutoTable.finalY + 10,
-        { align: 'center' }
-    );
+        doc.autoTable({
+            startY,
+            head: [tableColumnsCaracteristicas],
+            body: tableRowsCaracteristicas,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [46, 204, 113] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 }
+        });
 
-    // **Nota de precisión**
-    doc.setFontSize(8);
-    doc.text("La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)", 
-        doc.internal.pageSize.getWidth() / 2, doc.lastAutoTable.finalY + 40, { align: 'center' });
+        startY = doc.lastAutoTable.finalY + 10;
 
-    // **Número de página**
-    const pageCount = doc.internal.getNumberOfPages();
-    doc.setFontSize(8);
-    doc.text(`Página ${pageCount}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+        // **Tabla 3: Desglose del Total Estimado**
+        const tableColumnsCostoCierre = ["Estimación de costo de cierre", "Valor"];
+        const tableRowsCostoCierre = [
+            ["Costo Directo", this.formatNumero(estimacion.costoEstimado?.costoDirecto)],
+            ["Gastos Generales", this.formatNumero(estimacion.costoEstimado?.gastosGenerales)],
+            ["Utilidad", this.formatNumero(estimacion.costoEstimado?.utilidades)],
+            ["Subtotal", this.formatNumero(estimacion.costoEstimado?.subTotal)],
+            ["Subtotal Obra", this.formatNumero(estimacion.costoEstimado?.subTotalObras)]
+        ];
 
-    // **Generar el PDF**
-    const pdfUrl = doc.output('bloburl');
-    window.open(pdfUrl, '_blank');
+        doc.autoTable({
+            startY,
+            head: [tableColumnsCostoCierre],
+            body: tableRowsCostoCierre,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [39, 174, 96] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 }
+        });
+
+        startY = doc.lastAutoTable.finalY + 10;
+
+        // **Tabla 4: Otros costos adicionales**
+        const tableColumnsOtros = ["Otros", "Valor"];
+        const tableRowsOtros = [
+            ["IGV 18%", this.formatNumero(estimacion.costoEstimado?.igv)],
+            ["Expediente Técnico 6%", this.formatNumero(estimacion.costoEstimado?.expedienteTecnico)],
+            ["Supervisión 15%", this.formatNumero(estimacion.costoEstimado?.supervision)],
+            ["Gestión de Proyectos 5%", this.formatNumero(estimacion.costoEstimado?.gestionProyecto)],
+            ["Capacitación 1%", this.formatNumero(estimacion.costoEstimado?.capacitacion)],
+            ["Contingencias 6%", this.formatNumero(estimacion.costoEstimado?.contingencias)]
+        ];
+
+        doc.autoTable({
+            startY,
+            head: [tableColumnsOtros],
+            body: tableRowsOtros,
+            theme: "grid",
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [30, 132, 73] },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { left: 15, right: 15 }
+        });
+
+        startY = doc.lastAutoTable.finalY + 15;
+
+        // **Total Estimado final (alineado a la derecha)**
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(
+            `Total Estimado: ${this.formatNumero(estimacion.costoEstimado?.totalEstimado)}`,
+            doc.internal.pageSize.getWidth() - 20,
+            startY,
+            { align: 'right' }
+        );
+
+        // **Nota de precisión bien alineada**
+        const precisionNoteY = startY + 10;
+        doc.setFontSize(8);
+        doc.text(
+            "La información resultante solo debe ser utilizada para fines de cálculo referencial (+/-50% de precisión)",
+            doc.internal.pageSize.getWidth() / 2,
+            precisionNoteY,
+            { align: 'center' }
+        );
+
+        // **Número de páginas**
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.text(
+                `Página ${i} de ${pageCount}`,
+                doc.internal.pageSize.getWidth() - 20,
+                doc.internal.pageSize.getHeight() - 10
+            );
+        }
+
+        // **Generar y mostrar el PDF**
+        const pdfUrl = doc.output('bloburl');
+        window.open(pdfUrl, '_blank');
+    };
 },
+
       async cargarEstimaciones() {
         try {
           const estimaciones = await bdService.getEstimaciones();
