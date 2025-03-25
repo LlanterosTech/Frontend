@@ -102,17 +102,17 @@
         </p>
         <h2 class="text-lg font-semibold mb-4">Costo Estimado del PAM</h2>
         <div class="grid grid-cols-2 gap-4 costo-estimado-grid">
-          <p class="costo-item"><strong>Costo Directo:‎ </strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
-          <p class="costo-item"><strong>Gastos Generales:‎ </strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
-          <p class="costo-item"><strong>Utilidad:‎ </strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
-          <p class="costo-item"><strong>Subtotal:‎ </strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
-          <p class="costo-item"><strong>IGV:‎ </strong>  {{ formatNumero(costoEstimado.igv)}}</p>
-          <p class="costo-item"><strong>Subtotal Obra:‎ </strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
-          <p class="costo-item"><strong>Expediente Técnico:‎ </strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
-          <p class="costo-item"><strong>Supervisión:‎ </strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
-          <p class="costo-item"><strong>Gestión de Proyectos:‎ </strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
-          <p class="costo-item"><strong>Capacitación:‎ </strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
-          <p class="costo-item"><strong>Contingencias:‎ </strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
+          <p class="costo-item"><strong>Costo Directo: </strong> {{ formatNumero(costoEstimado.costoDirecto) }}</p>
+          <p class="costo-item"><strong>Gastos Generales: </strong> {{ formatNumero(costoEstimado.gastosGenerales) }}</p>
+          <p class="costo-item"><strong>Utilidad: </strong> {{ formatNumero(costoEstimado.utilidades)}}</p>
+          <p class="costo-item"><strong>Subtotal: </strong>  {{ formatNumero(costoEstimado.subTotal)}}</p>
+          <p class="costo-item"><strong>IGV:</strong>  {{ formatNumero(costoEstimado.igv)}}</p>
+          <p class="costo-item"><strong>Subtotal Obra: </strong>  {{ formatNumero(costoEstimado.subTotalObras) }}</p>
+          <p class="costo-item"><strong>Expediente Técnico: </strong>  {{ formatNumero(costoEstimado.expedienteTecnico) }}</p>
+          <p class="costo-item"><strong>Supervisión: </strong>  {{ formatNumero(costoEstimado.supervision) }}</p>
+          <p class="costo-item"><strong>Gestión de Proyectos: </strong> {{ formatNumero(costoEstimado.gestionProyecto) }}</p>
+          <p class="costo-item"><strong>Capacitación: </strong>  {{ formatNumero(costoEstimado.capacitacion) }}</p>
+          <p class="costo-item"><strong>Contingencias: </strong>  {{ formatNumero(costoEstimado.contingencias) }}</p>
         </div>
         <div class="total-estimado-container">
           <p class="cost-item total-estimado"><strong>Total Estimado:</strong>  {{ formatNumero(costoEstimado.totalEstimado) }}</p>
@@ -240,6 +240,7 @@ export default {
       dropdownOpen: false,
       selectedProjectName: null,
       tipoPamPrevio: null, // Para almacenar el valor anterior de tipoPamId
+      tipoProyectoPrevio: null, // Para almacenar el valor anterior de proyectoId
     };
   },
   async created() {
@@ -446,6 +447,31 @@ export default {
     },
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
+            // 🔍 Verificar si hay datos en los atributos guardados
+            if (Object.keys(this.valoresAtributos).length > 0 && Object.values(this.valoresAtributos).some(value => value)) {
+        const continuar = confirm("Si continúa, se perderán los datos guardados. ¿Desea continuar?");
+
+        if (!continuar) {
+          console.log("❌ Cancelado por el usuario. Restaurando selección previa...");
+
+          // 🔥 Restaurar la opción previa sin activar otro cambio
+          this.$nextTick(() => {
+        this.estimacion.proyectoId = this.tipoProyectoPrevio;
+          });
+
+          event.target.blur(); // Cerrar el menú desplegable
+          return;
+        } else {
+          // Si el usuario decide continuar, limpiar los atributos
+          this.valoresAtributos = {};
+          this.atributosIngresados = false;
+          this.tipoProyectoPrevio = null; // 🔄 Actualizar la opción previa con la nueva selección
+          this.estimacion.proyectoId = null; // 🔄 Limpiar la selección actual
+          this.$nextTick(() => {
+        event.target.focus(); // Abrir automáticamente la lista de tipo de PAM
+          });
+        }
+      }
     },
     cerrarModalNuevoProyecto() {
       this.modalNuevoProyecto = false;
