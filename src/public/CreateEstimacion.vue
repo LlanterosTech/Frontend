@@ -134,70 +134,82 @@
     </div>
   </div>
   <div v-if="modalAtributos" class="detalle-overlay show">
-    <div class="detalle-box">
-      <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
-      <h2 class="texto">Atributos del PAM</h2>
-      <div class="grid grid-cols-2 gap-4">
-        <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
-          <label class="block text-sm font-medium">
-            {{ obtenerDescripcionAtributo(atributo.nombre) }}
-          </label>
-          <template v-if="atributo.nombre === 'TipoCierre'">
-            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-              <option value="TRASLADO">TRASLADO</option>
-              <option value="INSITU">INSITU</option>
-            </select>
-          </template>
-          
-          <template v-else-if="atributo.nombre === 'TipoCobertura'">
-            <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
-              Seleccionar
-            </button>
-            <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
-          </template>
+  <div class="detalle-box">
+    <button @click="cerrarModalAtributos" class="btn-close">&times;</button>
+    <h2 class="texto">Atributos del PAM</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div v-for="atributo in atributos" :key="atributo.atributoPamId" class="mb-2">
+        <label class="block text-sm font-medium">
+          {{ obtenerDescripcionAtributo(atributo.nombre) }}
+        </label>
 
-          <template v-else-if="atributo.nombre === 'TipoTapon'">
-           <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-             <option disabled value="">Seleccione un tipo de tapón</option>
-             <option>Tapón Tipo I</option>
-             <option>Tapón Tipo II</option>
-             <option>Tapón Tipo III</option>
-             <option>Tapón Tipo IV</option>
-             <option>Muro barrera</option>
-             <option>Tapón II y Muro barrera</option>
-             <option>Losa de C° A</option>
-           </select>
-         </template>
+        <!-- Campo especial: TipoCierre -->
+        <template v-if="atributo.nombre === 'TipoCierre'">
+          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+            <option value="TRASLADO">TRASLADO</option>
+            <option value="INSITU">INSITU</option>
+          </select>
+        </template>
 
-         <template v-else-if="atributo.nombre === 'TipoRoca'">
-           <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-             <option disabled value="">Seleccione un tipo de roca</option>
-             <option>II</option>
-             <option>III</option>
-             <option>IV</option>
-           </select>
-         </template>
+        <!-- Campo especial: TipoCobertura -->
+        <template v-else-if="atributo.nombre === 'TipoCobertura'">
+          <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
+            Seleccionar
+          </button>
+          <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
+        </template>
 
-          <template v-else-if="atributo.tipoDato === 'bool'">
-            <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
-              <option :value="true">Sí</option>
-              <option :value="false">No</option>
-            </select>
-          </template>
-          <template v-else-if="atributo.tipoDato === 'decimal'">
-            <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
-          </template>
-          <template v-else>
-            <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
-          </template>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" @click="guardarAtributos">Grabar</button>
-        <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
+        <!-- Campo especial: TipoTapon (CORREGIDO) -->
+        <template v-else-if="atributo.nombre === 'TipoTapon'">
+          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+            <option disabled value="">Seleccione un tipo de tapón</option>
+            <option>Tapón Tipo I</option>
+            <option>Tapón Tipo II</option>
+            <option>Tapón Tipo III</option>
+            <option>Tapón Tipo IV</option>
+            <option>Muro barrera</option>
+            <option>Tapón II y Muro barrera</option>
+            <option>Losa de C° A</option>
+          </select>
+        </template>
+
+        <!-- Campo especial: TipoRoca (CORREGIDO) -->
+        <template v-else-if="atributo.nombre === 'TipoRoca'">
+          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+            <option disabled value="">Seleccione un tipo de roca</option>
+            <option>II</option>
+            <option>III</option>
+            <option>IV</option>
+          </select>
+        </template>
+
+        <!-- Campo booleano -->
+        <template v-else-if="atributo.tipoDato === 'bool'">
+          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+            <option :value="true">Sí</option>
+            <option :value="false">No</option>
+          </select>
+        </template>
+
+        <!-- Campo decimal -->
+        <template v-else-if="atributo.tipoDato === 'decimal'">
+          <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+        </template>
+
+        <!-- Campo por defecto (texto) -->
+        <template v-else>
+          <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+        </template>
       </div>
     </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" @click="guardarAtributos">Grabar</button>
+      <button class="btn-secondary" @click="cerrarModalAtributos">Cancelar</button>
+    </div>
   </div>
+</div>
+
 </template>
 
 
@@ -257,12 +269,6 @@ export default {
         TipoCobertura: "Tipo de Cobertura",
         Cobertura: '¿Requiere Cobertura?',
         DistanciaTraslado: "Distancia de Traslado (km)",
-        Longitud: "Longitud (m)",
-        ÁreaPortal: "Área de Portal (m²)",
-        Caudal: "Caudal (l/s)",
-        Drenaje: "¿Requiere Drenaje?",
-        TipoTapon: "Tipo de Tapón",
-        TipoRoca: "Tipo de Roca"
       },
       detalleEstimacion: {},
       estimacionGuardada: false, 
@@ -298,42 +304,12 @@ export default {
       this.$router.go(-1);
     },
     toggleDropdown() {
-  // Si el dropdown ya está abierto, simplemente ciérralo (sin validación)
-  if (this.dropdownOpen) {
-    this.dropdownOpen = false;
-    return;
-  }
-
-  // Solo validar si hay datos ingresados antes de abrir el dropdown
-  if (
-    Object.keys(this.valoresAtributos).length > 0 &&
-    Object.values(this.valoresAtributos).some(value => value)
-  ) {
-    const continuar = confirm("Si continúa, se perderán los datos guardados. ¿Desea continuar?");
-    if (!continuar) {
-      console.log("❌ Cancelado por el usuario. No se abre el dropdown.");
-      return; // 🔒 No abrir el dropdown
-    }
-
-    // Si acepta, limpiar
-    this.valoresAtributos = {};
-    this.atributosIngresados = false;
-    this.estimacion.tipoPamId = null;
-    this.tipoProyectoPrevio = null;
-    this.estimacion.proyectoId = null;
-    this.selectedProjectName = null;
-  }
-
-  // ✅ Abrir dropdown solo si pasa validación o no hay datos
-  this.dropdownOpen = true;
-}
-,
+      this.dropdownOpen = !this.dropdownOpen;
+    },
     selectProject(proyecto) {
       this.estimacion.proyectoId = proyecto.proyectoId;
       this.selectedProjectName = proyecto.name;
       this.cargarTiposPAM();
-      this.tipoProyectoPrevio = proyecto.proyectoId; // Guardar para revertir si se cancela después
-
       this.dropdownOpen = false; // Cerrar el dropdown
     },
     formatNumero(valor) {
@@ -508,7 +484,30 @@ export default {
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
             // 🔍 Verificar si hay datos en los atributos guardados
+            if (Object.keys(this.valoresAtributos).length > 0 && Object.values(this.valoresAtributos).some(value => value)) {
+        const continuar = confirm("Si continúa, se perderán los datos guardados. ¿Desea continuar?");
 
+        if (!continuar) {
+          console.log("❌ Cancelado por el usuario. Restaurando selección previa...");
+
+          // 🔥 Restaurar la opción previa sin activar otro cambio
+          this.$nextTick(() => {
+        this.estimacion.proyectoId = this.tipoProyectoPrevio;
+          });
+
+          event.target.blur(); // Cerrar el menú desplegable
+          return;
+        } else {
+          // Si el usuario decide continuar, limpiar los atributos
+          this.valoresAtributos = {};
+          this.atributosIngresados = false;
+          this.tipoProyectoPrevio = null; // 🔄 Actualizar la opción previa con la nueva selección
+          this.estimacion.proyectoId = null; // 🔄 Limpiar la selección actual
+          this.$nextTick(() => {
+        event.target.focus(); // Abrir automáticamente la lista de tipo de PAM
+          });
+        }
+      }
     },
     cerrarModalNuevoProyecto() {
       this.modalNuevoProyecto = false;
