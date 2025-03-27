@@ -5,22 +5,24 @@
         <img src="@/assets/Logo AMSAC - BLANCO 2023.png" alt="Logo" />
       </div>
     </div>
+    <!-- Mostrar el botón de logout si el usuario está autenticado y no está en las rutas de login/register -->
     <LogoutButton v-if="showLogoutButton" />
     <router-view />
   </div>
 </template>
 
 <script>
-
 import LogoutButton from './components/logout-button.vue';
+import userService from "@/main/services/userservice"; // Asegúrate de que este servicio exista
+
 export default {
   components: {
     LogoutButton
   },
   data() {
     return {
-      isAuthenticated: false
-    }
+      isAuthenticated: false // Inicialmente asumimos que el usuario no está autenticado
+    };
   },
   computed: {
     showLogoutButton() {
@@ -29,6 +31,14 @@ export default {
     }
   },
   async created() {
+    try {
+      // Verificar si el usuario está autenticado
+      const user = await userService.getInfoUser(); // Llama al servicio para obtener información del usuario
+      this.isAuthenticated = !!user; // Si hay un usuario, está autenticado
+    } catch (error) {
+      console.error("Error verificando autenticación:", error);
+      this.isAuthenticated = false; // Si hay un error, asumimos que no está autenticado
+    }
   }
 };
 </script>
