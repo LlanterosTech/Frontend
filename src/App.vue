@@ -11,8 +11,7 @@
 </template>
 
 <script>
-import { startInactivityTimer } from './utils/auth.js';
-import userService from './main/services/userservice.js';
+
 import LogoutButton from './components/logout-button.vue';
 export default {
   components: {
@@ -30,18 +29,6 @@ export default {
     }
   },
   async created() {
-    try {
-      const user = await userService.getInfoUser(); // 🔥 Obtiene usuario desde la API
-      if (user) {
-        this.isAuthenticated = true;
-        startInactivityTimer(userService.logoutUser); // Iniciar temporizador de inactividad
-      } else {
-        this.isAuthenticated = false;
-      }
-    } catch (error) {
-      console.error("Error verificando autenticación:", error);
-      this.isAuthenticated = false;
-    }
   }
 };
 </script>

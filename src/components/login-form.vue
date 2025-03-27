@@ -143,7 +143,7 @@ export default {
         console.error("❌ Error en login:", error);
 
         if (error.response?.status === 401) {
-            this.showAlert(error.message || "Error inesperado.", "error");
+          this.showAlert("Usuario o contraseña incorrectos.", "error");
         } else {
             this.showAlert("Usuario o contraseña incorrectos.", "error");
             this.inputError = true;

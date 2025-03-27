@@ -39,7 +39,7 @@
     </template>
     
     <script>
-    import axios from 'axios';
+    import api from '../../api/api';
     import { useRoute, useRouter } from 'vue-router';
     
     export default {
@@ -77,10 +77,10 @@
             }
     
             try {
-            const response = await axios.post("http://localhost:5162/amsac/v1/authentication/reset-password", {
+            const response = await api.post("/authentication/reset-password", {
                 token: this.token,
                 newPassword: this.password
-            });
+            },{ withCredentials: true });
     
             this.successMessage = response.data.message;
             setTimeout(() => {

@@ -106,28 +106,30 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title || 'App';
-
-    try {
-        const user = await userService.getInfoUser(); // 🔍 Obtener usuario desde la API
-        const isAuthenticated = !!user; // Si hay un usuario, está autenticado
-        const userRole = user?.role || "User"; // Si no tiene rol, por defecto es "User"
-
-        // 🔐 Verificar si la ruta requiere autenticación
-        if (to.meta.requiresAuth && !isAuthenticated) {
-            next('/login');
-        }
-        // 🔐 Verificar si la ruta tiene restricciones por rol
-        else if (to.meta.role && userRole !== to.meta.role) {
-            next('/'); // Redirigir al home si no tiene permisos
-        } 
-        else {
-            next();
-        }
-    } catch (error) {
-        console.error("Error verificando autenticación:", error);
-        next('/login'); // ❌ Si hay un error, redirigir al login
+  
+    // 👉 Si la ruta no necesita auth ni rol, pasa directo sin llamar al backend
+    if (!to.meta.requiresAuth && !to.meta.role) {
+      return next();
     }
-});
+  
+    try {
+      const user = await userService.getInfoUser();
+      const isAuthenticated = !!user;
+      const userRole = user?.role || "User";
+  
+      if (to.meta.requiresAuth && !isAuthenticated) {
+        return next('/login');
+      } else if (to.meta.role && userRole !== to.meta.role) {
+        return next('/');
+      } else {
+        return next();
+      }
+    } catch (error) {
+      console.error("Error verificando autenticación:", error);
+      return next('/login');
+    }
+  });
+  
 // window.addEventListener('load', () => {
 //     const lastRoute = localStorage.getItem('lastRoute');
 //     const token = localStorage.getItem('token');

@@ -27,8 +27,8 @@
     </template>
     
     <script>
-    import axios from "axios";
-    import { useRoute, useRouter } from "vue-router";
+import api from '../../api/api' // asumiendo que estás en src/components
+import { useRoute, useRouter } from "vue-router";
     
     export default {
         name: "VerifyAccount",
@@ -53,7 +53,7 @@
         }
     
         try {
-            const response = await axios.post("http://localhost:5162/amsac/v1/authentication/verify-account", { token });
+            const response = await api.post("/authentication/verify-account", { token },{ withCredentials: true });
             this.successMessage = response.data.message;
             setTimeout(() => this.$router.push("/login"), 3000);
         } catch (error) {

@@ -15,7 +15,7 @@ const userService = {
     // 🔹 LOGIN DE USUARIO (SE USA HttpOnly COOKIE)
     async loginUser(credentials) {
         try {
-            const response = await api.post("/authentication/sign-in", credentials);
+            const response = await api.post("/authentication/sign-in", credentials,{ withCredentials: true });
             return response;  // 🔥 RETORNAR la respuesta completa
         } catch (error) {
             console.error("❌ Error en loginUser:", error);
@@ -62,22 +62,22 @@ const userService = {
     async getInfoUser() {
         try {
             console.log("🔍 Haciendo petición a /auth-user/me...");
-    
             const response = await api.get("/auth-user/me", {
-                withCredentials: true, // 🔥 Asegura que las cookies sean enviadas
-                headers: {
-                    Authorization: `Bearer ${document.cookie.split('; ').find(row => row.startsWith('AuthToken='))
-                        ?.split('=')[1] || ""}` // 🔥 Asegura que el token se envíe en la cabecera
-                }
+                withCredentials: true,
+                skipAuthInterceptor: true, // Bandera personalizada
             });
-    
             console.log("✅ Usuario obtenido correctamente:", response.data);
             return response.data;
         } catch (error) {
+            if (error.response && error.response.status === 401) {
+                console.warn("⚠️ Usuario no autenticado o token expirado.");
+                return null; // Devuelve null si no está autenticado
+            }
             console.error("❌ Error obteniendo usuario:", error);
-            return null;
+            throw error; // Lanza otros errores
         }
     }
+      
 };
 
 export default userService;

@@ -15,6 +15,10 @@
             <input id="name" v-model="formData.name" type="text" placeholder="Nombre" required>
           </div>
           <div class="text-input">
+            <i class="ri-user-fill"></i>
+            <input id="name" v-model="formData.lastname" type="text" placeholder="Apellido" required>
+          </div>
+          <div class="text-input">
             <i class="ri-lock-fill"></i>
             <input class="icx" id="password" v-model="formData.password" type="password" placeholder="Contraseña" required>
           </div>
@@ -30,6 +34,10 @@
         </div>
         </form>
     
+        <!-- Mensaje de éxito -->
+        <p v-if="registrationSuccess" class="success-message">
+          Se ha enviado un mensaje a su correo electrónico para verificar la cuenta.
+        </p>
       </div>
     </div>
   </div>
@@ -49,6 +57,7 @@ export default {
         email: "",
         password: "",
         name: "",
+        lastname: "",
         registerArea: "", 
         role: "User", 
 
@@ -57,6 +66,7 @@ export default {
       alertMessage: null,
       alertType: "error",
       inputError: false,
+      registrationSuccess: false, // Nueva variable para mostrar el mensaje de éxito
     };
   },
   methods: {
@@ -87,7 +97,15 @@ export default {
         this.error = null; 
         await userService.registerUser(this.formData);
         console.log("Registro exitoso");
-        this.$router.push("/login"); 
+
+        // Mostrar mensaje de éxito
+        this.registrationSuccess = true;
+        this.showAlert("Se ha enviado un mensaje a su correo electrónico para verificar la cuenta.", "success");
+
+        // Redirigir al login después de unos segundos
+        setTimeout(() => {
+          this.$router.push("/login");
+        }, 3000);
       } catch (err) {
         this.showAlert("Error al registrarse, La cuenta ya existe.", "error");
         return;
@@ -249,7 +267,12 @@ a.forgot {
 .create {
   margin-top: 15px;
 }
-
+.success-message {
+  color: #28a745;
+  font-size: 1rem;
+  margin-top: 15px;
+  text-align: center;
+}
 .create a {
   font-size: 14px;
   color: #555;
