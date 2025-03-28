@@ -189,6 +189,7 @@ export default {
 html, body {
   height: 100%;
   background-size: cover;
+  font-size: 15px;
 }
 
 body {
@@ -228,9 +229,8 @@ body {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: flex-end; /* 👈 esto alinea al lado derecho */
   align-items: center;
-  padding-right: 8%;
+  justify-content: center;
   position: relative;
 
 }
@@ -344,21 +344,21 @@ body {
 }
 
 .alert-container {
-  position: fixed;  /* Fija el mensaje en la pantalla */
+  position: fixed; 
   top: 20px;
   right: 20px;
-  background: rgba(255, 0, 0, 0.9); /* Color rojo más visible */
+  background: rgba(255, 0, 0, 0.9);
   padding: 12px 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 9999; /* Asegura que esté por encima de otros elementos */
+  z-index: 9999;
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-  opacity: 0; /* Inicia oculto */
-  transform: translateY(-10px); /* Pequeña animación */
+  opacity: 0; 
+  transform: translateY(-10px);
 }
 
 .alert-container.show {
-  opacity: 1;  /* Se muestra cuando hay un error */
+  opacity: 1;
   transform: translateY(0);
 }
 
@@ -378,13 +378,15 @@ body {
 .input-error {
   border: 2px solid red;
 }
-/* ... (todo tu CSS anterior igual) ... */
 
 .login-container {
+  position: absolute;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 }
 
 .manual-button {
