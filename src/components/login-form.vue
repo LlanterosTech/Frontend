@@ -9,38 +9,49 @@
         <p>Herramienta para calcular el costo estimado de los pasivos ambientales mineros en AMSAC.</p>
       </div>
     </div>
-    <div class="login-box">
-      <div class="login">        
-        <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
+    <div class="login-container">
+  <div class="login-box">
+    <div class="login">
+      <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo" />
 
-        <!-- 🔥 FORMULARIO con @submit.prevent -->
-        <form @submit.prevent="handleLogin">
-          <div :class="['text-input', { 'input-error': inputError }]">
-            <i class="ri-user-fill"></i>
-            <input v-model="email" type="text" placeholder="Usuario">
-          </div>
-
-          <div :class="['text-input', { 'input-error': inputError }]">
-            <i class="ri-lock-fill"></i>
-            <input v-model="password" type="password" placeholder="Contraseña">
-          </div>
-
-          <div class="forgot-password">
-            <a @click.prevent="goToForgotPassword" href="#">¿Olvidaste tu contraseña?</a>
-          </div>
-
-          <div ref="recaptcha" class="g-recaptcha"></div>
-
-          <!-- 🔥 Botón corregido para evitar el refresco -->
-          <button type="submit" class="login-btn">Iniciar Sesión</button>
-        </form>
-
-        <div class="create">
-          <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
-          <i class="ri-arrow-right-fill"></i>
+      <form @submit.prevent="handleLogin">
+        <div :class="['text-input', { 'input-error': inputError }]">
+          <i class="ri-user-fill"></i>
+          <input v-model="email" type="text" placeholder="Usuario" />
         </div>
+
+        <div :class="['text-input', { 'input-error': inputError }]">
+          <i class="ri-lock-fill"></i>
+          <input v-model="password" type="password" placeholder="Contraseña" />
+        </div>
+
+        <div class="forgot-password">
+          <a @click.prevent="goToForgotPassword" href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <div ref="recaptcha" class="g-recaptcha"></div>
+
+        <button type="submit" class="login-btn">Iniciar Sesión</button>
+      </form>
+
+      <div class="create">
+        <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
+        <i class="ri-arrow-right-fill"></i>
       </div>
     </div>
+  </div>
+
+  <!-- 📄 Botón manual afuera del login-box pero alineado -->
+  <a
+    href="/manual.pdf"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="manual-button"
+  >
+    📄 Manual de Usuario
+  </a>
+</div>
+
 
   </div>
 </template>
@@ -217,8 +228,9 @@ body {
   width: 100vw;
   height: 100vh;
   display: flex;
+  justify-content: flex-end; /* 👈 esto alinea al lado derecho */
   align-items: center;
-  justify-content: center;
+  padding-right: 8%;
   position: relative;
 
 }
@@ -255,10 +267,6 @@ body {
 }
 
 .login-box {
-  position: absolute;
-  right: 8%;
-  top: 50%;
-  transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.9);
   padding: 40px;
   border-radius: 15px;
@@ -369,5 +377,29 @@ body {
 
 .input-error {
   border: 2px solid red;
+}
+/* ... (todo tu CSS anterior igual) ... */
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.manual-button {
+  margin-top: 20px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.manual-button:hover {
+  background-color: #0056b3;
 }
 </style>

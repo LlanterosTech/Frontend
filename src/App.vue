@@ -5,8 +5,8 @@
         <img src="@/assets/Logo AMSAC - BLANCO 2023.png" alt="Logo" />
       </div>
     </div>
-    <!-- Mostrar el botón de logout si el usuario está autenticado y no está en las rutas de login/register -->
-    <LogoutButton v-if="showLogoutButton" />
+    <!-- Mostrar el botón de logout solo si la autenticación está verificada -->
+    <LogoutButton v-if="!isLoading && showLogoutButton" />
     <router-view />
   </div>
 </template>
@@ -21,7 +21,8 @@ export default {
   },
   data() {
     return {
-      isAuthenticated: false // Inicialmente asumimos que el usuario no está autenticado
+      isAuthenticated: false, // Inicialmente asumimos que el usuario no está autenticado
+      isLoading: true // Estado de carga para verificar autenticación
     };
   },
   computed: {
@@ -38,6 +39,8 @@ export default {
     } catch (error) {
       console.error("Error verificando autenticación:", error);
       this.isAuthenticated = false; // Si hay un error, asumimos que no está autenticado
+    } finally {
+      this.isLoading = false; // Finaliza la carga después de verificar
     }
   }
 };
