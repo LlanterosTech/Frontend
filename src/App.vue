@@ -6,7 +6,8 @@
       </div>
     </div>
     <!-- Mostrar el botón de logout solo si la autenticación está verificada -->
-    <LogoutButton v-if="!isLoading && showLogoutButton" />
+<!-- En tu App.vue -->
+    <LogoutButton :visible="showLogoutButton" :disabled="isLoading || !isAuthenticated" />
     <router-view />
   </div>
 </template>

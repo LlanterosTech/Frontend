@@ -1,5 +1,12 @@
 <template>
-  <button @click="logout" class="logout-btn">
+  <button
+    v-show="visible"
+    :disabled="disabled"
+    @click="logout"
+    class="logout-btn"
+    :class="{ 'disabled-btn': disabled }"
+    :title="disabled ? 'Espere...' : 'Cerrar sesión'"
+  >
     <i class="fas fa-sign-out-alt"></i>
   </button>
 </template>
@@ -8,8 +15,19 @@
 import userService from "@/main/services/userservice";
 
 export default {
+  props: {
+    visible: {
+      type: Boolean,
+      default: true
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
   methods: {
     async logout() {
+      if (this.disabled) return;
       try {
         await userService.logoutUser();
         this.$router.push("/login");
@@ -34,7 +52,7 @@ export default {
   border-radius: 50%;
   cursor: pointer;
   transition: transform 0.3s;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
 .logout-btn:hover {
@@ -43,5 +61,12 @@ export default {
 
 .logout-btn i {
   margin: 0;
+}
+
+/* Estilo para botón deshabilitado */
+.disabled-btn {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 </style>

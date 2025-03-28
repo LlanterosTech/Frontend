@@ -145,7 +145,7 @@
 
         <!-- Campo especial: TipoCierre -->
         <template v-if="atributo.nombre === 'TipoCierre'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option value="TRASLADO">TRASLADO</option>
             <option value="INSITU">INSITU</option>
           </select>
@@ -156,12 +156,12 @@
           <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
             Seleccionar
           </button>
-          <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributos[atributo.atributoPamId] }}</p>
+          <p v-if="valoresAtributosTemp[atributo.atributoPamId]">Tipo: {{ valoresAtributosTemp[atributo.atributoPamId] }}</p>
         </template>
 
         <!-- Campo especial: TipoTapon (CORREGIDO) -->
         <template v-else-if="atributo.nombre === 'TipoTapon'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option disabled value="">Seleccione un tipo de tapón</option>
             <option>Tapón Tipo I</option>
             <option>Tapón Tipo II</option>
@@ -175,7 +175,7 @@
 
         <!-- Campo especial: TipoRoca (CORREGIDO) -->
         <template v-else-if="atributo.nombre === 'TipoRoca'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option disabled value="">Seleccione un tipo de roca</option>
             <option>II</option>
             <option>III</option>
@@ -185,7 +185,7 @@
 
         <!-- Campo booleano -->
         <template v-else-if="atributo.tipoDato === 'bool'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option :value="true">Sí</option>
             <option :value="false">No</option>
           </select>
@@ -195,7 +195,7 @@
         <template v-else-if="atributo.tipoDato === 'decimal'">
           <input
             type="number"
-            v-model="valoresAtributos[atributo.atributoPamId]"
+            v-model="valoresAtributosTemp[atributo.atributoPamId]"
             :class="{'input-error': camposInvalidos[atributo.atributoPamId]}"
             class="w-full p-2 border rounded input-standard"
             required
@@ -204,7 +204,7 @@
 
         <!-- Campo por defecto (texto) -->
         <template v-else>
-          <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+          <input type="text" v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
         </template>
       </div>
     </div>
@@ -245,6 +245,7 @@ export default {
       error: null,
       costosByProyecto: [],
       valoresAtributos: {},
+      valoresAtributosTemp: {},
       costoEstimado: null,
       totalProyecto: 0,
       fecha: new Date().toISOString().split("T")[0],
@@ -278,6 +279,12 @@ export default {
         TipoCobertura: "Tipo de Cobertura",
         Cobertura: '¿Requiere Cobertura?',
         DistanciaTraslado: "Distancia de Traslado (km)",
+        Longitud: "Longitud (m)",
+        ÁreaPortal: "Area de Portal (m²)",
+        Caudal: "Caudal (L/s)",
+        Drenaje: "Requiere Drenaje",
+        TipoTapon: "Tipo de Tapón",
+        TipoRoca: "Tipo de Roca",
       },
       detalleEstimacion: {},
       estimacionGuardada: false, 
@@ -339,8 +346,29 @@ export default {
       this.$router.go(-1);
     },
     toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen;
-    },
+  // Verificar si hay atributos ingresados
+  const hayDatos = Object.keys(this.valoresAtributos).length > 0 &&
+                   Object.values(this.valoresAtributos).some(value => value);
+
+  if (hayDatos) {
+    const continuar = confirm("Si continúa, se perderán los datos guardados. ¿Desea continuar?");
+    if (!continuar) {
+      console.log("❌ Cancelado por el usuario. No se abre el dropdown.");
+      this.dropdownOpen = false; // ❗ No abrir el dropdown si cancela
+      return;
+    } else {
+      // Si acepta, limpiar datos y permitir que se abra el dropdown
+      this.valoresAtributos = {};
+      this.atributosIngresados = false;
+      this.tipoProyectoPrevio = null;
+      this.estimacion.tipoPamId = null;
+      this.estimacion.proyectoId = null;
+    }
+  }
+
+  this.dropdownOpen = !this.dropdownOpen; // Solo se ejecuta si no hubo cancelación
+},
+
     selectProject(proyecto) {
       this.estimacion.proyectoId = proyecto.proyectoId;
       this.selectedProjectName = proyecto.name;
@@ -466,6 +494,8 @@ export default {
         const response = await bdService.getAtributosByTipoPamId(this.estimacion.tipoPamId);
         this.atributos = response || [];
         this.valoresAtributos = {};
+        this.valoresAtributosTemp = {};
+
 
         // Inicializa valores por defecto
         this.atributos.forEach(atributo => {
@@ -490,45 +520,54 @@ export default {
       }
     },
     abrirModalAtributos() {
+      this.valoresAtributosTemp = JSON.parse(JSON.stringify(this.valoresAtributos));
       this.modalAtributos = true;
     },
     cerrarModalAtributos() {
       this.modalAtributos = false;
     },
     guardarAtributos() {
-      let valid = true;
+  let valid = true;
 
-      // Validar los valores antes de guardar
-      this.atributos.forEach(atributo => {
-        const valor = this.valoresAtributos[atributo.atributoPamId];
-        const valorNumerico = parseFloat(valor);
+  this.atributos.forEach(atributo => {
+    const valor = this.valoresAtributosTemp[atributo.atributoPamId];
 
-        // Verificar si el valor está fuera de los límites permitidos
-        if (atributo.tipoDato === 'decimal' && (valorNumerico < 0 || valorNumerico > 10000)) {
-          this.camposInvalidos[atributo.atributoPamId] = true; // Marcar como inválido
-          valid = false;
-        } else {
-          this.camposInvalidos[atributo.atributoPamId] = false; // Marcar como válido
-        }
-      });
-
-      if (!valid) {
-        this.showAlert("Error al calcular la estimación, revise sus datos.", "error");
+    // Validación para decimales
+    if (atributo.tipoDato === 'decimal') {
+      const valorNumerico = parseFloat(valor);
+      if (isNaN(valorNumerico) || valorNumerico < 0 || valorNumerico > 10000) {
+        this.camposInvalidos[atributo.atributoPamId] = true;
+        valid = false;
         return;
       }
+    }
 
-      // Guardar los valores en la estimación si todo es válido
-      this.atributos.forEach(atributo => {
-        const valor = this.valoresAtributos[atributo.atributoPamId];
-        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
-      });
+    // Validación para strings vacíos (por ejemplo, selects)
+    if (
+      (atributo.tipoDato === 'string' || atributo.tipoDato === null || atributo.tipoDato === undefined) &&
+      (!valor || valor.trim() === "")
+    ) {
+      this.camposInvalidos[atributo.atributoPamId] = true;
+      valid = false;
+      return;
+    }
 
-      // Marcar que los atributos han sido ingresados correctamente
-      this.atributosIngresados = true;
+    this.camposInvalidos[atributo.atributoPamId] = false;
+  });
 
-      this.showAlert("Atributos guardados correctamente.", "success");
-      this.cerrarModalAtributos();
-    },
+  if (!valid) {
+    this.showAlert("Error al guardar los atributos, revise sus datos.", "error");
+    return;
+  }
+
+  // Guardar
+  this.valoresAtributos = JSON.parse(JSON.stringify(this.valoresAtributosTemp));
+
+  this.atributosIngresados = true;
+  this.showAlert("Atributos guardados correctamente.", "success");
+  this.cerrarModalAtributos();
+},
+
   
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
@@ -566,6 +605,7 @@ export default {
       this.proyectoBloqueado = !this.proyectoBloqueado;
     },
     limpiarFormulario() {
+      this.valoresAtributosTemp = {};
       this.estimacion.codPam = null;
       this.estimacion.tipoPamId = null;
       this.atributos = [];
@@ -579,45 +619,59 @@ export default {
       this.mostrarDetalle = !this.mostrarDetalle;
     },
     async guardarEstimacion() {
-      const storedUserId = this.usuarioId;
-      if (!storedUserId) {
-        this.error = "No se encontró un usuario autenticado.";
-        this.clearErrorAfterTimeout();
-        return;
-      }
-      this.estimacion.usuario = this.usuario;
-      this.estimacion.usuarioId = storedUserId;
-      this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
-      this.estimacion.tipoPam = this.detalleEstimacion;
-      this.estimacion.valores = {};
-      let valid = true;
-      this.atributos.forEach(atributo => {
-        const valor = this.valoresAtributos[atributo.atributoPamId];
-        if (atributo.tipoDato !== 'bool'&& !valor && valor !== 0) {
-          valid = false;
-        }
-        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
-      });
-      if (!valid) {
-        this.error = "Todos los atributos son obligatorios.";
-        this.clearErrorAfterTimeout();
-        return;
-      }
-      console.log("Datos enviados al backend:", JSON.stringify(this.estimacion, null, 2));
-      try {
-        const response = await bdService.createEstimacion(this.estimacion);
-        if (response && response.costoEstimado) {
-          this.costoEstimado = response.costoEstimado;
-          console.log("Total Estimado:", this.costoEstimado.totalEstimado);
-          this.mostrarDetalle = true; 
-          this.estimacionGuardada = true; 
-          console.warn("No se recibieron costos estimados en la respuesta.");
-        }
-        await this.cargarCostosByProyectoId();
-      } catch (error) {
-        this.showAlert("Error al guardar la estimación.", "error");
-      }
-    },
+  const storedUserId = this.usuarioId;
+  if (!storedUserId) {
+    this.showAlert("No se encontró un usuario autenticado.", "error");
+    return;
+  }
+
+  // ⚠️ Validar si no hay atributos o valores antes de continuar
+  if (
+    this.atributos.length === 0 || 
+    Object.keys(this.valoresAtributos).length === 0 ||
+    Object.values(this.valoresAtributos).every(v => v === "" || v === null || v === undefined)
+  ) {
+    this.showAlert("Debe ingresar todos los atributos antes de calcular.", "warning");
+    return;
+  }
+
+  this.estimacion.usuario = this.usuario;
+  this.estimacion.usuarioId = storedUserId;
+  this.estimacion.codPam = this.estimacion.codPam ? this.estimacion.codPam.toString() : "0";
+  this.estimacion.tipoPam = this.detalleEstimacion;
+  this.estimacion.valores = {};
+
+  let valid = true;
+  this.atributos.forEach(atributo => {
+    const valor = this.valoresAtributos[atributo.atributoPamId];
+    if (atributo.tipoDato !== 'bool' && !valor && valor !== 0) {
+      valid = false;
+    }
+    this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
+  });
+
+  if (!valid) {
+    this.showAlert("No hay atributos guardados, Presione el botón de Nuevo", "error");
+    return;
+  }
+
+  console.log("Datos enviados al backend:", JSON.stringify(this.estimacion, null, 2));
+  try {
+    const response = await bdService.createEstimacion(this.estimacion);
+    if (response && response.costoEstimado) {
+      this.costoEstimado = response.costoEstimado;
+      console.log("Total Estimado:", this.costoEstimado.totalEstimado);
+      this.mostrarDetalle = true;
+      this.estimacionGuardada = true;
+    } else {
+      console.warn("No se recibieron costos estimados en la respuesta.");
+    }
+    await this.cargarCostosByProyectoId();
+  } catch (error) {
+    this.showAlert("Error al guardar la estimación.", "error");
+  }
+},
+
     clearErrorAfterTimeout() {
       setTimeout(() => {
         this.error = null;
@@ -636,8 +690,12 @@ export default {
       this.abrirModalAtributos(); 
     },
     seleccionarCobertura(value) {
-      this.valoresAtributos[this.atributoPamIdSeleccionado] = value;
-      this.cerrarModalCobertura();
+        // ✅ Solo modifica el temporal
+      this.valoresAtributosTemp[this.atributoPamIdSeleccionado] = value;
+      this.mostrarModalCoberturas = false;
+
+      // ✅ Vuelve a mostrar el modal principal de atributos
+      this.modalAtributos = true;
     },
     descargarPDF() {
     const doc = new jsPDF("p", "mm", "a4");
