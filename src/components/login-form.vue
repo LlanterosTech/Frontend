@@ -40,16 +40,14 @@
       </div>
     </div>
   </div>
-
-  <!-- 📄 Botón manual afuera del login-box pero alineado -->
   <a
-    href="/manual.pdf"
-    target="_blank"
-    rel="noopener noreferrer"
-    class="manual-button"
-  >
-    📄 Manual de Usuario
-  </a>
+  href="/manual.pdf"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="manual-button"
+>
+  📄 Manual de Usuario
+</a>
 </div>
 
 

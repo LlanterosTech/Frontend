@@ -106,30 +106,30 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title || 'App';
-  
+
     // 👉 Si la ruta no necesita auth ni rol, pasa directo sin llamar al backend
     if (!to.meta.requiresAuth && !to.meta.role) {
-      return next();
+    return next();
     }
-  
+
     try {
-      const user = await userService.getInfoUser();
-      const isAuthenticated = !!user;
-      const userRole = user?.role || "User";
-  
-      if (to.meta.requiresAuth && !isAuthenticated) {
+    const user = await userService.getInfoUser();
+    const isAuthenticated = !!user;
+    const userRole = user?.role || "User";
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
         return next('/login');
-      } else if (to.meta.role && userRole !== to.meta.role) {
+    } else if (to.meta.role && userRole !== to.meta.role) {
         return next('/');
-      } else {
+    } else {
         return next();
-      }
-    } catch (error) {
-      console.error("Error verificando autenticación:", error);
-      return next('/login');
     }
-  });
-  
+    } catch (error) {
+    console.error("Error verificando autenticación:", error);
+    return next('/login');
+    }
+});
+
 // window.addEventListener('load', () => {
 //     const lastRoute = localStorage.getItem('lastRoute');
 //     const token = localStorage.getItem('token');

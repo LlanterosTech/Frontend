@@ -193,7 +193,13 @@
 
         <!-- Campo decimal -->
         <template v-else-if="atributo.tipoDato === 'decimal'">
-          <input type="number" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+          <input
+            type="number"
+            v-model="valoresAtributos[atributo.atributoPamId]"
+            :class="{'input-error': camposInvalidos[atributo.atributoPamId]}"
+            class="w-full p-2 border rounded input-standard"
+            required
+          />
         </template>
 
         <!-- Campo por defecto (texto) -->
@@ -227,12 +233,15 @@ export default {
     AlertComponent,
   },
   data() {
+
+    
     return {
       alertMessage: null,
       alertType: "error",
       proyectos: [],
       tiposPAM: [],
       atributos: [],
+      camposInvalidos: {}, 
       error: null,
       costosByProyecto: [],
       valoresAtributos: {},
@@ -279,11 +288,37 @@ export default {
       tipoProyectoPrevio: null, // Para almacenar el valor anterior de proyectoId
     };
   },
+  watch: {
+    valoresAtributos: {
+    handler(newValues) {
+      // Iterar sobre los valores de los atributos
+      for (const [atributoId, valor] of Object.entries(newValues)) {
+        const atributo = this.atributos.find(attr => attr.atributoPamId === parseInt(atributoId));
+        if (!atributo || atributo.tipoDato !== "decimal") continue; // Solo validar atributos numéricos
+
+        const valorNumerico = parseFloat(valor);
+
+        // Validar que el valor esté entre 0 y 10,000
+        if (valorNumerico < 0 || valorNumerico > 10000) {
+          // Mostrar el mensaje solo si el campo no estaba previamente marcado como inválido
+          if (!this.camposInvalidos[atributoId]) {
+            this.showAlert("El valor debe estar entre 0 y 10,000.", "warning");
+          }
+          this.camposInvalidos[atributoId] = true; // Marcar como inválido
+        } else {
+          this.camposInvalidos[atributoId] = false; // Marcar como válido
+        }
+      }
+    },
+    deep: true, // Necesario para observar cambios en objetos anidados
+  },
+  },
   async created() {
     await this.obtenerUsuario();
     await this.cargarProyectos();
   },
   methods: {
+
     async obtenerUsuario() {
     try {
         const response = await userService.getInfoUser();
@@ -375,6 +410,7 @@ export default {
         alert("Error al crear el proyecto.");
       }
     },
+   
     validarProyectoAntesDeSeleccionarPam(event) {
       console.log("🔹 Ejecutando validación antes de seleccionar Tipo PAM");
 
@@ -397,14 +433,12 @@ export default {
         return;
       }
 
-      // 🔍 Verificar si hay datos en los atributos guardados
       if (Object.keys(this.valoresAtributos).length > 0 && Object.values(this.valoresAtributos).some(value => value)) {
         const continuar = confirm("Si continúa, se perderán los datos guardados. ¿Desea continuar?");
 
         if (!continuar) {
           console.log("❌ Cancelado por el usuario. Restaurando selección previa...");
 
-          // 🔥 Restaurar la opción previa sin activar otro cambio
           this.$nextTick(() => {
         this.estimacion.tipoPamId = this.tipoPamPrevio;
           });
@@ -462,25 +496,40 @@ export default {
       this.modalAtributos = false;
     },
     guardarAtributos() {
-      this.atributosIngresados = true;
       let valid = true;
 
+      // Validar los valores antes de guardar
       this.atributos.forEach(atributo => {
         const valor = this.valoresAtributos[atributo.atributoPamId];
-        if (atributo.tipoDato !== 'bool' && !valor && valor !== 0) {
+        const valorNumerico = parseFloat(valor);
+
+        // Verificar si el valor está fuera de los límites permitidos
+        if (atributo.tipoDato === 'decimal' && (valorNumerico < 0 || valorNumerico > 10000)) {
+          this.camposInvalidos[atributo.atributoPamId] = true; // Marcar como inválido
           valid = false;
+        } else {
+          this.camposInvalidos[atributo.atributoPamId] = false; // Marcar como válido
         }
-        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
       });
 
       if (!valid) {
-        this.showAlert("Todos los atributos son obligatorios.", "error");
+        this.showAlert("Error al calcular la estimación, revise sus datos.", "error");
         return;
       }
+
+      // Guardar los valores en la estimación si todo es válido
+      this.atributos.forEach(atributo => {
+        const valor = this.valoresAtributos[atributo.atributoPamId];
+        this.estimacion.valores[parseInt(atributo.atributoPamId)] = String(valor);
+      });
+
+      // Marcar que los atributos han sido ingresados correctamente
+      this.atributosIngresados = true;
 
       this.showAlert("Atributos guardados correctamente.", "success");
       this.cerrarModalAtributos();
     },
+  
     mostrarModalNuevoProyecto() {
       this.modalNuevoProyecto = true;
             // 🔍 Verificar si hay datos en los atributos guardados
@@ -763,7 +812,10 @@ export default {
 
 
 }
-
+.input-error {
+  border: 2px solid red;
+  background-color: #ffe6e6;
+}
 .fondo {
   background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
   background-size: cover;
