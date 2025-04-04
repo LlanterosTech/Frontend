@@ -145,7 +145,7 @@
 
         <!-- Campo especial: TipoCierre -->
         <template v-if="atributo.nombre === 'TipoCierre'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option value="TRASLADO">TRASLADO</option>
             <option value="INSITU">INSITU</option>
           </select>
@@ -156,12 +156,12 @@
           <button @click="mostrarModalCobertura(atributo.atributoPamId)" class="w-full p-2 border rounded input-standard">
             Seleccionar
           </button>
-          <p v-if="valoresAtributos[atributo.atributoPamId]">Tipo: {{ valoresAtributosTemp[atributo.atributoPamId] }}</p>
+          <p v-if="valoresAtributosTemp[atributo.atributoPamId]">Tipo: {{ valoresAtributosTemp[atributo.atributoPamId] }}</p>
         </template>
 
         <!-- Campo especial: TipoTapon (CORREGIDO) -->
         <template v-else-if="atributo.nombre === 'TipoTapon'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option disabled value="">Seleccione un tipo de tapón</option>
             <option>Tapón Tipo I</option>
             <option>Tapón Tipo II</option>
@@ -175,7 +175,7 @@
 
         <!-- Campo especial: TipoRoca (CORREGIDO) -->
         <template v-else-if="atributo.nombre === 'TipoRoca'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option disabled value="">Seleccione un tipo de roca</option>
             <option>II</option>
             <option>III</option>
@@ -185,7 +185,7 @@
 
         <!-- Campo booleano -->
         <template v-else-if="atributo.tipoDato === 'bool'">
-          <select v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
+          <select v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required>
             <option :value="true">Sí</option>
             <option :value="false">No</option>
           </select>
@@ -195,7 +195,7 @@
         <template v-else-if="atributo.tipoDato === 'decimal'">
           <input
             type="number"
-            v-model="valoresAtributos[atributo.atributoPamId]"
+            v-model="valoresAtributosTemp[atributo.atributoPamId]"
             :class="{'input-error': camposInvalidos[atributo.atributoPamId]}"
             class="w-full p-2 border rounded input-standard"
             required
@@ -204,7 +204,7 @@
 
         <!-- Campo por defecto (texto) -->
         <template v-else>
-          <input type="text" v-model="valoresAtributos[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
+          <input type="text" v-model="valoresAtributosTemp[atributo.atributoPamId]" class="w-full p-2 border rounded input-standard" required />
         </template>
       </div>
     </div>
@@ -668,7 +668,7 @@ export default {
     }
     await this.cargarCostosByProyectoId();
   } catch (error) {
-    this.showAlert("Error al guardar la estimación.", "error");
+    this.showAlert("Error al guardar la estimación. Revise sus datos ingresados", "error");
   }
 },
 

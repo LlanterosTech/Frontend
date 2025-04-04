@@ -294,7 +294,9 @@
               estimacion.usuario = { email: "Desconocido", area: "No definido" }; 
             }
           }
-          this.ultimasEstimaciones = estimaciones.slice(-5);
+          this.ultimasEstimaciones = estimaciones
+  .filter(e => e.costoEstimado?.totalEstimado > 0)
+  .slice(-5);
         } catch (error) {
           console.error("Error al cargar las estimaciones:", error);
         }

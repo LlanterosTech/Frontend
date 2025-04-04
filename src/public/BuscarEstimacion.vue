@@ -184,6 +184,8 @@
   },
   filteredEstimaciones() {
     return this.estimaciones.filter((estimacion) => {
+        const totalEstimado = estimacion.costoEstimado?.totalEstimado ?? 0;
+        if (totalEstimado <= 0) return false; // Filtra estimaciones con costo 0 o nulo
       // Asegurar que 'codPam' y 'idPam' no sean undefined antes de comparar
       const codPam = estimacion.codPam ? estimacion.codPam.toLowerCase().trim() : "";
       const idPamFilter = this.idPam ? this.idPam.toLowerCase().trim() : "";
