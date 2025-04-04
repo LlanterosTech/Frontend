@@ -1,7 +1,7 @@
 import axios from "axios";
 import userService from "@/main/services/userservice";
 const api = axios.create({
-    baseURL: "https://epam.amsac.pe:5162/amsac/v1",
+    baseURL: "http://localhost:5162/amsac/v1",
     withCredentials: true, 
     headers: {
         "Content-Type": "application/json",
