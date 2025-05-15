@@ -2,74 +2,111 @@
   <div class="container fondo">
     <div class="header">
       <div class="logo">
-        <img src="@/assets/Logo AMSAC - BLANCO 2023.png" alt="Logo" />
+        <img src="@/assets/logo.png" alt="Logo" />
       </div>
     </div>
 
     <div class="glass-box">
       <h1 class="title">Bienvenido, {{ userName }}</h1>
-      <div class="options">
-        <div class="option" @click="irCalculadora">
-          <i class="fas fa-calculator icono-opcion"></i>
-          <p>Calculador</p>
-        </div>
-        <div class="option" @click="irHistorial">
-          <i class="fas fa-history icono-opcion"></i>
-          <p>Historial</p>
-        </div>
-        <div class="option" @click="irBiblioteca">
-          <i class="fas fa-book icono-opcion"></i>
-          <p>Biblioteca</p>
-        </div>
+
+      <!-- 📷 Subida de imagen -->
+      <div class="form-upload">
+        <label for="plantImage">Sube una imagen de tu planta:</label>
+        <input type="file" id="plantImage" @change="handleImageUpload" accept="image/*" />
+
+        <button class="btn-secondary" @click="identifyPlant" :disabled="!selectedImage">
+          Identificar Planta
+        </button>
+      </div>
+
+      <!-- 🌱 Mostrar resultado de la identificación -->
+      <div v-if="identifiedPlant" class="plant-result">
+        <h2>Resultado:</h2>
+        <img :src="identifiedPlant.imageUrl" alt="Planta" class="preview-image" />
+        <p><strong>Nombre común:</strong> {{ identifiedPlant.commonName }}</p>
+        <p><strong>Nombre científico:</strong> {{ identifiedPlant.scientificName }}</p>
+        <p><strong>Descripción:</strong> {{ identifiedPlant.description }}</p>
+
+        <button class="btn-primary" @click="registerPlant">
+          Registrar Planta
+        </button>
       </div>
     </div>
 
     <footer class="footer">
-      © Todos los derechos reservados por Activos Mineros SAC - AMSAC
+      © Todos los derechos reservados por Plantita
     </footer>
   </div>
 </template>
 
+
 <script>
 import userService from "@/main/services/userservice";
+import plantservice from "@/main/services/plantservice";
 
 export default {
   data() {
     return {
       userName: "",
+      selectedImage: null,
+      identifiedPlant: null,
     };
   },
   async created() {
-    await this.loadUserData(); // Llama a la función al crear el componente
+    await this.loadUserData();
   },
   methods: {
     async loadUserData() {
       try {
-        const user = await userService.getInfoUser(); // Llama al servicio de usuario
-        if (user) {
-          this.userName = user.name; // Asigna el nombre del usuario
-        } else {
-          console.warn("⚠️ No se encontró un usuario autenticado.");
-          this.$router.push('/login'); // Redirige si no hay usuario autenticado
-        }
-      } catch (error) {
-        console.error("❌ Error obteniendo usuario:", error);
-        this.userName = "Usuario";
-        this.$router.push('/login'); // Redirige en caso de error
+        const user = await userService.getInfoUser();
+        if (user) this.userName = user.name;
+        else this.$router.push("/login");
+      } catch {
+        this.$router.push("/login");
       }
     },
-    irCalculadora() {
-      this.$router.push("/nuevaestimacion");
+
+    handleImageUpload(event) {
+      this.selectedImage = event.target.files[0];
+      console.log("📷 Imagen seleccionada:", this.selectedImage);
     },
-    irHistorial() {
-      this.$router.push("/historial-estimaciones");
+
+    async identifyPlant() {
+      if (!this.selectedImage) return;
+
+      try {
+        const formData = new FormData();
+        formData.append("Image", this.selectedImage); // Usa la clave esperada por tu backend
+
+        // Log para revisar lo que se envía
+        console.log("📦 FormData enviado:");
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
+
+        const response = await plantservice.identifySavePlant(formData);
+        this.identifiedPlant = response;
+
+        console.log("✅ Planta identificada:", response);
+      } catch (error) {
+        console.error("❌ Error identificando planta:", error);
+      }
     },
-    irBiblioteca() {
-      this.$router.push("/buscar-estimacion");
-    },
-  },
+
+    async registerPlant() {
+      try {
+        await plantservice.registerPlant(this.identifiedPlant);
+        alert("🌱 Planta registrada con éxito!");
+        this.identifiedPlant = null;
+        this.selectedImage = null;
+      } catch (err) {
+        console.error("❌ Error registrando planta:", err);
+      }
+    }
+  }
 };
 </script>
+
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
@@ -86,7 +123,7 @@ body, html {
 }
 
 .fondo {
-  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
+  background: #548f4e;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

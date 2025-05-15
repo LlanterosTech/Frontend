@@ -1,15 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginPage from "@/public/auth/login-page.vue";
 import RegisterPage from "@/public/auth/register-page.vue";
-import CreateEstimacion from "@/public/CreateEstimacion.vue";
 import InitPage from "@/public/InitPage.vue";
 import MainContainer from '@/components/main-container.vue';
-import BuscarEstimacion from "@/public/BuscarEstimacion.vue";
-import HistoralEstimacion from '@/public/HistoralEstimacion.vue';
-import ForgotPassword from "@/components/ForgotPassword.vue";
-import ResetPassword from "@/components/ResetPassword.vue"; 
-import VerifyAccount from "@/components/VerifyAccount.vue";
-import HelloWorld from '@/components/HelloWorld.vue'; // Import correcto
+
 import userService from '@/main/services/userservice';
 const routes = [
     {
@@ -35,47 +29,6 @@ const routes = [
         name: 'init',
         component: InitPage,
         meta: { title: 'Init', requiresAuth: true }
-    },
-    {
-        path: '/nuevaestimacion',
-        name: 'nuevaestimacion',
-        component: CreateEstimacion,
-        meta: { title: 'Nueva Estimación', requiresAuth: true }
-    },
-    {
-        path: '/buscar-estimacion',
-        name: 'BuscarEstimacion',
-        component: BuscarEstimacion,
-        meta: { title: 'Buscar Estimación', requiresAuth: true }
-    },
-    {
-        path: '/historial-estimaciones',
-        name: 'HistorialEstimaciones',
-        component: HistoralEstimacion,
-        meta: { title: 'Historial Estimaciones', requiresAuth: true }
-    },
-    {
-        path: "/forgot-password",
-        name: "ForgotPassword",
-        component: ForgotPassword,
-    },
-    {
-        path: '/hello',
-        name: 'HelloWorld',
-        component: HelloWorld,
-        meta: { title: 'Hola Mundo' , requiresAuth: true,role: "Admin" }
-    },
-    {
-        path: "/reset-password",
-        name: "ResetPassword",
-        component: ResetPassword,
-        meta: { title: "Restablecer Contraseña" }
-    },
-    {
-        path: "/verify-account",
-        name: "VerifyAccount",
-        component: VerifyAccount,
-        meta: { title: "Verificación de Cuenta" }
     },
     {
         path: '/:catchAll(.*)',

@@ -3,16 +3,11 @@
 
   <div class="container fondo">
 
-    <div class = "content">
-      <div class="text-box">
-        <h1>PAM Calculator</h1>
-        <p>Herramienta para calcular el costo estimado de los pasivos ambientales mineros en AMSAC.</p>
-      </div>
-    </div>
+   
     <div class="login-container">
   <div class="login-box">
     <div class="login">
-      <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo" />
+      <img src="@/assets/logo.png" alt="Logo Activos Mineros" class="logo" />
 
       <form @submit.prevent="handleLogin">
         <div :class="['text-input', { 'input-error': inputError }]">
@@ -23,10 +18,6 @@
         <div :class="['text-input', { 'input-error': inputError }]">
           <i class="ri-lock-fill"></i>
           <input v-model="password" type="password" placeholder="Contraseña" />
-        </div>
-
-        <div class="forgot-password">
-          <a @click.prevent="goToForgotPassword" href="#">¿Olvidaste tu contraseña?</a>
         </div>
 
         <div ref="recaptcha" class="g-recaptcha"></div>
@@ -40,14 +31,7 @@
       </div>
     </div>
   </div>
-  <a
-  href="/manual.pdf"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="manual-button"
->
-  📄 Manual de Usuario
-</a>
+
 </div>
 
 
@@ -258,7 +242,7 @@ body {
 }
 
 .fondo {
-  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
+  background: #73ac78;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

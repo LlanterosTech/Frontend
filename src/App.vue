@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div class="header">
-      <div class="logo">
-        <img src="@/assets/Logo AMSAC - BLANCO 2023.png" alt="Logo" />
-      </div>
-    </div>
+    
     <!-- Mostrar el botón de logout solo si la autenticación está verificada -->
 <!-- En tu App.vue -->
     <LogoutButton :visible="showLogoutButton" :disabled="isLoading || !isAuthenticated" />

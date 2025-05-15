@@ -1,51 +1,62 @@
 <template>
-    <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
+  <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
 
   <div class="container fondo">
     <div class="register-box">
       <div class="register">
-        <img src="@/assets/cropped-logo-amsac.png" alt="Logo Activos Mineros" class="logo">
-          <form @submit.prevent="handleRegister">
+        <img src="@/assets/logo.png" alt="Logo Activos Mineros" class="logo" />
+        <form @submit.prevent="handleRegister">
           <div class="text-input">
             <i class="ri-user-fill"></i>
-            <input id="email" v-model="formData.email" type="text" placeholder="usuario@dominio" required>
+            <input id="email" v-model="formData.email" type="text" placeholder="usuario@dominio" required />
           </div>
+
           <div class="text-input">
             <i class="ri-user-fill"></i>
-            <input id="name" v-model="formData.name" type="text" placeholder="Nombre" required>
+            <input id="name" v-model="formData.name" type="text" placeholder="Nombre" required />
           </div>
+
           <div class="text-input">
             <i class="ri-user-fill"></i>
-            <input id="name" v-model="formData.lastname" type="text" placeholder="Apellido" required>
+            <input id="lastname" v-model="formData.lastname" type="text" placeholder="Apellido" required />
           </div>
+
           <div class="text-input">
             <i class="ri-lock-fill"></i>
-            <input class="icx" id="password" v-model="formData.password" type="password" placeholder="Contraseña" required>
+            <input id="password" v-model="formData.password" type="password" placeholder="Contraseña" required />
           </div>
+
+          <div class="text-input">
+            <i class="ri-earth-fill"></i>
+            <select v-model="formData.preferredLanguage" required>
+              <option value="es">Español</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
           <div class="text-input">
             <i class="ri-user-fill"></i>
-            <input id="area" v-model="formData.registerArea" type="text" placeholder="Area / Invitado" required>
+            <input id="area" v-model="formData.role" type="text" placeholder="User / Invitado" required />
             <button type="button" @click="setAreaInvitado" class="btn-invitado">Invitado</button>
           </div>
+
           <button type="submit" class="register-btn">Registrarse</button>
+
           <div class="create">
-          <a @click.prevent="goToLogin" href="#">¿Ya tienes cuenta? Inicia Sesion</a>
-          <i class="ri-arrow-right-fill"></i>
-        </div>
+            <a @click.prevent="goToLogin" href="#">¿Ya tienes cuenta? Inicia Sesión</a>
+            <i class="ri-arrow-right-fill"></i>
+          </div>
         </form>
-    
-        <!-- Mensaje de éxito -->
-        <p v-if="registrationSuccess" class="success-message">
-          Se ha enviado un mensaje a su correo electrónico para verificar la cuenta.
-        </p>
       </div>
     </div>
   </div>
 </template>
 
+
 <script>
 import userService from "@/main/services/userservice";
 import AlertComponent from "./AlertComponent.vue";
+
 export default {
   name: "RegisterFormComponent",
   components: {
@@ -58,15 +69,14 @@ export default {
         password: "",
         name: "",
         lastname: "",
-        registerArea: "", 
-        role: "User", 
-
+        preferredLanguage: navigator.language.startsWith("es") ? "es" : "en",
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        registeredAt: new Date().toISOString(),
+        role: "User",
       },
-      error: null,
       alertMessage: null,
       alertType: "error",
-      inputError: false,
-      registrationSuccess: false, // Nueva variable para mostrar el mensaje de éxito
+      registrationSuccess: false,
     };
   },
   methods: {
@@ -79,52 +89,41 @@ export default {
         this.alertMessage = null;
       }, 200);
     },
-    validateEmail(email){
+    validateEmail(email) {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(String(email).toLowerCase());
+      return re.test(email.toLowerCase());
     },
     async handleRegister() {
       if (!this.validateEmail(this.formData.email)) {
         this.showAlert("Por favor, ingrese un correo electrónico válido.", "error");
-        this.inputError = true;
-        setTimeout(() => {
-          this.inputError = false;
-        }, 2000);
         return;
       }
 
       try {
-        this.error = null; 
+        // Actualiza zona horaria y fecha antes de enviar
+        this.formData.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        this.formData.registeredAt = new Date().toISOString();
+
         await userService.registerUser(this.formData);
-        console.log("Registro exitoso");
-
-        // Mostrar mensaje de éxito
         this.registrationSuccess = true;
-        this.showAlert("Se ha enviado un mensaje a su correo electrónico para verificar la cuenta.", "success");
-
-        // Redirigir al login después de unos segundos
+        this.showAlert("Registro exitoso. Redirigiendo a la página de inicio de sesión...", "success");
         setTimeout(() => {
           this.$router.push("/login");
         }, 3000);
       } catch (err) {
-        this.showAlert("Error al registrarse, La cuenta ya existe.", "error");
-        return;
+        this.showAlert("Error al registrarse. La cuenta ya existe o falló la conexión.", "error");
       }
     },
-    async goToLogin() {
+    goToLogin() {
       this.$router.push("/login");
     },
-    clearErrorAfterTimeout() {
-      setTimeout(() => {
-        this.error = null;
-      }, 4000); 
-    },
     setAreaInvitado() {
-      this.formData.registerArea = "Invitado";
+      this.formData.role = "Invitado";
     },
   },
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -165,7 +164,7 @@ body {
 }
 
 .fondo {
-  background: url("@/assets/Pag 37 Proyecto Calioc y Chacrapuquio en Junín.jpg") no-repeat center center fixed;
+  background: #73ac78;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
