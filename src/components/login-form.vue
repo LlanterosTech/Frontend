@@ -2,41 +2,41 @@
   <AlertComponent v-if="alertMessage" :message="alertMessage" :type="alertType" @close="clearAlert" />
 
   <div class="container fondo">
-
-   
     <div class="login-container">
-  <div class="login-box">
-    <div class="login">
-      <img src="@/assets/logo.png" alt="Logo Activos Mineros" class="logo" />
+      <div class="login-box">
+        <div class="login">
+          <img src="@/assets/logo.png" alt="Logo Activos Mineros" class="logo" />
 
-      <form @submit.prevent="handleLogin">
-        <div :class="['text-input', { 'input-error': inputError }]">
-          <i class="ri-user-fill"></i>
-          <input v-model="email" type="text" placeholder="Usuario" />
+          <form @submit.prevent="handleLogin" novalidate>
+            <div :class="['text-input', { 'input-error': inputError }]">
+              <i class="ri-user-fill icon"></i>
+              <input v-model="email" type="text" placeholder="Usuario" autocomplete="username" />
+            </div>
+
+            <div :class="['text-input', { 'input-error': inputError }]">
+              <i class="ri-lock-fill icon"></i>
+              <input v-model="password" type="password" placeholder="Contraseña" autocomplete="current-password" />
+            </div>
+
+            <div ref="recaptcha" class="g-recaptcha"></div>
+
+            <button type="submit" class="login-btn" :disabled="inputError">
+              Iniciar Sesión
+            </button>
+          </form>
+
+          <div class="create">
+            <a @click.prevent="goToRegister" href="#" class="register-link">
+              ¿No tienes cuenta? <strong>Regístrate</strong>
+            </a>
+            <i class="ri-arrow-right-fill arrow-icon"></i>
+          </div>
         </div>
-
-        <div :class="['text-input', { 'input-error': inputError }]">
-          <i class="ri-lock-fill"></i>
-          <input v-model="password" type="password" placeholder="Contraseña" />
-        </div>
-
-        <div ref="recaptcha" class="g-recaptcha"></div>
-
-        <button type="submit" class="login-btn">Iniciar Sesión</button>
-      </form>
-
-      <div class="create">
-        <a @click.prevent="goToRegister" href="#">¿No tienes cuenta? Regístrate</a>
-        <i class="ri-arrow-right-fill"></i>
       </div>
     </div>
   </div>
-
-</div>
-
-
-  </div>
 </template>
+
 <script>
 import userService from "@/main/services/userservice";
 import { loadRecaptcha } from "@/utils/recaptcha";
@@ -73,7 +73,7 @@ export default {
             theme: "light"
           });
         });
-      }, 500); 
+      }, 500);
     } catch (error) {
       console.error("Error al cargar reCAPTCHA:", error);
       this.error = "No se pudo cargar el reCAPTCHA. Intenta recargar la página.";
@@ -90,7 +90,7 @@ export default {
       }, 200);
     },
     async handleLogin(event) {
-    if (event) event.preventDefault(); 
+    if (event) event.preventDefault();
     console.log("🔥 handleLogin ejecutado");
 
     try {
@@ -118,7 +118,7 @@ export default {
         console.log("🔹 Enviando credenciales:", credentials);
 
         const response = await userService.loginUser(credentials);
-        
+
         console.log("✅ Respuesta completa del backend:", response);
 
         if (!response) {
@@ -162,228 +162,176 @@ export default {
 
 
 
-<style>
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 html, body {
   height: 100%;
-  background-size: cover;
-  font-size: 15px;
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin: 0;
-  padding: 0;
-  background: none; /* Quita cualquier fondo en body */
-}
-
-.logo {
-  display: block;
-  width: 100px;  /* Ajusta según el tamaño deseado */
-  margin: 0 auto 10px; /* Centra y da espacio debajo */
-  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.2)); /* Sombra sutil */
-}
-
-.login h3.title {
-  margin: 20px 0;
-  font-size: 2.4rem; /* Ajusta según necesites */
-  font-weight: 10; /* Negrita */
-  letter-spacing: 1px; /* Para mejorar legibilidad */
-  text-transform: uppercase; /* Para mantener mayúsculas */
-  font-family: 'Nunito', sans-serif; /* Asegura la fuente */
-}
-
-.g-recaptcha {
-  display: flex;
-  justify-content: center;
-  margin: 15px 0;
+  font-family: 'Inter', sans-serif;
+  background-size: cover;
+  background: #73ac78 center;
 }
 
 .container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  position: relative;
-
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.text-box {
-  position: absolute;
-  left: 5%;
-  top: 30%;
+.login-container {
+  max-width: 380px;
+  width: 100%;
+}
+
+.login-box {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.login-box:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
+}
+
+.logo {
+  width: 110px;
+  margin-bottom: 30px;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.1));
+}
+
+.text-input {
+  background: #f7f9fa;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  height: 48px;
+  margin-bottom: 18px;
+  border: 2px solid black;
+  transition: border-color 0.3s ease;
+}
+
+.text-input.input-error {
+  border-color: #e74c3c;
+}
+
+.text-input:focus-within {
+  border-color: #3c9d3c;
+  background: #f0f7f0;
+}
+
+.text-input input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  color: #333;
+  padding-left: 10px;
+  font-weight: 500;
+}
+
+.icon {
+  font-size: 1.3rem;
+  color: #6c757d;
+  min-width: 20px;
+}
+
+::placeholder {
+  color: #a0a5ab;
+  font-weight: 400;
+}
+
+.g-recaptcha {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.login-btn {
+  width: 100%;
+  background: #3c9d3c;
   color: white;
-  max-width: 1200px; /* Aumenta el ancho permitido */
-  width: auto; /* Permite que el contenedor se expanda si es necesario */
+  border: none;
+  padding: 14px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
 }
 
-.text-box h1 {
-  font-size: 4.2rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  line-height: 1.2;
-  white-space: nowrap; /* Evita que "Calculator" baje de línea */
+.login-btn:disabled {
+  background: #a5d6a7;
+  cursor: not-allowed;
 }
 
-.text-box p {
-  font-size: 1.5rem;
-  font-weight: 300;
-  line-height: 1.5;
-  max-width: 600px; /* Ajusta el ancho del texto para evitar que se vea angosto */
+.login-btn:hover:not(:disabled) {
+  background-color: #35862b;
+}
+
+.create {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #4b4b4b;
+  user-select: none;
+}
+
+.register-link {
+  color: #3c9d3c;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.register-link:hover {
+  color: #2a6a21;
+  text-decoration: underline;
+}
+
+.arrow-icon {
+  font-size: 1.1rem;
+  color: #3c9d3c;
+  margin-left: 8px;
+  user-select: none;
+}
+
+.g-recaptcha iframe {
+  border-radius: 8px !important;
 }
 
 .fondo {
-  background: #73ac78;
+  background-image: url('@/assets/planta_fondo.jpg');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
 }
 
 .login-box {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   padding: 40px;
   border-radius: 15px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   width: 350px;
   text-align: center;
 }
-.text-input {
-  background: #e6e6e6;
-  height: 45px;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
 
-.text-input input {
-  background: none;
-  border: none;
-  outline: none;
-  width: 100%;
-  height: 100%;
-  margin-left: 10px;
-  font-size: 1rem;
-}
 
-.text-input i {
-  color: #686868;
-  font-size: 1.2rem;
-}
-
-::placeholder {
-  color: #9a9aa9;
-  font-size: 1rem;
-}
-
-.login-btn {
-  padding: 12px 60px;
-  color: #ffffff;
-  font-size: 1.2rem;
-  background: rgba(62, 189, 36, 0.75);
-  border: none;
-  border-radius: 15px;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: transform 0.3s;
-}
-
-.login-btn:hover {
-  transform: scale(1.05);
-}
-
-.create {
-  margin-top: 15px;
-}
-
-.forgot-password a {
-  font-size: 11px;
-  color: #555;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.forgot-password {
-  text-align: left !important;
-  margin-left: 10px; /* Ajusta el valor según lo necesites */
-}
-
-.create a {
-  font-size: 14px;
-  color: #555;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.alert-container {
-  position: fixed; 
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 0, 0, 0.9);
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-  opacity: 0; 
-  transform: translateY(-10px);
-}
-
-.alert-container.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-
-.error-message {
-  color: white;
-  font-size: 0.9rem;
-}
-
-.input-error {
-  border: 2px solid red;
-}
-
-.login-container {
-  position: absolute;
-  right: 8%;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.manual-button {
-  margin-top: 20px;
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-}
-
-.manual-button:hover {
-  background-color: #0056b3;
-}
 </style>

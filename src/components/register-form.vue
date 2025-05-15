@@ -6,36 +6,36 @@
       <div class="register">
         <img src="@/assets/logo.png" alt="Logo Activos Mineros" class="logo" />
         <form @submit.prevent="handleRegister">
-          <div class="text-input">
-            <i class="ri-user-fill"></i>
+          <div :class="['text-input', { 'input-error': false }]">
+            <i class="ri-user-fill icon"></i>
             <input id="email" v-model="formData.email" type="text" placeholder="usuario@dominio" required />
           </div>
 
-          <div class="text-input">
-            <i class="ri-user-fill"></i>
+          <div :class="['text-input', { 'input-error': false }]">
+            <i class="ri-user-fill icon"></i>
             <input id="name" v-model="formData.name" type="text" placeholder="Nombre" required />
           </div>
 
-          <div class="text-input">
-            <i class="ri-user-fill"></i>
+          <div :class="['text-input', { 'input-error': false }]">
+            <i class="ri-user-fill icon"></i>
             <input id="lastname" v-model="formData.lastname" type="text" placeholder="Apellido" required />
           </div>
 
-          <div class="text-input">
-            <i class="ri-lock-fill"></i>
+          <div :class="['text-input', { 'input-error': false }]">
+            <i class="ri-lock-fill icon"></i>
             <input id="password" v-model="formData.password" type="password" placeholder="Contraseña" required />
           </div>
 
-          <div class="text-input">
-            <i class="ri-earth-fill"></i>
+          <div :class="['text-input', { 'input-error': false }]">
+            <i class="ri-earth-fill icon"></i>
             <select v-model="formData.preferredLanguage" required>
               <option value="es">Español</option>
               <option value="en">English</option>
             </select>
           </div>
 
-          <div class="text-input">
-            <i class="ri-user-fill"></i>
+          <div :class="['text-input', { 'input-error': false }]">
+            <i class="ri-user-fill icon"></i>
             <input id="area" v-model="formData.role" type="text" placeholder="User / Invitado" required />
             <button type="button" @click="setAreaInvitado" class="btn-invitado">Invitado</button>
           </div>
@@ -43,14 +43,15 @@
           <button type="submit" class="register-btn">Registrarse</button>
 
           <div class="create">
-            <a @click.prevent="goToLogin" href="#">¿Ya tienes cuenta? Inicia Sesión</a>
-            <i class="ri-arrow-right-fill"></i>
+            <a @click.prevent="goToLogin" href="#" class="register-link">¿Ya tienes cuenta? Inicia Sesión</a>
+            <i class="ri-arrow-right-fill arrow-icon"></i>
           </div>
         </form>
       </div>
     </div>
   </div>
 </template>
+
 
 
 <script>
@@ -130,189 +131,166 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 html, body {
   height: 100%;
-  background-size: cover;
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin: 0;
-  padding: 0;
-  background: none; /* Quita cualquier fondo en body */
+  font-family: 'Inter', sans-serif;
+  background-size: cover;
+  background: #73ac78 center;
 }
-
-.logo {
-  display: block;
-  width: 100px;  /* Ajusta según el tamaño deseado */
-  margin: 0 auto 10px; /* Centra y da espacio debajo */
-  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.2)); /* Sombra sutil */
-}
-
 
 .container {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center; /* Centrará el modal horizontalmente */
-  align-items: center; /* Centrará el modal verticalmente */
-  position: relative;
+  justify-content: center;
+  align-items: center;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  box-sizing: border-box;
 }
-
-.fondo {
-  background: #73ac78;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
-
-
-.create i {
-  color: #9a9a9a;
-  margin-left: 12px;
-}
-
-
 
 .register-box {
-  background: rgba(255, 255, 255);
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 0 25px 5px rgb(0 0 0 / 20%);
-  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
   width: 350px;
   text-align: center;
+  transition: box-shadow 0.3s ease;
+  max-height: 90vh;
+  margin: auto 0;
 }
 
+.register-box:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
+}
+
+.logo {
+  width: 110px;
+  margin-bottom: 30px;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.1));
+}
 
 .text-input {
-  background: #e6e6e6;
-  height: 45px;
+  background: #f7f9fa;
+  height: 48px;
   display: flex;
-  width: 100%;
   align-items: center;
+  padding: 0 15px;
   border-radius: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 18px;
+  border: 2px solid black;
+  transition: border-color 0.3s ease;
 }
 
-.register h3.title {
-  margin: 20px 0;
-  font-size: 2.4rem; /* Ajusta según necesites */
-  font-weight: 10; /* Negrita */
-  letter-spacing: 1px; /* Para mejorar legibilidad */
-  text-transform: uppercase; /* Para mantener mayúsculas */
-
-  font-family: 'Nunito', sans-serif; /* Asegura la fuente */
+.text-input:focus-within {
+  border-color: #1e5d1e; /* verde oscuro al enfocar */
+  background: #f0f7f0;
 }
 
-.text-input input {
-  background: none;
+.text-input.input-error {
+  border-color: #e74c3c !important; /* rojo para error */
+}
+
+.text-input input,
+.text-input select {
+  flex-grow: 1;
   border: none;
   outline: none;
-  width: 100%;
-  height: 100%;
-  margin-left: 10px;
+  background: transparent;
   font-size: 1rem;
+  color: #333;
+  padding-left: 10px;
+  font-weight: 500;
+  appearance: none;
 }
 
-
+.icon {
+  font-size: 1.3rem;
+  color: #6c757d;
+  min-width: 20px;
+}
 
 .btn-invitado {
-  right: 10px;
+  margin-left: 10px;
   background: #74c905;
   color: white;
   border: none;
   border-radius: 8px;
   padding: 5px 10px;
   cursor: pointer;
-  transition: transform 0.3s;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+  user-select: none;
 }
 
 .btn-invitado:hover {
   transform: scale(1.1);
 }
 
-::placeholder {
-  color: #9a9a9a;
-  font-size: 1.2rem;
-}
-
 .register-btn {
-  padding: 12px 60px;
-  color: #ffffff;
-  font-size: 1.2rem;
-  background: rgba(62, 189, 36, 0.75);
+  width: 100%;
+  background: #3c9d3c;
+  color: white;
   border: none;
-  border-radius: 15px;
+  padding: 14px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
   margin-top: 15px;
-  transition: transform 0.3s;
 }
-
 
 .register-btn:hover {
-  transform: scale(1.05);
-}
-
-a.forgot {
-  margin-top: 15px;
+  background-color: #35862b;
 }
 
 .create {
-  margin-top: 15px;
-}
-.success-message {
-  color: #28a745;
-  font-size: 1rem;
-  margin-top: 15px;
-  text-align: center;
-}
-.create a {
-  font-size: 14px;
-  color: #555;
-  cursor: pointer;
-  text-decoration: none;
-}
-.create i {
-  color: #9a9a9a;
-  margin-left: 12px;
-}
-
-
-.alert-container {
-  position: fixed;  /* Fija el mensaje en la pantalla */
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 0, 0, 0.9); /* Color rojo más visible */
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 9999; /* Asegura que esté por encima de otros elementos */
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-  opacity: 0; /* Inicia oculto */
-  transform: translateY(-10px); /* Pequeña animación */
-}
-
-.alert-container.show {
-  opacity: 1;  /* Se muestra cuando hay un error */
-  transform: translateY(0);
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-
-.error-message {
-  color: white;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 0.9rem;
+  color: #4b4b4b;
+  user-select: none;
+  margin-bottom: 40px;
 }
+
+.register-link {
+  color: #3c9d3c;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.register-link:hover {
+  color: #2a6a21;
+  text-decoration: underline;
+}
+
+.arrow-icon {
+  font-size: 1.1rem;
+  color: #3c9d3c;
+  margin-left: 8px;
+  user-select: none;
+}
+
+::placeholder {
+  color: #a0a5ab;
+  font-weight: 400;
+}
+
+.fondo {
+  background-image: url('@/assets/planta_fondo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 </style>
