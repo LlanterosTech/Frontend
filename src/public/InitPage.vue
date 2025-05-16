@@ -1,35 +1,59 @@
 <template>
-  <div class="container fondo">
-    <div class="header">
-      <div class="logo">
-        <img src="@/assets/logo.png" alt="Logo" />
-      </div>
-    </div>
+  <div class="fondo">
+    <div class="container">
 
-    <div class="glass-box">
-      <h1 class="title">Bienvenido, {{ userName }}</h1>
-
-      <!-- 📷 Subida de imagen -->
-      <div class="form-upload">
-        <label for="plantImage">Sube una imagen de tu planta:</label>
-        <input type="file" id="plantImage" @change="handleImageUpload" accept="image/*" />
-
-        <button class="btn-secondary" @click="identifyPlant" :disabled="!selectedImage">
-          Identificar Planta
-        </button>
+      <div class="header">
+        <div class="logo">
+          <img src="@/assets/logo.png" alt="Logo" />
+        </div>
       </div>
 
-      <!-- 🌱 Mostrar resultado de la identificación -->
-      <div v-if="identifiedPlant" class="plant-result">
-        <h2>Resultado:</h2>
-        <img :src="identifiedPlant.imageUrl" alt="Planta" class="preview-image" />
-        <p><strong>Nombre común:</strong> {{ identifiedPlant.commonName }}</p>
-        <p><strong>Nombre científico:</strong> {{ identifiedPlant.scientificName }}</p>
-        <p><strong>Descripción:</strong> {{ identifiedPlant.description }}</p>
+      <div class="main-layout">
+        <div class="glass-box">
+          <h1 class="title">Bienvenido, {{ userName }}</h1>
 
-        <button class="btn-primary" @click="registerPlant">
-          Registrar Planta
-        </button>
+          <div class="form-upload">
+            <div class="form-inputs">
+              <label for="plantImage">Sube una imagen de tu planta:</label>
+              <input type="file" id="plantImage" @change="handleImageUpload" accept="image/*" />
+              <div class="buttons-group">
+                <button class="btn-secondary" @click="identifyPlant" :disabled="!selectedImage">
+                  Identificar Planta
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Derecha: fuera de glass-box, pero dentro de main-layout -->
+        <div v-if="identifiedPlant" class="result-and-form-container">
+          <div class="plant-result">
+            <h2>Resultado:</h2>
+            <img :src="identifiedPlant.imageUrl" alt="Planta" class="preview-image" />
+            <p><strong>Nombre común:</strong> {{ identifiedPlant.commonName }}</p>
+            <p><strong>Nombre científico:</strong> {{ identifiedPlant.scientificName }}</p>
+            <p><strong>Descripción:</strong> {{ identifiedPlant.description }}</p>
+
+            <button class="btn-primary" @click="registerPlant">
+              Registrar Planta
+            </button>
+          </div>
+
+          <form @submit.prevent="submitForm" class="plant-form">
+            <h2>Formulario</h2>
+
+            <label for="field1">Campo 1</label>
+            <input id="field1" v-model="formData.campo1" type="text" placeholder="Ingresa valor 1" />
+
+            <label for="field2">Campo 2</label>
+            <input id="field2" v-model="formData.campo2" type="text" placeholder="Ingresa valor 2" />
+
+            <label for="field3">Campo 3</label>
+            <input id="field3" v-model="formData.campo3" type="text" placeholder="Ingresa valor 3" />
+
+            <button type="submit" class="btn-primary">Enviar</button>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -50,6 +74,12 @@ export default {
       userName: "",
       selectedImage: null,
       identifiedPlant: null,
+      plantId: null,
+      formData: {
+        customName: "",
+        location: "",
+        note: ""
+      }
     };
   },
   async created() {
@@ -85,6 +115,7 @@ export default {
         }
 
         const response = await plantservice.identifySavePlant(formData);
+        this.plantId = response.id;
         this.identifiedPlant = response;
 
         console.log("✅ Planta identificada:", response);
@@ -95,16 +126,39 @@ export default {
 
     async registerPlant() {
       try {
-        await plantservice.registerPlant(this.identifiedPlant);
+        await plantservice.registerPlant({ plantId: this.plantId });
         alert("🌱 Planta registrada con éxito!");
         this.identifiedPlant = null;
         this.selectedImage = null;
       } catch (err) {
         console.error("❌ Error registrando planta:", err);
       }
+    },
+
+    async submitForm() {
+      try {
+        const payload = {
+          customName: this.formData.customName,
+          location: this.formData.location,
+          note: this.formData.note
+        };
+
+        await plantservice.sendFormData(this.plantId, payload);
+        alert("Datos enviados con éxito!");
+
+        // Limpiar formulario
+        this.formData.customName = "";
+        this.formData.location = "";
+        this.formData.note = "";
+
+      } catch (error) {
+        console.error("Error enviando datos del formulario:", error);
+        alert("Error enviando datos. Intenta nuevamente.");
+      }
     }
   }
 };
+
 </script>
 
 
@@ -112,242 +166,320 @@ export default {
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
 
-body, html {
-  margin: 0;
-  padding: 0;
-  font-family: "Poppins", sans-serif;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .fondo {
-  background: #548f4e;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-  position: relative;
-}
-
-/* Estilo para el encabezado con el logo */
-.header {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
-
-.logo img {
-  width: 100px; /* Ajusta el tamaño del logo */
-  height: auto;
-}
-
-/* Caja de bienvenida con fondo difuminado */
-.glass-box {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
- max-width: 700px; /* Ajusta según sea necesario */
-  width: 90%;
-  text-align: center;
-}
-
-.title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: white;
-  max-width: 90%; /* Permite que el título ocupe más espacio */
-  text-align: center; /* Centra el texto */
-  word-wrap: break-word; /* Permite dividir el texto en varias líneas */
-  overflow-wrap: break-word; /* Alternativa para compatibilidad */
-  white-space: normal; /* Permite que el texto salte de línea */
-  margin: 0 auto; /* Centra el elemento dentro de su contenedor */
-}
-
-
-
-.options {
-  display: flex;
-  gap: 20px;
-  margin-top: 30px;
-}
-
-.btn-primary:hover {
-  transform: scale(1.1);
-}
-
-.btn-secondary {
-  padding: 14px 40px;
-  color: white;
-  font-size: 1.4rem;
-  background: #74c905;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.btn-secondary:hover {
-  transform: scale(1.1);
-}
-
-.btn-orden {
-  padding: 0;
-  color: #4fd87d; 
-  font-size: 1.4rem;
-  border: none;
-  background: none; 
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.btn-orden:hover {
-  transform: scale(1.1);
-}
-
-.btn-action {
-  padding: 5px;
-  margin: 0 2px;
-  color: white;
-  background-color: #548f4e;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-.btn-action-ver {
-  padding: 5px;
-  margin: 0 2px;
-  color: white;
-  background-color: #62a1ff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-.btn-action-del {
-  padding: 5px;
-  margin: 0 2px;
-  color: white;
-  background-color: #f87c5d;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-.detalle-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  background-color: #d1d1d1;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  z-index: 0;
+  min-height: unset;
+  max-width: unset;
 }
 
-.detalle-overlay.show {
-  opacity: 1;
-  visibility: visible;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
 }
 
-
-.options {
-  display: flex;
-  justify-content: center; /* Centra los botones */
-  align-items: center;
-  gap: 20px;
-  margin-top: 30px;
-  flex-wrap: wrap; /* Permite que los botones se acomoden en varias filas si es necesario */
+.fondo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(5px);
+  background: rgba(0,0,0,0.1);
+  z-index: 0;
 }
 
-.option {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  text-align: center;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 40px 30px;
+  box-sizing: border-box;
+}
+
+.header {
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 8px 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  z-index: 2;
+  position: fixed;
+}
+
+.header:hover {
+  transform: scale(1.05);
+}
+
+.logo img {
+  width: 110px;
+  height: auto;
+}
+
+.glass-box {
+  flex: 0 0 350px; /* ancho fijo a la izquierda */
+  background: white;
+  backdrop-filter: saturate(180%) blur(12px);
+  border-radius: 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: #333;
+  padding: 40px 40px 50px 40px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #222;
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+
+.form-upload {
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center; /* Asegura alineación vertical */
-  width: 140px; /* Aumentar si es necesario */
-  height: 140px; /* Mantiene proporción */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.icono-opcion {
-  font-size: 3rem; /* Asegurar tamaño de los iconos */
-  color: #3ea845;
-}
-
-.option p {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #3ea845;
-  margin-top: 10px; /* Espacio entre icono y texto */
-  text-align: center;
-}
-
-.option:hover {
-  transform: scale(1.1);
-  background: rgba(255, 255, 255, 0.8);
-}
-
-.icono-opcion {
-  font-size: 3rem; /* Cambia el tamaño */
-  color: #3ea845; /* Cambia el color */
+  gap: 12px;
+  color: #222;
+  font-weight: 600;
+  font-size: 1.2rem;
+  max-width: 350px;
+  display: flex;
 }
 
 
-.option p {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #3ea845;
+.form-upload > div:first-child {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.option:hover {
-  transform: scale(1.1);
-  background: rgba(255, 255, 255, 0.8);
+.form-upload button {
+  font-size: 1.1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.25s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 8px 25px;
 }
 
-/* Pie de página */
-.footer {
-  position: absolute;
-  bottom: 20px;
-  font-size: 0.9rem;
+.form-upload label {
+  cursor: pointer;
+  background: #4c7a28;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  padding: 8px 15px;
+}
+.form-upload label:hover {
+  background: #73b139;
   color: white;
+}
+
+.buttons-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.form-upload button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.form-upload input[type="file"] {
+  display: none;
+}
+
+.btn-secondary {
+  background: #6aaa29;
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  box-shadow: 0 6px 12px rgba(106, 170, 41, 0.5);
+  transition: all 0.3s ease;
+  user-select: none;
+  padding: 10px 35px;
+}
+.btn-secondary:hover:not(:disabled) {
+  background: #8fca3f;
+  transform: scale(1.12);
+  box-shadow: 0 8px 20px rgba(143, 202, 63, 0.7);
+}
+.btn-secondary:disabled {
+  background: #a3bba5;
+  cursor: not-allowed;
+  box-shadow: none;
+  color: #e0e0e0;
+}
+
+.plant-result {
+  flex: 1 1 50%;
+  background: #7E8C54;
+  border-radius: 15px;
+  padding: 30px 25px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.1);
+  color: #000;
+  text-align: left;
+  animation: fadeIn 0.8s ease forwards;
+  max-width: 100%;
+}
+
+
+.form-inputs {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plant-result h2 {
+  margin-bottom: 15px;
+  color: #e3f3d6;
   text-align: center;
+  font-weight: 700;
 }
-.estimado-ultimas {
-    text-align: right;
+
+.preview-image {
+  max-width: 150px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
-.encabezados-ultimas th  {
+
+.btn-primary {
+  background: #4a7f21;
+  border-radius: 28px;
+  border: none;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(74,127,33,0.6);
+  transition: background-color 0.3s ease, transform 0.25s ease;
+  margin-top: 15px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 35px;
+}
+
+.btn-primary:hover {
+  background: #67a62c;
+  transform: scale(1.1);
+}
+
+.footer {
+  position: fixed;
+  bottom: 12px;
+  width: 100%;
   text-align: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  user-select: none;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 6px rgba(0,0,0,0.5);
 }
-.text-center {
-    text-align: center !important;
+
+.result-and-form-container {
+  flex: 1 1 auto; /* ocupa espacio restante a la derecha */
+  display: flex;
+  gap: 30px;
+  max-width: calc(100% - 390px); /* evita que se salga del contenedor */
+  justify-content: flex-start;
+  align-items: flex-start;
+  background: transparent;
 }
-.acciones {
-    display: flex;
-    justify-content: center; 
-    align-items: center; 
-    gap: 5px; 
+
+.plant-form {
+  flex: 1 1 50%;
+  background: #e6f2d4;
+  border-radius: 15px;
+  padding: 25px 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  max-width: 350px;
+  width: 100%;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.plant-form h2 {
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 700;
+  color: #4a7f21;
+}
+
+.plant-form label {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.plant-form input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #999;
+  font-size: 1rem;
+}
+
+.plant-form button {
+  margin-top: 20px;
+  align-self: center;
+  width: 50%;
+  font-size: 1.1rem;
+}
+
+.main-layout {
+  display: flex;
+  gap: 40px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  max-width: 100%;
+  /* Para evitar scroll horizontal si la pantalla es pequeña */
+  overflow-x: auto;
+  padding-bottom: 2rem;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(20px);}
+  to {opacity: 1; transform: translateY(0);}
 }
 </style>

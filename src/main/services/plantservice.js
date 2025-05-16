@@ -10,7 +10,17 @@ const plantservice = {
       console.error("❌ Error identificando y guardando planta:", error);
       throw error;
     }
-  }
+  },
+
+  async sendFormData(plantId, formPayload) {
+    try {
+      const response = await api.post(`http://localhost:7230/plantita/v1/my-plant/${plantId}`, formPayload);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error enviando datos del formulario:", error);
+      throw error;
+    }
+  },
 };
 
 export default plantservice;

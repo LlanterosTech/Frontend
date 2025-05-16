@@ -10,7 +10,6 @@
       </div>
     </div>
 
-    <!-- Columna derecha -->
     <div class="user-form">
       <h2>Registrar Mi Planta</h2>
       <label>Nombre personalizado</label>
