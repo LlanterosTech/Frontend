@@ -14,7 +14,7 @@ const plantservice = {
 
   async sendFormData(plantId, formPayload) {
     try {
-      const response = await api.post(`http://localhost:7230/plantita/v1/my-plant/${plantId}`, formPayload);
+      const response = await api.post(`my-plant/${plantId}`, formPayload);
       return response.data;
     } catch (error) {
       console.error("❌ Error enviando datos del formulario:", error);

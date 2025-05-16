@@ -34,22 +34,20 @@
             <p><strong>Nombre científico:</strong> {{ identifiedPlant.scientificName }}</p>
             <p><strong>Descripción:</strong> {{ identifiedPlant.description }}</p>
 
-            <button class="btn-primary" @click="registerPlant">
-              Registrar Planta
-            </button>
+        
           </div>
 
           <form @submit.prevent="submitForm" class="plant-form">
-            <h2>Formulario</h2>
+            <h2>Registra tu planta</h2>
 
-            <label for="field1">Campo 1</label>
-            <input id="field1" v-model="formData.campo1" type="text" placeholder="Ingresa valor 1" />
+            <label for="field1">Nombre</label>
+            <input id="field1" v-model="formData.customName" type="text" placeholder="Ingresa el nombre" />
 
-            <label for="field2">Campo 2</label>
-            <input id="field2" v-model="formData.campo2" type="text" placeholder="Ingresa valor 2" />
+            <label for="field2">Ubicación</label>
+            <input id="field2" v-model="formData.location" type="text" placeholder="Ingresa la ubicación" />
 
-            <label for="field3">Campo 3</label>
-            <input id="field3" v-model="formData.campo3" type="text" placeholder="Ingresa valor 3" />
+            <label for="field3">Descripción</label>
+            <input id="field3" v-model="formData.note" type="text" placeholder="Ingresa la descripcion" />
 
             <button type="submit" class="btn-primary">Enviar</button>
           </form>
@@ -115,7 +113,7 @@ export default {
         }
 
         const response = await plantservice.identifySavePlant(formData);
-        this.plantId = response.id;
+        this.plantId = response.plantId;
         this.identifiedPlant = response;
 
         console.log("✅ Planta identificada:", response);
@@ -202,14 +200,12 @@ html, body {
 .container {
   position: relative;
   z-index: 1;
-  max-width: 720px;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  width: 100vw;
-  height: 100vh;
+
   margin: 0;
   padding: 40px 30px;
   box-sizing: border-box;
