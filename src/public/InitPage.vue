@@ -18,21 +18,10 @@
         </div>
       </div>
 
-      <!-- SIDEBAR -->
-      <div class="sidebar" :class="{ expanded: isSidebarExpanded }">
-        <button class="toggle-btn" @click="isSidebarExpanded = !isSidebarExpanded">
-          <i :class="isSidebarExpanded ? 'fas fa-chevron-left' : 'fas fa-bars'"></i>
-        </button>
-        <ul>
-          <li><i class="fas fa-cog"></i> <span>Configuración</span></li>
-          <li><i class="fas fa-seedling"></i> <span>Ver mis plantas</span></li>
-          <li><i class="fas fa-microchip"></i> <span>Ver mis dispositivos</span></li>
-        </ul>
-      </div>
 
       <!-- CONTENIDO PRINCIPAL -->
       <div class="main-layout" :class="{ 'sidebar-expanded': isSidebarExpanded }">
-      <div class="glass-box">
+        <div class="glass-box">
           <h1 class="title">Bienvenido, {{ userName }}</h1>
 
           <div class="form-upload">
@@ -54,27 +43,27 @@
             <h2>Resultado:</h2>
             <img :src="identifiedPlant.imageUrl" alt="Planta" class="preview-image" />
             <p><strong>Nombre científico:</strong> {{ identifiedPlant.scientificName }}</p>
-           </div>
+          </div>
 
-           <form @submit.prevent="submitForm" class="plant-form">
-             <h2>Registra tu planta</h2>
+          <form @submit.prevent="submitForm" class="plant-form">
+            <h2>Registra tu planta</h2>
 
-             <label for="field1">Nombre</label>
-             <input id="field1" v-model="formData.customName" type="text" placeholder="Ingresa el nombre" />
+            <label for="field1">Nombre</label>
+            <input id="field1" v-model="formData.customName" type="text" placeholder="Ingresa el nombre" />
 
-             <label for="field2">Ubicación</label>
-             <input id="field2" v-model="formData.location" type="text" placeholder="Ingresa la ubicación" />
+            <label for="field2">Ubicación</label>
+            <input id="field2" v-model="formData.location" type="text" placeholder="Ingresa la ubicación" />
 
-             <label for="field3">Descripción</label>
-             <input id="field3" v-model="formData.note" type="text" placeholder="Ingresa la descripción" />
+            <label for="field3">Descripción</label>
+            <input id="field3" v-model="formData.note" type="text" placeholder="Ingresa la descripción" />
 
-             <button type="submit" class="btn-primary">Enviar</button>
-           </form>
-         </div>
-       </div>
-     </div>
+            <button type="submit" class="btn-primary">Enviar</button>
+          </form>
+        </div>
+      </div>
+    </div>
 
-     <!-- FOOTER -->
+    <!-- FOOTER -->
     <footer class="footer">
       © Todos los derechos reservados por Plantita
     </footer>
@@ -234,23 +223,33 @@ html, body {
 
 .header {
   position: fixed;
-  top: 1px;
-  left: 1px;
-  right: 1px;
-  height: 70px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #00A6A6;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 10px 10px;
+  background: #028090;
+  padding: 0 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 
+.logo {
+  background-color: #ffffff22;
+  padding: 6px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .logo img {
-  width: 20px;
-  height: 20px;
+  width: 42px;
+  height: auto;
+  border-radius: 8px;
+  object-fit: contain;
 }
 
 .glass-box {
@@ -504,37 +503,45 @@ html, body {
   to {opacity: 1; transform: translateY(0);}
 }
 
-.logo img {
-  width: 80px;
-  height: auto;
-}
-
 .nav-links {
   display: flex;
-  gap: 60px;
+  gap: 32px;
   align-items: center;
-  margin-left: 30px;
 }
 
 .nav-links a {
+  color: #fff;
   text-decoration: none;
-  color: black;
   font-weight: 600;
-  background: #00A6A6;
-  padding: 6px 14px;
-  border-radius: 8px;
-  transition: background 0.3s ease;
+  font-size: 1rem;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #fff;
+  transition: width 0.3s ease;
 }
 
 .nav-links a:hover {
   background-color: rgba(0, 0, 0, 0.3);
 }
 
+.nav-links a:hover::after {
+  width: 100%;
+}
+
 .user-icon {
-  font-size: 40px;
-  color: #333;
+  font-size: 28px;
+  color: #fff;
   cursor: pointer;
-  margin-right: 40px;
+  transition: transform 0.3s ease;
 }
 
 .user-icon i {
@@ -545,67 +552,4 @@ html, body {
 .user-icon i:hover {
   transform: scale(1.15);
 }
-
-/* Sidebar */
-.sidebar {
-  position: fixed;
-  top: 170px;
-  left: 0;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(6px);
-  padding: 20px 10px;
-  width: 60px;
-  height: auto;
-  border-radius: 0 12px 12px 0;
-  box-shadow: 4px 4px 12px rgba(0,0,0,0.1);
-  z-index: 2;
-  transition: width 0.3s ease;
-  overflow: hidden;
-}
-
-.sidebar.expanded {
-  width: 200px;
-}
-
-.sidebar ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar li {
-  margin-bottom: 18px;
-  font-weight: 600;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background 0.3s ease;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.sidebar li span {
-  display: none;
-}
-
-.sidebar.expanded li span {
-  display: inline;
-}
-
-.toggle-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-bottom: 20px;
-  font-size: 1.2rem;
-  color: #333;
-}
-
-.sidebar li:hover {
-  background: rgba(130, 180, 120, 0.3);
-}
-
 </style>

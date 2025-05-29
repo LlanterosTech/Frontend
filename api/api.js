@@ -1,7 +1,7 @@
 import axios from "axios";
 import userService from "@/main/services/userservice";
 const api = axios.create({
-    baseURL: "http://localhost:5071/plantita/v1",
+    baseURL: "https://localhost:7230/plantita/v1",
     withCredentials: true, 
  
 });
