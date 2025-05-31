@@ -36,11 +36,11 @@ export default {
     </div>
 
     <ul>
-      <li><i class="fas fa-cog"></i> <span>Configuración</span></li>
-      <li><i class="fas fa-seedling"></i> <span>Ver mis plantas</span></li>
+      <li><i class="fas fa-cog"></i> <span> Configuración</span></li>
+      <li><i class="fas fa-seedling"></i> <span> Ver mis plantas</span></li>
       <li>
         <router-link to="/see-my-devices">
-          <i class="fas fa-microchip"></i> <span>Ver mis dispositivos</span>
+          <i class="fas fa-microchip"></i> <span> Ver mis dispositivos</span>
         </router-link>
       </li>
     </ul>
@@ -50,7 +50,7 @@ export default {
 <style scoped>
 .sidebar {
   position: fixed;
-  top: 61px; /* igual a la altura del header */
+  top: 60px; /* igual a la altura del header */
   left: 0;
   width: 60px;
   height: calc(100vh - 70px);
@@ -87,6 +87,7 @@ export default {
   color: #333;
   transition: background 0.3s ease;
   cursor: pointer;
+  margin-bottom: 18px
 }
 
 .sidebar li span {
@@ -103,7 +104,7 @@ export default {
   cursor: pointer;
   font-size: 1.3rem;
   color: #333;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
   align-self: flex-end;
   margin-right: 10px;
 }
@@ -119,6 +120,7 @@ export default {
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   width: 100%;
+  gap: 18px;
 }
 
 .sidebar-profile i {
@@ -133,10 +135,12 @@ export default {
   color: #333;
   opacity: 0;
   transition: opacity 0.3s ease;
+  gap: 18px;
 }
 
 .sidebar.expanded .sidebar-profile i {
-  font-size: 2.4rem;
+  font-size: 5rem;
+  transition: font-size 0.3s ease;
 }
 
 .sidebar.expanded .sidebar-profile p {
@@ -164,5 +168,6 @@ export default {
   align-items: center;
   width: 100%;
 }
+
 
 </style>
