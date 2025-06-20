@@ -35,6 +35,7 @@ const plantservice = {
   async getMyPlantById(plantId) {
     try {
       const response = await api.get(`my-plant/${plantId}`);
+      console.log("✅ Planta obtenida por ID:", response.data);
       return response.data;
     } catch (error) {
       console.error("❌ Error obteniendo planta por ID:", error);
