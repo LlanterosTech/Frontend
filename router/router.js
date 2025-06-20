@@ -7,6 +7,7 @@ import MainContainer from '@/components/main-container.vue';
 import userService from '@/main/services/userservice';
 import MyPlants from '@/public/MyPlants.vue';
 import PlantDashboard from '@/public/PlantDashboard.vue';
+import DevicesPage from '@/public/DevicesPage.vue';
 const routes = [
     {
         path: '/',
@@ -43,6 +44,12 @@ const routes = [
         name: 'dashboard-myplant',
         component: PlantDashboard,
         meta: { title: 'Dashboard Mis Plantas', requiresAuth: true }
+    },
+    {
+        path: '/devices',
+        name: 'devices',
+        component: DevicesPage,
+        meta: { title: 'Dispositivos', requiresAuth: true }
     },
     {
         path: '/:catchAll(.*)',

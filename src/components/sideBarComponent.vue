@@ -16,7 +16,7 @@
         <i class="fas fa-seedling"></i>
         <span>Ver mis plantas</span>
       </li>
-      <li>
+      <li @click="goToMyDevices">
         <i class="fas fa-microchip"></i>
         <span>Ver mis dispositivos</span>
       </li>
@@ -53,6 +53,9 @@ export default {
     },
     goToMyPlants() {
       this.$router.push("/my-plants");
+    },
+    goToMyDevices() {
+      this.$router.push("/devices");
     }
   }
 };

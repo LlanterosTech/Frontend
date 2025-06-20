@@ -44,9 +44,7 @@ export default {
 
 <style scoped>
 .my-plants-view {
-  padding: 2rem;
   background: #e6f3e6;
-  min-height: 100vh;
 }
 
 .title {
