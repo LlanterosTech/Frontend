@@ -2,33 +2,7 @@
   <div class="fondo">
     <div class="container">
 
-      <!-- HEADER COMPLETO -->
-      <div class="header">
-        <div class="logo">
-          <img src="@/assets/logo.png" alt="Logo" />
-        </div>
-
-        <div class="nav-links">
-          <a href="#">Acerca de nosotros</a>
-          <a href="#">Catálogo</a>
-        </div>
-
-        <div class="user-icon">
-          <i class="fas fa-user-circle"></i>
-        </div>
-      </div>
-
-      <!-- SIDEBAR -->
-      <div class="sidebar" :class="{ expanded: isSidebarExpanded }">
-        <button class="toggle-btn" @click="isSidebarExpanded = !isSidebarExpanded">
-          <i :class="isSidebarExpanded ? 'fas fa-chevron-left' : 'fas fa-bars'"></i>
-        </button>
-        <ul>
-          <li><i class="fas fa-cog"></i> <span>Configuración</span></li>
-          <li><i class="fas fa-seedling"></i> <span>Ver mis plantas</span></li>
-          <li><i class="fas fa-microchip"></i> <span>Ver mis dispositivos</span></li>
-        </ul>
-      </div>
+  
 
       <!-- CONTENIDO PRINCIPAL -->
       <div class="main-layout" :class="{ 'sidebar-expanded': isSidebarExpanded }">
@@ -191,7 +165,7 @@ export default {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #555555;
+  background-color: #a4d69f;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -214,7 +188,7 @@ html, body {
   position: absolute;
   inset: 0;
   backdrop-filter: blur(5px);
-  background: rgba(0,0,0,0.1);
+  background: rgba(228, 225, 225, 0.1);
   z-index: 0;
 }
 
@@ -230,22 +204,6 @@ html, body {
   margin: 0;
   padding: 40px 30px;
   box-sizing: border-box;
-}
-
-.header {
-  position: fixed;
-  top: 1px;
-  left: 1px;
-  right: 1px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #00A6A6;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 10px 10px;
-  z-index: 10;
 }
 
 .logo img {

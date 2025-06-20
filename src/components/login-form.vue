@@ -18,7 +18,7 @@
               <input v-model="password" type="password" placeholder="Contraseña" autocomplete="current-password" />
             </div>
 
-            <div ref="recaptcha" class="g-recaptcha"></div>
+            <!-- reCAPTCHA eliminado -->
 
             <button type="submit" class="login-btn" :disabled="inputError">
               Iniciar Sesión
@@ -39,7 +39,6 @@
 
 <script>
 import userService from "@/main/services/userservice";
-import { loadRecaptcha } from "@/utils/recaptcha";
 import AlertComponent from "@/components/AlertComponent.vue";
 
 export default {
@@ -51,34 +50,12 @@ export default {
       email: "",
       password: "",
       error: null,
-      recaptchaSiteKey: "6Lc7S94qAAAAAE2ohl9u4JgSRLkqFCBd-ypbg9Wd",
       alertMessage: null,
       alertType: "error",
       inputError: false, // Estado para manejar el error en los inputs
     };
   },
-  async mounted() {
-    try {
-      const grecaptcha = await loadRecaptcha();
-
-      setTimeout(() => {
-        if (!this.$refs.recaptcha) {
-          console.error("No se encontró el div de reCAPTCHA en el DOM.");
-          return;
-        }
-
-        grecaptcha.ready(() => {
-          grecaptcha.render(this.$refs.recaptcha, {
-            sitekey: this.recaptchaSiteKey,
-            theme: "light"
-          });
-        });
-      }, 500);
-    } catch (error) {
-      console.error("Error al cargar reCAPTCHA:", error);
-      this.error = "No se pudo cargar el reCAPTCHA. Intenta recargar la página.";
-    }
-  },
+  // reCAPTCHA eliminado del ciclo de vida
   methods: {
     showAlert(message, type = "error") {
       this.alertMessage = message;
@@ -90,33 +67,21 @@ export default {
       }, 200);
     },
     async handleLogin(event) {
-    if (event) event.preventDefault();
-    console.log("🔥 handleLogin ejecutado");
+      if (event) event.preventDefault();
+      console.log("🔥 handleLogin ejecutado");
       if (this.email === "admin" && this.password === "admin") {
         console.log("✅ Acceso rápido como admin");
         this.$router.push("/init");
         return;
       }
-    try {
+      try {
         this.error = null;
 
-        if (!window.grecaptcha || !window.grecaptcha.getResponse) {
-            console.log("⚠️ reCAPTCHA no está cargado.");
-            this.showAlert("Error: reCAPTCHA no está cargado.", "error");
-            return;
-        }
-
-        const recaptchaResponse = window.grecaptcha.getResponse();
-        if (!recaptchaResponse) {
-            console.log("⚠️ CAPTCHA no completado.");
-            this.showAlert("Por favor, completa el CAPTCHA.", "error");
-            return;
-        }
+        // reCAPTCHA eliminado
 
         const credentials = {
-            email: this.email,
-            password: this.password,
-            recaptchaResponse
+          email: this.email,
+          password: this.password
         };
 
         console.log("🔹 Enviando credenciales:", credentials);
@@ -126,32 +91,32 @@ export default {
         console.log("✅ Respuesta completa del backend:", response);
 
         if (!response) {
-            throw new Error("Error: La respuesta del backend es undefined.");
+          throw new Error("Error: La respuesta del backend es undefined.");
         }
 
         if (response?.status === 200) {
-            console.log("✅ Login exitoso. Redirigiendo...");
-            this.$router.push("/init");
+          console.log("✅ Login exitoso. Redirigiendo...");
+          this.$router.push("/init");
         } else {
-            console.log("❌ Error en login: Respuesta inesperada.");
-            throw new Error("Error: Respuesta inesperada.");
+          console.log("❌ Error en login: Respuesta inesperada.");
+          throw new Error("Error: Respuesta inesperada.");
         }
-    } catch (error) {
+      } catch (error) {
         console.error("❌ Error en login:", error);
 
         if (error.response?.status === 401) {
           this.showAlert("Usuario o contraseña incorrectos.", "error");
         } else {
-            this.showAlert("Usuario o contraseña incorrectos.", "error");
-            this.inputError = true;
-            setTimeout(() => {
-                this.inputError = false;
-            }, 2000);
+          this.showAlert("Usuario o contraseña incorrectos.", "error");
+          this.inputError = true;
+          setTimeout(() => {
+            this.inputError = false;
+          }, 2000);
         }
 
         return;
-    }
-},
+      }
+    },
     goToRegister() {
       console.log("🔹 Navegando a registro");
       this.$router.push("/register");
@@ -163,8 +128,6 @@ export default {
   }
 };
 </script>
-
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -259,9 +222,7 @@ html, body {
 }
 
 .g-recaptcha {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
+  display: none;
 }
 
 .login-btn {

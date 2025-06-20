@@ -3,7 +3,7 @@
 
   <div class="container fondo">
     <div class="register-box">
-      <div class="register">zz
+      <div class="register">
         <img src="@/assets/logo.png" alt="Logo Activos Mineros" class="logo" />
         <form @submit.prevent="handleRegister">
           <div :class="['text-input', { 'input-error': false }]">

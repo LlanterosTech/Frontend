@@ -5,6 +5,8 @@ import InitPage from "@/public/InitPage.vue";
 import MainContainer from '@/components/main-container.vue';
 
 import userService from '@/main/services/userservice';
+import MyPlants from '@/public/MyPlants.vue';
+import PlantDashboard from '@/public/PlantDashboard.vue';
 const routes = [
     {
         path: '/',
@@ -29,6 +31,18 @@ const routes = [
         name: 'init',
         component: InitPage,
         meta: { title: 'Init', requiresAuth: true }
+    },
+    {
+        path: '/my-plants',
+        name: 'my-plants',
+        component: MyPlants,
+        meta: { title: 'Mis Plantas', requiresAuth: true }
+    },
+    {
+        path: '/dashboard-myplant/:plantId',
+        name: 'dashboard-myplant',
+        component: PlantDashboard,
+        meta: { title: 'Dashboard Mis Plantas', requiresAuth: true }
     },
     {
         path: '/:catchAll(.*)',

@@ -21,6 +21,26 @@ const plantservice = {
       throw error;
     }
   },
+
+  async getAllPlantsByUser(){
+    try{
+      const response = await api.get('my-plant');
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error obteniendo plantas del usuario:", error);
+      throw error;
+    }
+  },
+
+  async getMyPlantById(plantId) {
+    try {
+      const response = await api.get(`my-plant/${plantId}`);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error obteniendo planta por ID:", error);
+      throw error;
+    }
+  } 
 };
 
 export default plantservice;

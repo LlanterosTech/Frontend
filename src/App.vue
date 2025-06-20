@@ -1,8 +1,15 @@
 <template>
   <div>
-    
-    <!-- Mostrar el botón de logout solo si la autenticación está verificada -->
-<!-- En tu App.vue -->
+ <HeaderComponent
+      v-if="showComps"
+      :visible="showComps"
+      :disabled="isLoading || !isAuthenticated"
+    />
+     <SideBarComponent
+      v-if="showComps"
+      :visible="showComps"
+      :disabled="isLoading || !isAuthenticated"
+    /> 
     <LogoutButton :visible="showLogoutButton" :disabled="isLoading || !isAuthenticated" />
     <router-view />
   </div>
@@ -11,10 +18,13 @@
 <script>
 import LogoutButton from './components/logout-button.vue';
 import userService from "@/main/services/userservice"; // Asegúrate de que este servicio exista
-
+import HeaderComponent from "@/components/headerComponent.vue";
+import SideBarComponent from './components/sideBarComponent.vue';
 export default {
   components: {
-    LogoutButton
+    LogoutButton,
+    HeaderComponent,
+    SideBarComponent
   },
   data() {
     return {
@@ -26,6 +36,10 @@ export default {
     showLogoutButton() {
       const noLogoutRoutes = ["/login", "/register"];
       return this.isAuthenticated && !noLogoutRoutes.includes(this.$route.path);
+    },
+    showComps() {
+      const noHeaderRoutes = ["/","/login", "/register"];
+      return this.isAuthenticated && !noHeaderRoutes.includes(this.$route.path);
     }
   },
   async created() {
