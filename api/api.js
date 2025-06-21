@@ -2,10 +2,10 @@ import axios from "axios";
 import userService from "@/main/services/userservice";
 const api = axios.create({
     baseURL: "https://plantita-backend.onrender.com/plantita/v1",
-    withCredentials: true, 
+    withCredentials: true,
+    credentials: 'include',
  
 })
-
 axios.interceptors.response.use(
     response => response,
     async error => {
