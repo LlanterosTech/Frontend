@@ -1,10 +1,10 @@
 import axios from "axios";
 import userService from "@/main/services/userservice";
 const api = axios.create({
-    baseURL: "http://localhost:5071/plantita/v1",
+    baseURL: "https://plantita-backend.onrender.com/plantita/v1",
     withCredentials: true, 
  
-});
+})
 
 axios.interceptors.response.use(
     response => response,
