@@ -26,7 +26,7 @@ export default {
       console.log("✅ Device obtenida por ID:", response.data);
       return response.data;
     } catch (error) {
-      console.error("❌ Error obteniendo Device por ID:", error);
+      console.error("❌ Error obteniesndo Device por ID:", error);
       throw error;
     }
   },
