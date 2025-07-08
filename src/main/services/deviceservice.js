@@ -13,7 +13,7 @@ export default {
     async getAllDevicesByUser() {
         try {
             console.log("🔍 Haciendo petición a /auth-user/me...");
-            const response = await api.get("/iot-devices/me/me", {
+            const response = await api.get("/iot-device/me/me", {
                 withCredentials: true,
                 skipAuthInterceptor: true, // Bandera personalizada
             });
