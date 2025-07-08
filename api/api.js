@@ -21,7 +21,7 @@ axios.interceptors.response.use(
   
         try {
           await userService.refreshToken(); 
-          return axios(originalRequest); 
+        return api(originalRequest);  // 👈 usa tu instancia
         } catch (refreshError) {
           console.error("Error al refrescar el token:", refreshError);
         }
