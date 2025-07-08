@@ -12,7 +12,7 @@ export default {
   },
     async getAllDevicesByUser(){
     try{
-      const response = await api.get('iot-device/me');
+      const response = await api.get('iot-device/me/me');
       return response.data;
     } catch (error) {
       console.error("❌ Error obteniendo plantas del usuario:", error);
