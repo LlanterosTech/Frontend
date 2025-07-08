@@ -10,15 +10,24 @@ export default {
       throw error;
     }
   },
-    async getAllDevicesByUser(){
-    try{
-      const response = await api.get('iot-device/me/me');
-      return response.data;
-    } catch (error) {
-      console.error("❌ Error obteniendo plantas del usuario:", error);
-      throw error;
-    }
-  },
+    async getAllDevicesByUser() {
+        try {
+            console.log("🔍 Haciendo petición a /auth-user/me...");
+            const response = await api.get("/iot-devices/me/me", {
+                withCredentials: true,
+                skipAuthInterceptor: true, // Bandera personalizada
+            });
+            console.log("✅ Usuario obtenido correctamente:", response.data);
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status === 401) {
+                console.warn("⚠️ Usuario no autenticado o token expirado.");
+                return null; // Devuelve null si no está autenticado
+            }
+            console.error("❌ Error obteniendo usuario:", error);
+            throw error; // Lanza otros errores
+        }
+    },
 
   async getMyDeviceById(deviceId) {
     try {
