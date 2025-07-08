@@ -3,7 +3,7 @@ import api from '@/../api/api';
 export default {
   async createIotDevice(formData) {
     try {
-      const response = await api.post("iot-device", formData);
+      const response = await api.post("io-t-device", formData);
       return response.data;
     } catch (error) {
       console.error("❌ Error identificando y guardando planta:", error);
@@ -12,7 +12,7 @@ export default {
   },
     async getAllDevicesByUser(){
     try{
-      const response = await api.get('iot-device/me');
+      const response = await api.get('io-t-device/me');
       return response.data;
     } catch (error) {
       console.error("❌ Error obteniendo plantas del usuario:", error);
@@ -22,7 +22,7 @@ export default {
 
   async getMyDeviceById(deviceId) {
     try {
-      const response = await api.get(`iot-device/${deviceId}`);
+      const response = await api.get(`io-t-device/${deviceId}`);
       console.log("✅ Device obtenida por ID:", response.data);
       return response.data;
     } catch (error) {
