@@ -16,28 +16,36 @@
 
     <!-- Formulario de nuevo dispositivo -->
     <div class="new-device-form">
-      <input v-model="newDevice.name" placeholder="Nombre del dispositivo" />
-      <input v-model="newDevice.serial" placeholder="Número de serie" />
+      <input v-model="newDevice.deviceName" placeholder="Nombre del dispositivo" />
+      <input v-model="newDevice.connectionType" placeholder="Tipo de conexión" />
       <input v-model="newDevice.location" placeholder="Ubicación" />
-      <input v-model="newDevice.plantName" placeholder="Planta asignada (opcional)" />
+      <input v-model="newDevice.firmwareVersion" placeholder="Firmware (opcional)" />
+
+      <select v-model="newDevice.myPlantId">
+        <option disabled value="">🌿 Selecciona una planta (opcional)</option>
+        <option v-for="plant in myPlants" :key="plant.myPlantId" :value="plant.myPlantId">
+          {{ plant.customName }} - {{ plant.location }}
+        </option>
+      </select>
+
       <select v-model="newDevice.status">
         <option value="active">Activo</option>
         <option value="inactive">Inactivo</option>
       </select>
+
       <button @click="addDevice">Agregar</button>
     </div>
 
     <!-- Filtros -->
     <div class="filter">
-      <input v-model="searchQuery" placeholder="🔍 Buscar por nombre o serial" />
+      <input v-model="searchQuery" placeholder="🔍 Buscar por nombre o ubicación" />
     </div>
 
-    <!-- Tabla de dispositivos -->
+    <!-- Tabla -->
     <table class="device-table">
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Serial</th>
           <th>Ubicación</th>
           <th>Planta asignada</th>
           <th>Estado</th>
@@ -45,19 +53,24 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="device in filteredDevices" :key="device.id">
-          <td>{{ device.name }}</td>
-          <td>{{ device.serial }}</td>
+        <tr v-for="device in filteredDevices" :key="device.deviceId">
+          <td>{{ device.deviceName }}</td>
           <td>{{ device.location }}</td>
-          <td>{{ device.plantName || 'No asignado' }}</td>
+          <td>
+            <span v-if="device.myPlantId">
+              {{ getPlantName(device.myPlantId) }}
+            </span>
+            <span v-else>No asignado</span>
+          </td>
           <td>
             <span :class="['chip', device.status]">
               {{ device.status === 'active' ? '🟢 Activo' : '🔴 Inactivo' }}
             </span>
           </td>
           <td>
+            <button @click="openSensors(device)">Sensores</button>
             <button @click="editDevice(device)">Editar</button>
-            <button @click="deleteDevice(device.id)">Eliminar</button>
+            <button @click="deleteDevice(device.deviceId)">Eliminar</button>
           </td>
         </tr>
       </tbody>
@@ -66,43 +79,32 @@
 </template>
 
 <script>
+import iotservice from "@/main/services/deviceservice";
+import plantservice from "@/main/services/plantservice";
+
 export default {
   name: 'DeviceDashboard',
   data() {
     return {
-      devices: [
-        {
-          id: 1,
-          name: 'Sensor 1',
-          serial: 'ABC123',
-          location: 'Jardín',
-          status: 'active',
-          plantName: 'Rosa'
-        },
-        {
-          id: 2,
-          name: 'Sensor 2',
-          serial: 'XYZ456',
-          location: 'Interior',
-          status: 'inactive',
-          plantName: null
-        }
-      ],
+      devices: [],
+      myPlants: [],
       searchQuery: '',
       newDevice: {
-        name: '',
-        serial: '',
+        deviceName: '',
+        myPlantId: '',
+        connectionType: '',
         location: '',
-        plantName: '',
-        status: 'inactive'
+        activatedAt: new Date().toISOString(),
+        status: 'inactive',
+        firmwareVersion: ''
       }
     };
   },
   computed: {
     filteredDevices() {
       return this.devices.filter(device =>
-        device.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        device.serial.toLowerCase().includes(this.searchQuery.toLowerCase())
+        device.deviceName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        device.location.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     activeCount() {
@@ -113,50 +115,77 @@ export default {
     }
   },
   methods: {
-    addDevice() {
-      if (!this.newDevice.name || !this.newDevice.serial || !this.newDevice.location) {
-        alert("Por favor completa los campos requeridos.");
-        return;
+    getPlantName(plantId) {
+      const plant = this.myPlants.find(p => p.myPlantId === plantId);
+      return plant ? `${plant.customName} (${plant.location})` : "No asignado";
+    },
+    async loadDevices() {
+      try {
+        this.devices = await iotservice.getAllDevicesByUser();
+      } catch (error) {
+        console.error("❌ Error cargando dispositivos:", error);
       }
-
-      const newId = this.devices.length ? Math.max(...this.devices.map(d => d.id)) + 1 : 1;
-      this.devices.push({ id: newId, ...this.newDevice });
-
-      // Resetear el formulario
-      this.newDevice = {
-        name: '',
-        serial: '',
-        location: '',
-        plantName: '',
-        status: 'inactive'
-      };
+    },
+    async loadUserPlants() {
+      try {
+        this.myPlants = await plantservice.getAllPlantsByUser();
+      } catch (error) {
+        console.error("❌ Error cargando plantas del usuario:", error);
+      }
+    },
+    async addDevice() {
+      try {
+        if (!this.newDevice.deviceName || !this.newDevice.location) {
+          alert("Por favor completa los campos requeridos.");
+          return;
+        }
+        await iotservice.createIotDevice(this.newDevice);
+        await this.loadDevices();
+        this.newDevice = {
+          deviceName: '',
+          myPlantId: '',
+          connectionType: '',
+          location: '',
+          activatedAt: new Date().toISOString(),
+          status: 'inactive',
+          firmwareVersion: ''
+        };
+      } catch (error) {
+        console.error("❌ Error agregando dispositivo:", error);
+      }
+    },
+    openSensors(device) {
+      this.$router.push({ name: 'sensors', params: { deviceId: device.deviceId } });
     },
     editDevice(device) {
-      alert(`Editar dispositivo: ${device.name}`);
+      alert(`Editar dispositivo: ${device.deviceName}`);
     },
-    deleteDevice(id) {
-      this.devices = this.devices.filter(d => d.id !== id);
+    async deleteDevice(id) {
+      try {
+        await iotservice.deleteIotDevice(id);
+        await this.loadDevices();
+      } catch (error) {
+        console.error("❌ Error eliminando dispositivo:", error);
+      }
     }
+  },
+  async mounted() {
+    await Promise.all([
+      this.loadDevices(),
+      this.loadUserPlants()
+    ]);
   }
 };
 </script>
 
 <style scoped>
 .device-dashboard {
-  margin-top: -40px;
+  margin-top: -20px;
   padding: 1rem;
 }
-
-/* INTRO */
-.intro {
-  margin-bottom: 2rem;
-}
-
-/* STATS */
+.intro { margin-bottom: 2rem; }
 .stats {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  display: flex; gap: 1rem; margin-bottom: 1.5rem;
 }
 .card {
   background: #e3f5e7;
@@ -165,8 +194,6 @@ export default {
   font-weight: bold;
   flex: 1;
 }
-
-/* FORMULARIO NUEVO DISPOSITIVO */
 .new-device-form {
   display: flex;
   flex-wrap: wrap;
@@ -192,8 +219,6 @@ export default {
 .new-device-form button:hover {
   background-color: #25631f;
 }
-
-/* FILTRO */
 .filter input {
   width: 100%;
   padding: 0.5rem;
@@ -201,8 +226,6 @@ export default {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
-
-/* TABLA */
 .device-table {
   width: 100%;
   border-collapse: collapse;
@@ -216,8 +239,6 @@ export default {
 .device-table th {
   background-color: #f4f4f4;
 }
-
-/* ESTADO */
 .chip {
   padding: 4px 8px;
   border-radius: 12px;
@@ -232,8 +253,6 @@ export default {
   background: #f8d7da;
   color: #721c24;
 }
-
-/* BOTONES */
 button {
   margin-right: 5px;
   padding: 4px 8px;

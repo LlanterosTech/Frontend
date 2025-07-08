@@ -8,6 +8,7 @@ import userService from '@/main/services/userservice';
 import MyPlants from '@/public/MyPlants.vue';
 import PlantDashboard from '@/public/PlantDashboard.vue';
 import DevicesPage from '@/public/DevicesPage.vue';
+import DeviceSensors from '@/public/DeviceSensors.vue';
 const routes = [
     {
         path: '/',
@@ -50,6 +51,12 @@ const routes = [
         name: 'devices',
         component: DevicesPage,
         meta: { title: 'Dispositivos', requiresAuth: true }
+    },
+     {
+        path: '/devices/:deviceId/sensors',
+        name: 'sensors',
+        component: DeviceSensors,
+        meta: { title: 'Sensores', requiresAuth: true }
     },
     {
         path: '/:catchAll(.*)',
