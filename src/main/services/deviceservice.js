@@ -13,7 +13,7 @@ export default {
     async getAllDevicesByUser() {
         try {
             console.log("🔍 Haciendo petición a /auth-user/me...");
-            const response = await api.get("/iotdevice/me/me", {
+            const response = await api.get("/iot-device/me/me", {
                 withCredentials: true,
                 skipAuthInterceptor: true, // Bandera personalizada
             });
@@ -61,6 +61,8 @@ export default {
     }
   },
 
+    //obtener la lectura del sensor por id del sensor
+
       async getMySensorByDeviceId(deviceId) {
     try {
       const response = await api.get(`sensor/device/${deviceId}`);
@@ -71,4 +73,27 @@ export default {
       throw error;
     }
   },
+
+    async getSensorReadingById(Id) {
+        try {
+            const response = await api.get(`sensor-reading/${Id}/sensorid`);
+            return response.data;
+        } catch (error) {
+            console.error("❌ Error obteniendo lectura del sensor por ID:", error);
+            throw error;
+        }
+    },
+
+    async getAllSensorsByDeviceId(deviceId) {
+        try {
+            const response = await api.get(`sensor/device/${deviceId}`);
+            console.log("✅ Sensores obtenidos por ID de dispositivo:", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("❌ Error obteniendo sensores por ID de dispositivo:", error);
+            throw error;
+        }
+    }
+
+
 };

@@ -26,7 +26,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in sensorReadings" :key="r.readingId">
+          <tr v-for="r in sensor" :key="r.sensor">
             <td>{{ r.sensorType }}</td>
             <td>{{ r.value }}</td>
             <td>{{ r.unit }}</td>
@@ -107,16 +107,18 @@
 
 <script>
 import plantservice from '@/main/services/plantservice';
+import deviceservice from "@/main/services/deviceservice";
 
 export default {
   name: 'PlantDashboard',
   data() {
     return {
       myPlant: null,
-      sensorReadings: [],
+      sensor: [],
       careTasks: [],
       healthLogs: [],
-      alerts: []
+      alerts: [],
+      deviceId: null,
     };
   },
   created() {
@@ -126,16 +128,28 @@ export default {
   methods: {
     async fetchDashboardData(plantId) {
       try {
-        const [plant, readings, tasks, logs, alerts] = await Promise.all([
-          plantservice.getMyPlantById(plantId),
-      
-        ]);
+        const devices = await deviceservice.getAllDevicesByUser();
+        const deviceIds = Array.isArray(devices) ? devices.map(d => d.deviceId) : [];
+
+        let sensores = [];
+        if (deviceIds.length > 0) {
+          sensores = await deviceservice.getAllSensorsByDeviceId(deviceIds);
+          this.sensor = sensores.map(s => ({
+            sensorType: s.sensorType,
+            unit: s.unit,
+          }));
+        } else {
+          this.sensor = [];
+        }
+
+        const plant = await plantservice.getMyPlantById(plantId);
+        this.myPlant = plant;
 
         this.myPlant = plant;
-        this.sensorReadings = readings;
-        this.careTasks = tasks;
-        this.healthLogs = logs;
-        this.alerts = alerts;
+        //this.sensor = sensor;
+        //this.careTasks = tasks;
+        //this.healthLogs = logs;
+        //this.alerts = alerts;
       } catch (err) {
         console.error('Error cargando dashboard:', err);
       }
