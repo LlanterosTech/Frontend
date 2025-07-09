@@ -6,8 +6,11 @@
       <img :src="myPlant?.photoUrl" alt="Planta" class="plant-image" />
       <div class="plant-info">
         <p><strong>Ubicación:</strong> {{ myPlant?.location }}</p>
-        <p><strong>Estado actual:</strong> <span :class="statusColor(myPlant?.currentStatus)">
-          {{ myPlant?.currentStatus }}</span>
+        <p>
+          <strong>Estado actual:</strong>
+          <span :class="statusColor(myPlant?.currentStatus)">
+            {{ myPlant?.currentStatus }}
+          </span>
         </p>
         <p><strong>Fecha de adquisición:</strong> {{ formatDate(myPlant?.acquiredAt) }}</p>
       </div>
@@ -26,7 +29,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in sensor" :key="r.sensor">
+          <tr v-for="r in sensor" :key="r.sensorId">
             <td>{{ r.sensorType }}</td>
             <td>{{ r.value }}</td>
             <td>{{ r.unit }}</td>
@@ -118,46 +121,108 @@ export default {
       careTasks: [],
       healthLogs: [],
       alerts: [],
-      deviceId: null,
+      updateInterval: null,
     };
   },
   created() {
     const plantId = this.$route.params.plantId;
     this.fetchDashboardData(plantId);
+
+    // Actualización automática cada 5 segundos
+    this.updateInterval = setInterval(() => {
+      this.updateSensorReadings();
+    }, 5000);
+  },
+  beforeUnmount() {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   },
   methods: {
     async fetchDashboardData(plantId) {
       try {
+        // Obtener dispositivos
         const devices = await deviceservice.getAllDevicesByUser();
         const deviceIds = Array.isArray(devices) ? devices.map(d => d.deviceId) : [];
 
         let sensores = [];
         if (deviceIds.length > 0) {
-          sensores = await deviceservice.getAllSensorsByDeviceId(deviceIds);
-          this.sensor = sensores.map(s => ({
-            sensorType: s.sensorType,
-            unit: s.unit,
-          }));
+          // Obtener todos los sensores de todos los dispositivos
+          const sensorPromises = deviceIds.map(deviceId =>
+            deviceservice.getAllSensorsByDeviceId(deviceId).catch(() => [])
+          );
+          const sensorArrays = await Promise.all(sensorPromises);
+          sensores = sensorArrays.flat();
+
+          // Cargar lecturas para esos sensores
+          await this.loadSensorReadings(sensores);
         } else {
           this.sensor = [];
         }
 
+        // Obtener la planta
         const plant = await plantservice.getMyPlantById(plantId);
         this.myPlant = plant;
 
-        this.myPlant = plant;
-        //this.sensor = sensor;
-        //this.careTasks = tasks;
-        //this.healthLogs = logs;
-        //this.alerts = alerts;
       } catch (err) {
-        console.error('Error cargando dashboard:', err);
+        console.error('❌ Error cargando dashboard:', err);
       }
     },
+
+    async loadSensorReadings(sensores) {
+      // Para cada sensor, traer su lectura más reciente
+      const sensorWithReadings = await Promise.all(
+        sensores.map(async (sensor) => {
+          try {
+            const readings = await deviceservice.getMySensorReadingBySensorId(sensor.sensorId);
+
+            let latestReading = null;
+            if (Array.isArray(readings) && readings.length > 0) {
+              latestReading = readings.sort(
+                (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+              )[0];
+            }
+
+            return {
+              sensorId: sensor.sensorId,
+              sensorType: sensor.sensorType,
+              unit: sensor.unit ?? 'N/A',
+              value: latestReading?.value ?? 'N/A',
+              timestamp: latestReading?.timestamp ?? null
+            };
+          } catch (error) {
+            console.warn(`⚠️ Error obteniendo lecturas para sensor ${sensor.sensorId}:`, error);
+            return {
+              sensorId: sensor.sensorId,
+              sensorType: sensor.sensorType,
+              unit: sensor.unit ?? 'N/A',
+              value: 'N/A',
+              timestamp: null
+            };
+          }
+        })
+      );
+
+      this.sensor = sensorWithReadings;
+    },
+
+    async updateSensorReadings() {
+      if (this.sensor.length > 0) {
+        const sensores = this.sensor.map(s => ({
+          sensorId: s.sensorId,
+          sensorType: s.sensorType,
+          unit: s.unit
+        }));
+        await this.loadSensorReadings(sensores);
+        console.log('✅ Lecturas de sensores actualizadas');
+      }
+    },
+
     formatDate(date) {
       if (!date) return 'N/A';
       return new Date(date).toLocaleString();
     },
+
     statusColor(status) {
       return status === 'Healthy' ? 'status-ok' : 'status-warning';
     }

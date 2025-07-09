@@ -74,6 +74,17 @@ export default {
     }
   },
 
+       async getMySensorReadingBySensorId(sensorId) {
+    try {
+      const response = await api.get(`sensor-reading/${sensorId}/sensorid`);
+      console.log("✅ Device obtenida por ID:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error obteniendo Device por ID:", error);
+      throw error;
+    }
+  },
+
     async getSensorReadingById(Id) {
         try {
             const response = await api.get(`sensor-reading/${Id}/sensorid`);
