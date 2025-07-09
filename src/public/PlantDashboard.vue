@@ -51,6 +51,9 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="healthLogs.length === 0">
+            <td colspan="3">No hay historial de salud generado aún.</td>
+          </tr>
           <tr v-for="log in healthLogs" :key="log.healthLogId">
             <td>{{ formatDate(log.timestamp) }}</td>
             <td>{{ log.healthStatus }}</td>
@@ -72,6 +75,9 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="careTasks.length === 0">
+            <td colspan="3">No hay tareas pendientes generadas.</td>
+          </tr>
           <tr v-for="task in careTasks" :key="task.taskId">
             <td>{{ task.taskType }}</td>
             <td>{{ formatDate(task.scheduledFor) }}</td>
@@ -96,6 +102,9 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="alerts.length === 0">
+            <td colspan="4">No hay alertas generadas.</td>
+          </tr>
           <tr v-for="alert in alerts" :key="alert.alertId">
             <td>{{ alert.alertType }}</td>
             <td>{{ alert.message }}</td>
@@ -128,7 +137,6 @@ export default {
     const plantId = this.$route.params.plantId;
     this.fetchDashboardData(plantId);
 
-    // Refrescado cada 5 segundos
     this.updateInterval = setInterval(() => {
       this.updateSensorReadings();
     }, 5000);
@@ -142,11 +150,8 @@ export default {
     async fetchDashboardData(plantId) {
       try {
         await this.updateSensorReadings();
-
-        // Cargar datos de la planta
         const plant = await plantservice.getMyPlantById(plantId);
         this.myPlant = plant;
-
       } catch (err) {
         console.error('❌ Error cargando dashboard:', err);
       }
@@ -154,7 +159,6 @@ export default {
 
     async updateSensorReadings() {
       try {
-        // Volver a traer TODO: dispositivos, sensores y lecturas
         const devices = await deviceservice.getAllDevicesByUser();
         const deviceIds = Array.isArray(devices) ? devices.map(d => d.deviceId) : [];
 
@@ -192,8 +196,6 @@ export default {
               )[0];
             }
 
-            console.log(`✅ Última lectura para ${sensor.sensorType}:`, latestReading);
-
             return {
               sensorId: sensor.sensorId,
               sensorType: sensor.sensorType,
@@ -215,6 +217,87 @@ export default {
       );
 
       this.sensor = sensorWithReadings;
+
+      // ✅ Generar alertas y tareas sugeridas
+      this.generateAlertsAndTasks();
+    },
+
+    generateAlertsAndTasks() {
+      const alerts = [];
+      const tasks = [];
+
+      this.sensor.forEach(s => {
+        if (s.value === 'N/A' || s.value == null) return;
+
+        const val = Number(s.value);
+
+        if (s.sensorType === 'SoilMoisture' && val < 1000) {
+          alerts.push({
+            alertId: `${s.sensorId}-low-moisture`,
+            alertType: 'Humedad Baja',
+            message: 'Nivel de humedad del suelo es bajo.',
+            level: 'advertencia',
+            generatedAt: s.timestamp
+          });
+          tasks.push({
+            taskId: `${s.sensorId}-water`,
+            taskType: 'Regar la planta',
+            scheduledFor: new Date().toISOString(),
+            status: 'Pending'
+          });
+        }
+
+        if (s.sensorType === 'AirTemperature' && val > 35) {
+          alerts.push({
+            alertId: `${s.sensorId}-high-temp`,
+            alertType: 'Temperatura Alta',
+            message: 'La temperatura ambiente es muy alta.',
+            level: 'crítica',
+            generatedAt: s.timestamp
+          });
+          tasks.push({
+            taskId: `${s.sensorId}-move-shade`,
+            taskType: 'Mover a lugar fresco',
+            scheduledFor: new Date().toISOString(),
+            status: 'Pending'
+          });
+        }
+
+        if (s.sensorType === 'Light' && val < 50) {
+          alerts.push({
+            alertId: `${s.sensorId}-low-light`,
+            alertType: 'Poca Luz',
+            message: 'Nivel de luz insuficiente.',
+            level: 'advertencia',
+            generatedAt: s.timestamp
+          });
+          tasks.push({
+            taskId: `${s.sensorId}-move-light`,
+            taskType: 'Reubicar en lugar con más luz',
+            scheduledFor: new Date().toISOString(),
+            status: 'Pending'
+          });
+        }
+
+        if (s.sensorType === 'AirHumidity' && val < 30) {
+          alerts.push({
+            alertId: `${s.sensorId}-low-humidity`,
+            alertType: 'Humedad Ambiental Baja',
+            message: 'El ambiente está muy seco.',
+            level: 'advertencia',
+            generatedAt: s.timestamp
+          });
+          tasks.push({
+            taskId: `${s.sensorId}-spray`,
+            taskType: 'Pulverizar agua',
+            scheduledFor: new Date().toISOString(),
+            status: 'Pending'
+          });
+        }
+      });
+
+      this.alerts = alerts;
+      this.careTasks = tasks;
     },
 
     formatDate(date) {
