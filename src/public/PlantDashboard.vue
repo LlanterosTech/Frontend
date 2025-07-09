@@ -128,7 +128,7 @@ export default {
     const plantId = this.$route.params.plantId;
     this.fetchDashboardData(plantId);
 
-    // Actualización automática cada 5 segundos
+    // Refrescado cada 5 segundos
     this.updateInterval = setInterval(() => {
       this.updateSensorReadings();
     }, 5000);
@@ -141,26 +141,9 @@ export default {
   methods: {
     async fetchDashboardData(plantId) {
       try {
-        // Obtener dispositivos
-        const devices = await deviceservice.getAllDevicesByUser();
-        const deviceIds = Array.isArray(devices) ? devices.map(d => d.deviceId) : [];
+        await this.updateSensorReadings();
 
-        let sensores = [];
-        if (deviceIds.length > 0) {
-          // Obtener todos los sensores de todos los dispositivos
-          const sensorPromises = deviceIds.map(deviceId =>
-            deviceservice.getAllSensorsByDeviceId(deviceId).catch(() => [])
-          );
-          const sensorArrays = await Promise.all(sensorPromises);
-          sensores = sensorArrays.flat();
-
-          // Cargar lecturas para esos sensores
-          await this.loadSensorReadings(sensores);
-        } else {
-          this.sensor = [];
-        }
-
-        // Obtener la planta
+        // Cargar datos de la planta
         const plant = await plantservice.getMyPlantById(plantId);
         this.myPlant = plant;
 
@@ -169,26 +152,54 @@ export default {
       }
     },
 
+    async updateSensorReadings() {
+      try {
+        // Volver a traer TODO: dispositivos, sensores y lecturas
+        const devices = await deviceservice.getAllDevicesByUser();
+        const deviceIds = Array.isArray(devices) ? devices.map(d => d.deviceId) : [];
+
+        let sensores = [];
+        if (deviceIds.length > 0) {
+          const sensorPromises = deviceIds.map(deviceId =>
+            deviceservice.getAllSensorsByDeviceId(deviceId).catch(() => [])
+          );
+          const sensorArrays = await Promise.all(sensorPromises);
+          sensores = sensorArrays.flat();
+
+          await this.loadSensorReadings(sensores);
+          console.log('✅ Lecturas de sensores actualizadas');
+        } else {
+          this.sensor = [];
+        }
+      } catch (error) {
+        console.error('❌ Error actualizando lecturas de sensores:', error);
+      }
+    },
+
     async loadSensorReadings(sensores) {
-      // Para cada sensor, traer su lectura más reciente
       const sensorWithReadings = await Promise.all(
         sensores.map(async (sensor) => {
           try {
             const readings = await deviceservice.getMySensorReadingBySensorId(sensor.sensorId);
+            console.log(`🔎 Todas las lecturas para ${sensor.sensorType}:`, readings);
 
             let latestReading = null;
             if (Array.isArray(readings) && readings.length > 0) {
               latestReading = readings.sort(
-                (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+                (a, b) =>
+                  new Date(b.timestamp || b.createdAt || b.date) -
+                  new Date(a.timestamp || a.createdAt || a.date)
               )[0];
             }
+
+            console.log(`✅ Última lectura para ${sensor.sensorType}:`, latestReading);
 
             return {
               sensorId: sensor.sensorId,
               sensorType: sensor.sensorType,
               unit: sensor.unit ?? 'N/A',
               value: latestReading?.value ?? 'N/A',
-              timestamp: latestReading?.timestamp ?? null
+              timestamp: latestReading?.timestamp || latestReading?.createdAt || latestReading?.date || null
             };
           } catch (error) {
             console.warn(`⚠️ Error obteniendo lecturas para sensor ${sensor.sensorId}:`, error);
@@ -204,18 +215,6 @@ export default {
       );
 
       this.sensor = sensorWithReadings;
-    },
-
-    async updateSensorReadings() {
-      if (this.sensor.length > 0) {
-        const sensores = this.sensor.map(s => ({
-          sensorId: s.sensorId,
-          sensorType: s.sensorType,
-          unit: s.unit
-        }));
-        await this.loadSensorReadings(sensores);
-        console.log('✅ Lecturas de sensores actualizadas');
-      }
     },
 
     formatDate(date) {
