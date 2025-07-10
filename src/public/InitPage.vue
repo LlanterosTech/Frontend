@@ -2,8 +2,6 @@
   <div class="fondo">
     <div class="container">
 
-  
-
       <!-- CONTENIDO PRINCIPAL -->
       <div class="main-layout" :class="{ 'sidebar-expanded': isSidebarExpanded }">
       <div class="glass-box">
@@ -226,6 +224,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  top: 250px;
 }
 
 

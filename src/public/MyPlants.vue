@@ -1,4 +1,6 @@
 <template>
+  <div class="background-layer"></div>
+  <div class="my-plants-view content-layer">
   <div class="my-plants-view">
     <h1 class="title">Mis Plantas 🌿</h1>
 
@@ -19,6 +21,7 @@
       <p>No tienes plantas registradas todavía.</p>
       <router-link to="/identificar" class="btn-primary">Identificar y Registrar Planta</router-link>
     </div>
+  </div>
   </div>
 </template>
 
@@ -45,6 +48,12 @@ export default {
 <style scoped>
 .my-plants-view {
   background: #e6f3e6;
+  flex: 1;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .title {
@@ -68,6 +77,7 @@ export default {
   width: 280px;
   overflow: hidden;
   transition: transform 0.2s ease-in-out;
+  top: 0;
 }
 
 .plant-card:hover {
@@ -110,4 +120,22 @@ export default {
   margin-top: 1rem;
   display: inline-block;
 }
+
+.background-layer {
+  background-color: #e6f3e6;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 50px;
+  height: 100vh;
+  width: 100vw;
+  z-index: 0;
+}
+
+.content-layer {
+  position: relative;
+  z-index: 1;
+}
+
+
 </style>

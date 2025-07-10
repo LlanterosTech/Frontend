@@ -8,7 +8,7 @@
         <i class="fas fa-home"></i>
         <span>Inicio</span>
       </li>
-      <li>
+      <li @click="goToSetting">
         <i class="fas fa-cog"></i>
         <span>Configuración</span>
       </li>
@@ -56,6 +56,9 @@ export default {
     },
     goToMyDevices() {
       this.$router.push("/devices");
+    },
+    goToSetting() {
+      this.$router.push("/settings");
     }
   }
 };

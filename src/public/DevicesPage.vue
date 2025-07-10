@@ -19,7 +19,6 @@
       <input v-model="newDevice.deviceName" placeholder="Nombre del dispositivo" />
       <input v-model="newDevice.connectionType" placeholder="Tipo de conexión" />
       <input v-model="newDevice.location" placeholder="Ubicación" />
-      <input v-model="newDevice.firmwareVersion" placeholder="Firmware (opcional)" />
 
       <select v-model="newDevice.myPlantId">
         <option disabled value="">🌿 Selecciona una planta (opcional)</option>
@@ -69,8 +68,6 @@
           </td>
           <td>
             <button @click="openSensors(device)">Sensores</button>
-            <button @click="editDevice(device)">Editar</button>
-            <button @click="deleteDevice(device.deviceId)">Eliminar</button>
           </td>
         </tr>
       </tbody>

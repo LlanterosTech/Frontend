@@ -27,6 +27,5 @@ body{
   padding:0;
   height: auto;
   overflow: hidden;
-
 }
 </style>

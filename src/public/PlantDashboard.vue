@@ -7,7 +7,7 @@
       <div class="plant-info">
         <p><strong>Ubicación:</strong> {{ myPlant?.location }}</p>
         <p>
-          <strong>Estado actual:</strong>
+          <strong>Estado actual: </strong>
           <span :class="statusColor(myPlant?.currentStatus)">
             {{ myPlant?.currentStatus }}
           </span>
@@ -16,101 +16,117 @@
       </div>
     </div>
 
-    <!-- Sección: Sensor readings -->
+    <div class="section">
+      <h3>Temperatura (°C)</h3>
+      <RealTimeChart :sensorData="sensorReadings.AirTemperature" label="Temperatura" unit="°C" />
+    </div>
+
+    <div class="section">
+      <h3>Humedad del Suelo</h3>
+      <RealTimeChart :sensorData="sensorReadings.SoilMoisture" label="Humedad del Suelo" unit="u" />
+    </div>
+
+    <div class="section">
+      <h3>Luz</h3>
+      <RealTimeChart :sensorData="sensorReadings.Light" label="Luz" unit="lx" />
+    </div>
+
+    <div class="section">
+      <h3>Humedad Ambiental</h3>
+      <RealTimeChart :sensorData="sensorReadings.AirHumidity" label="Humedad Ambiental" unit="%" />
+    </div>
+
     <div class="section">
       <h3>Lecturas de sensores</h3>
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Sensor</th>
-            <th>Valor</th>
-            <th>Unidad</th>
-            <th>Fecha</th>
-          </tr>
+        <tr>
+          <th>Sensor</th>
+          <th>Valor</th>
+          <th>Unidad</th>
+          <th>Fecha</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-for="r in sensor" :key="r.sensorId">
-            <td>{{ r.sensorType }}</td>
-            <td>{{ r.value }}</td>
-            <td>{{ r.unit }}</td>
-            <td>{{ formatDate(r.timestamp) }}</td>
-          </tr>
+        <tr v-for="r in sensor" :key="r.sensorId">
+          <td>{{ r.sensorType }}</td>
+          <td>{{ r.value }}</td>
+          <td>{{ r.unit }}</td>
+          <td>{{ formatDate(r.timestamp) }}</td>
+        </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Sección: Health log -->
     <div class="section">
       <h3>Historial de salud</h3>
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Estado</th>
-            <th>Fuente</th>
-          </tr>
+        <tr>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Fuente</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-if="healthLogs.length === 0">
-            <td colspan="3">No hay historial de salud generado aún.</td>
-          </tr>
-          <tr v-for="log in healthLogs" :key="log.healthLogId">
-            <td>{{ formatDate(log.timestamp) }}</td>
-            <td>{{ log.healthStatus }}</td>
-            <td>{{ log.source }}</td>
-          </tr>
+        <tr v-if="healthLogs.length === 0">
+          <td colspan="3">No hay historial de salud generado aún.</td>
+        </tr>
+        <tr v-for="log in healthLogs" :key="log.healthLogId">
+          <td>{{ formatDate(log.timestamp) }}</td>
+          <td>{{ log.healthStatus }}</td>
+          <td>{{ log.source }}</td>
+        </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Sección: Tareas -->
     <div class="section">
       <h3>Tareas de cuidado</h3>
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Tarea</th>
-            <th>Fecha</th>
-            <th>Estado</th>
-          </tr>
+        <tr>
+          <th>Tarea</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-if="careTasks.length === 0">
-            <td colspan="3">No hay tareas pendientes generadas.</td>
-          </tr>
-          <tr v-for="task in careTasks" :key="task.taskId">
-            <td>{{ task.taskType }}</td>
-            <td>{{ formatDate(task.scheduledFor) }}</td>
-            <td :class="task.status === 'Completed' ? 'status-done' : 'status-pending'">
-              {{ task.status }}
-            </td>
-          </tr>
+        <tr v-if="careTasks.length === 0">
+          <td colspan="3">No hay tareas pendientes generadas.</td>
+        </tr>
+        <tr v-for="task in careTasks" :key="task.taskId">
+          <td>{{ task.taskType }}</td>
+          <td>{{ formatDate(task.scheduledFor) }}</td>
+          <td :class="task.status === 'Completed' ? 'status-done' : 'status-pending'">
+            {{ task.status }}
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Sección: Alertas -->
     <div class="section">
       <h3>Alertas</h3>
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Mensaje</th>
-            <th>Severidad</th>
-            <th>Fecha</th>
-          </tr>
+        <tr>
+          <th>Tipo</th>
+          <th>Mensaje</th>
+          <th>Severidad</th>
+          <th>Fecha</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-if="alerts.length === 0">
-            <td colspan="4">No hay alertas generadas.</td>
-          </tr>
-          <tr v-for="alert in alerts" :key="alert.alertId">
-            <td>{{ alert.alertType }}</td>
-            <td>{{ alert.message }}</td>
-            <td :class="'level-' + alert.level">{{ alert.level }}</td>
-            <td>{{ formatDate(alert.generatedAt) }}</td>
-          </tr>
+        <tr v-if="alerts.length === 0">
+          <td colspan="4">No hay alertas generadas.</td>
+        </tr>
+        <tr v-for="alert in alerts" :key="alert.alertId">
+          <td>{{ alert.alertType }}</td>
+          <td>{{ alert.message }}</td>
+          <td :class="'level-' + alert.level">{{ alert.level }}</td>
+          <td>{{ formatDate(alert.generatedAt) }}</td>
+        </tr>
         </tbody>
       </table>
     </div>
@@ -119,10 +135,14 @@
 
 <script>
 import plantservice from '@/main/services/plantservice';
-import deviceservice from "@/main/services/deviceservice";
+import deviceservice from '@/main/services/deviceservice';
+import RealTimeChart from '@/components/RealTimeChart.vue';
 
 export default {
   name: 'PlantDashboard',
+  components: {
+    RealTimeChart
+  },
   data() {
     return {
       myPlant: null,
@@ -131,12 +151,17 @@ export default {
       healthLogs: [],
       alerts: [],
       updateInterval: null,
+      sensorReadings: {
+        AirTemperature: [],
+        SoilMoisture: [],
+        Light: [],
+        AirHumidity: []
+      }
     };
   },
   created() {
     const plantId = this.$route.params.plantId;
     this.fetchDashboardData(plantId);
-
     this.updateInterval = setInterval(() => {
       this.updateSensorReadings();
     }, 5000);
@@ -153,158 +178,99 @@ export default {
         const plant = await plantservice.getMyPlantById(plantId);
         this.myPlant = plant;
       } catch (err) {
-        console.error('❌ Error cargando dashboard:', err);
+        console.error('Error cargando dashboard:', err);
       }
     },
-
     async updateSensorReadings() {
       try {
         const devices = await deviceservice.getAllDevicesByUser();
         const deviceIds = Array.isArray(devices) ? devices.map(d => d.deviceId) : [];
-
         let sensores = [];
         if (deviceIds.length > 0) {
-          const sensorPromises = deviceIds.map(deviceId =>
-            deviceservice.getAllSensorsByDeviceId(deviceId).catch(() => [])
+          const sensorArrays = await Promise.all(
+              deviceIds.map(deviceId =>
+                  deviceservice.getAllSensorsByDeviceId(deviceId).catch(() => [])
+              )
           );
-          const sensorArrays = await Promise.all(sensorPromises);
           sensores = sensorArrays.flat();
-
           await this.loadSensorReadings(sensores);
-          console.log('✅ Lecturas de sensores actualizadas');
         } else {
           this.sensor = [];
         }
       } catch (error) {
-        console.error('❌ Error actualizando lecturas de sensores:', error);
+        console.error('Error actualizando lecturas:', error);
       }
     },
-
     async loadSensorReadings(sensores) {
       const sensorWithReadings = await Promise.all(
-        sensores.map(async (sensor) => {
-          try {
-            const readings = await deviceservice.getMySensorReadingBySensorId(sensor.sensorId);
-            console.log(`🔎 Todas las lecturas para ${sensor.sensorType}:`, readings);
-
-            let latestReading = null;
-            if (Array.isArray(readings) && readings.length > 0) {
-              latestReading = readings.sort(
-                (a, b) =>
-                  new Date(b.timestamp || b.createdAt || b.date) -
-                  new Date(a.timestamp || a.createdAt || a.date)
-              )[0];
+          sensores.map(async (sensor) => {
+            try {
+              const readings = await deviceservice.getMySensorReadingBySensorId(sensor.sensorId);
+              let latestReading = null;
+              if (Array.isArray(readings) && readings.length > 0) {
+                latestReading = readings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                const value = Number(latestReading.value);
+                if (this.sensorReadings[sensor.sensorType]) {
+                  this.sensorReadings[sensor.sensorType].push({
+                    timestamp: latestReading.timestamp,
+                    value
+                  });
+                  if (this.sensorReadings[sensor.sensorType].length > 20) {
+                    this.sensorReadings[sensor.sensorType].shift();
+                  }
+                }
+              }
+              return {
+                sensorId: sensor.sensorId,
+                sensorType: sensor.sensorType,
+                unit: sensor.unit ?? 'N/A',
+                value: latestReading?.value ?? 'N/A',
+                timestamp: latestReading?.timestamp || null
+              };
+            } catch (error) {
+              return {
+                sensorId: sensor.sensorId,
+                sensorType: sensor.sensorType,
+                unit: sensor.unit ?? 'N/A',
+                value: 'N/A',
+                timestamp: null
+              };
             }
-
-            return {
-              sensorId: sensor.sensorId,
-              sensorType: sensor.sensorType,
-              unit: sensor.unit ?? 'N/A',
-              value: latestReading?.value ?? 'N/A',
-              timestamp: latestReading?.timestamp || latestReading?.createdAt || latestReading?.date || null
-            };
-          } catch (error) {
-            console.warn(`⚠️ Error obteniendo lecturas para sensor ${sensor.sensorId}:`, error);
-            return {
-              sensorId: sensor.sensorId,
-              sensorType: sensor.sensorType,
-              unit: sensor.unit ?? 'N/A',
-              value: 'N/A',
-              timestamp: null
-            };
-          }
-        })
+          })
       );
-
       this.sensor = sensorWithReadings;
-
-      // ✅ Generar alertas y tareas sugeridas
       this.generateAlertsAndTasks();
     },
-
     generateAlertsAndTasks() {
       const alerts = [];
       const tasks = [];
-
       this.sensor.forEach(s => {
         if (s.value === 'N/A' || s.value == null) return;
-
         const val = Number(s.value);
-
         if (s.sensorType === 'SoilMoisture' && val < 1000) {
-          alerts.push({
-            alertId: `${s.sensorId}-low-moisture`,
-            alertType: 'Humedad Baja',
-            message: 'Nivel de humedad del suelo es bajo.',
-            level: 'advertencia',
-            generatedAt: s.timestamp
-          });
-          tasks.push({
-            taskId: `${s.sensorId}-water`,
-            taskType: 'Regar la planta',
-            scheduledFor: new Date().toISOString(),
-            status: 'Pending'
-          });
+          alerts.push({ alertId: `${s.sensorId}-low-moisture`, alertType: 'Humedad Baja', message: 'Nivel de humedad del suelo es bajo.', level: 'advertencia', generatedAt: s.timestamp });
+          tasks.push({ taskId: `${s.sensorId}-water`, taskType: 'Regar la planta', scheduledFor: new Date().toISOString(), status: 'Pending' });
         }
-
         if (s.sensorType === 'AirTemperature' && val > 35) {
-          alerts.push({
-            alertId: `${s.sensorId}-high-temp`,
-            alertType: 'Temperatura Alta',
-            message: 'La temperatura ambiente es muy alta.',
-            level: 'crítica',
-            generatedAt: s.timestamp
-          });
-          tasks.push({
-            taskId: `${s.sensorId}-move-shade`,
-            taskType: 'Mover a lugar fresco',
-            scheduledFor: new Date().toISOString(),
-            status: 'Pending'
-          });
+          alerts.push({ alertId: `${s.sensorId}-high-temp`, alertType: 'Temperatura Alta', message: 'La temperatura ambiente es muy alta.', level: 'crítica', generatedAt: s.timestamp });
+          tasks.push({ taskId: `${s.sensorId}-shade`, taskType: 'Mover a sombra', scheduledFor: new Date().toISOString(), status: 'Pending' });
         }
-
-        if (s.sensorType === 'Light' && val < 50) {
-          alerts.push({
-            alertId: `${s.sensorId}-low-light`,
-            alertType: 'Poca Luz',
-            message: 'Nivel de luz insuficiente.',
-            level: 'advertencia',
-            generatedAt: s.timestamp
-          });
-          tasks.push({
-            taskId: `${s.sensorId}-move-light`,
-            taskType: 'Reubicar en lugar con más luz',
-            scheduledFor: new Date().toISOString(),
-            status: 'Pending'
-          });
+        if (s.sensorType === 'Light' && val < 400) {
+          alerts.push({ alertId: `${s.sensorId}-low-light`, alertType: 'Poca Luz', message: 'Nivel de luz insuficiente.', level: 'advertencia', generatedAt: s.timestamp });
+          tasks.push({ taskId: `${s.sensorId}-move-light`, taskType: 'Reubicar en lugar con más luz', scheduledFor: new Date().toISOString(), status: 'Pending' });
         }
-
         if (s.sensorType === 'AirHumidity' && val < 30) {
-          alerts.push({
-            alertId: `${s.sensorId}-low-humidity`,
-            alertType: 'Humedad Ambiental Baja',
-            message: 'El ambiente está muy seco.',
-            level: 'advertencia',
-            generatedAt: s.timestamp
-          });
-          tasks.push({
-            taskId: `${s.sensorId}-spray`,
-            taskType: 'Pulverizar agua',
-            scheduledFor: new Date().toISOString(),
-            status: 'Pending'
-          });
+          alerts.push({ alertId: `${s.sensorId}-low-humidity`, alertType: 'Humedad Baja', message: 'El ambiente está muy seco.', level: 'advertencia', generatedAt: s.timestamp });
+          tasks.push({ taskId: `${s.sensorId}-spray`, taskType: 'Pulverizar agua', scheduledFor: new Date().toISOString(), status: 'Pending' });
         }
       });
-
       this.alerts = alerts;
       this.careTasks = tasks;
     },
-
     formatDate(date) {
       if (!date) return 'N/A';
       return new Date(date).toLocaleString();
     },
-
     statusColor(status) {
       return status === 'Healthy' ? 'status-ok' : 'status-warning';
     }

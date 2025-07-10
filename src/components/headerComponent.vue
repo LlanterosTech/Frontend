@@ -4,7 +4,7 @@
       <img src="@/assets/logo_png.png" alt="Logo Plantita" />
     </div>
     <nav class="nav-links">
-      <a href="#">Acerca de nosotros</a>
+      <a @click="goToAboutUs">Acerca de nosotros</a>
       <a href="#">Catálogo</a>
     </nav>
     <div class="user-icon" @click="$emit('user-click')">
@@ -15,7 +15,13 @@
 
 <script>
 export default {
-  name: "HeaderComponent"
+  name: "HeaderComponent",
+  methods: {
+
+    goToAboutUs() {
+      this.$router.push("/about-us");
+    }
+  }
 };
 </script>
 
@@ -26,14 +32,13 @@ export default {
   left: 0;
   right: 0;
   width: 100vw;
-  padding: 16px 24px; /* agrega espacio arriba y abajo */
+  padding: 0 24px; /* agrega espacio arriba y abajo */
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: #2a7028;
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 0 24px;
   z-index: 100;
   box-sizing: border-box;
 }
